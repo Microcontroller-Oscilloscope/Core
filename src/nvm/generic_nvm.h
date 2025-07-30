@@ -54,6 +54,8 @@ enum VarType {
 #define DEFAULT_BOOL false
 #define DEFAULT_FLOAT NAN
 
+#ifndef NO_CHAR_ARRAY_SUPPORT
+
 /**
  * Tests if two char arrays are the same value
  * 
@@ -81,6 +83,8 @@ bool validCharPointer(char* value);
  * @return size of array or error
  */
 uint8_t charArraySize(char* value);
+
+#endif
 
 #ifdef __NVM_DEBUG__
 
@@ -220,6 +224,8 @@ bool nvmWriteValue(uint16_t key, float value);
  */
 bool nvmWriteValue(uint16_t key, double value);
 
+#ifndef NO_CHAR_ARRAY_SUPPORT
+
 /**
  * Writes value to nvm
  * 
@@ -230,6 +236,8 @@ bool nvmWriteValue(uint16_t key, double value);
  * @return if write was valid
  */
 bool nvmWriteValue(uint16_t key, char* value, uint8_t maxLength);
+
+#endif
 
 /****************************
  * NVM Get Methods
@@ -356,6 +364,8 @@ bool nvmGetValue(uint16_t key, float *value, bool canDefault = CAN_DEFAULT);
  */
 bool nvmGetValue(uint16_t key, double *value, bool canDefault = CAN_DEFAULT);
 
+#ifndef NO_CHAR_ARRAY_SUPPORT
+
 /**
  * Gets value from nvm
  * 
@@ -366,5 +376,7 @@ bool nvmGetValue(uint16_t key, double *value, bool canDefault = CAN_DEFAULT);
  * @return if write was valid
  */
 bool nvmGetValue(uint16_t key, char* value, uint8_t maxLength);
+
+#endif
 
 #endif

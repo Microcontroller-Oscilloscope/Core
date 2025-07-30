@@ -77,8 +77,18 @@
  * Variable Support
 ****************************/
 
+/**
+ * Supports 64 bit operations natively
+ */
 #if defined(ESP32DEVC) || defined(PICO)
 #define INT64_SUPPORT
+#endif
+
+/**
+ * Only compiles char array operations to needed platforms
+ */
+#if defined(UNOR3)
+#define NO_CHAR_ARRAY_SUPPORT
 #endif
 
 /****************************

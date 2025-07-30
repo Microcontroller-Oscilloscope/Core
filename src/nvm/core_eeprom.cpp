@@ -248,6 +248,8 @@ bool nvmWriteValue(uint16_t key, double value) {
 	return nvmWrite(key, value);
 }
 
+#ifndef NO_CHAR_ARRAY_SUPPORT
+
 bool nvmWriteValue(uint16_t key, char* value, uint8_t maxLength) {
 
 	if (!nvmStarted()) {
@@ -303,6 +305,8 @@ bool nvmWriteValue(uint16_t key, char* value, uint8_t maxLength) {
 
 	return true;
 }
+
+#endif
 
 /**
  * Gets value from nvm
@@ -463,6 +467,8 @@ bool nvmGetValue(uint16_t key, double *value, bool canDefault) {
 	return nvmGet(key, value, (double)DEFAULT_FLOAT, canDefault);
 }
 
+#ifndef NO_CHAR_ARRAY_SUPPORT
+
 bool nvmGetValue(uint16_t key, char* value, uint8_t maxLength) {
 
 	if (!nvmStarted()) {
@@ -522,4 +528,5 @@ bool nvmGetValue(uint16_t key, char* value, uint8_t maxLength) {
 	return false;
 }
 
+#endif
 #endif

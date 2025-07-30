@@ -18,6 +18,8 @@
 
 #include "generic_nvm.h"
 
+#ifndef NO_CHAR_ARRAY_SUPPORT
+
 bool sameString(char* first, char* second) {
 	uint8_t firstSize = charArraySize(first);
 	uint8_t secondSize = charArraySize(second);
@@ -63,6 +65,8 @@ uint8_t charArraySize(char* value) {
 	return CHAR_LEN_ERROR;
 }
 
+#endif
+
 #ifdef __NVM_DEBUG__
 
 void printVarType(enum VarType varType) {
@@ -101,10 +105,10 @@ void printVarType(enum VarType varType) {
 			Serial.print(F("dbl"));
 		break;
 		case VAR_CHAR_ARRAY:
-			Serial.print(F("char array"));
+			Serial.print(F("char arr"));
 		break;
 		case VAR_STRING:
-			Serial.print(F("string"));
+			Serial.print(F("str"));
 		break;
 		default:
 			Serial.print(F("invalid"));
