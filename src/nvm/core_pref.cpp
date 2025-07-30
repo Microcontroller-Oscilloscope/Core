@@ -138,6 +138,8 @@ typedef size_t	(Preferences::*PrefPutI64)	(const char*, int64_t);
 typedef size_t	(Preferences::*PrefPutUI64)	(const char*, uint64_t);
 typedef size_t	(Preferences::*PrefPutF)	(const char*, float);
 typedef size_t	(Preferences::*PrefPutD)	(const char*, double);
+typedef size_t	(Preferences::*PrefPutC)	(const char*, const char*);
+typedef size_t	(Preferences::*PrefPutS)	(const char*, String);
 
 template <typename PTR, typename VAL>
 bool nvmWrite(PTR prefptr, const uint16_t key, VAL value, VarType var) {
@@ -207,6 +209,53 @@ bool nvmWriteValue(uint16_t key, double value) {
 	return nvmWrite(&Preferences::putDouble, key, value, VAR_DOUBLE);
 }
 
+bool nvmWriteValue(uint16_t key, char* value, uint8_t maxLength) {
+
+	if (!nvmStarted()) {
+		return false;
+	}
+
+	uint8_t valueLen = charArraySize(value);
+
+	if (valueLen == 0) {
+		#ifdef __NVM_DEBUG__
+			printNVM();
+			Serial.println(F("Null pointer was given"));
+		#endif
+		return false;
+	}
+	else if (valueLen > maxLength) {
+		#ifdef __NVM_DEBUG__
+			printNVM();
+			Serial.println(F("Max length not long enough"));
+		#endif
+		return false;
+	}
+	else if (valueLen == CHAR_LEN_ERROR) {
+		#ifdef __NVM_DEBUG__
+			printNVM();
+			Serial.println(F("Invalid input was given"));
+		#endif
+		return false;
+	}
+
+	char keyStr[CHAR_KEY_SIZE];
+	keyToChar(key, keyStr);
+
+	size_t result = preferences.putString(keyStr, value) + 1U;
+
+	#ifdef __NVM_DEBUG__
+	if ((uint8_t)result != valueLen) {
+		nvmWriteFailed(VAR_CHAR_ARRAY);
+	}
+	else {
+		printGotValue(VAR_CHAR_ARRAY, key, value, WROTE_VALUE);
+	}
+	#endif
+
+	return (bool)result;
+}
+
 typedef bool		(Preferences::*PrefGetB)	(const char*, bool);
 typedef int8_t		(Preferences::*PrefGetI8)	(const char*, int8_t);
 typedef uint8_t		(Preferences::*PrefGetUI8)	(const char*, uint8_t);
@@ -218,9 +267,11 @@ typedef int64_t		(Preferences::*PrefGetI64)	(const char*, int64_t);
 typedef uint64_t	(Preferences::*PrefGetUI64)	(const char*, uint64_t);
 typedef float		(Preferences::*PrefGetF)	(const char*, float);
 typedef double		(Preferences::*PrefGetD)	(const char*, double);
+typedef size_t		(Preferences::*PrefGetC)	(const char*, char*, size_t);
+typedef String		(Preferences::*PrefGetS)	(const char*, String);
 
 template <typename PTR, typename VAL>
-bool nvmGet(PTR prefptr, const uint16_t key, VAL *value, VAL defValue, VarType var) {
+bool nvmGet(PTR prefptr, const uint16_t key, VAL *value, VAL defValue, VarType var, bool canDefault) {
 
 	if (!nvmStarted()) {
 		return false;
@@ -231,6 +282,14 @@ bool nvmGet(PTR prefptr, const uint16_t key, VAL *value, VAL defValue, VarType v
 
 	*value = (preferences.*prefptr)(keyStr, defValue);
 
+	if (!canDefault && *value == defValue) {
+		#ifdef __NVM_DEBUG__
+			printNVM();
+			Serial.println(F("Can't get default value"));
+		#endif
+		return false;
+	}
+
 	#ifdef __NVM_DEBUG__
 		printGotValue(var, key, *value, GOT_VALUE);
 	#endif
@@ -238,48 +297,79 @@ bool nvmGet(PTR prefptr, const uint16_t key, VAL *value, VAL defValue, VarType v
 	return true;
 }
 
-bool nvmGetValue(uint16_t key, bool *value) {
-	return nvmGet(&Preferences::getBool, key, value, (bool)DEFAULT_BOOL, VAR_BOOL);
+bool nvmGetValue(uint16_t key, bool *value, bool canDefault) {
+	return nvmGet(&Preferences::getBool, key, value, (bool)DEFAULT_BOOL, VAR_BOOL, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, int8_t *value) {
-	return nvmGet(&Preferences::getChar, key, value, (int8_t)DEFAULT_INT, VAR_INT8);
+bool nvmGetValue(uint16_t key, int8_t *value, bool canDefault) {
+	return nvmGet(&Preferences::getChar, key, value, (int8_t)DEFAULT_INT, VAR_INT8, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, uint8_t *value) {
-	return nvmGet(&Preferences::getUChar, key, value, (uint8_t)DEFAULT_INT, VAR_UINT8);
+bool nvmGetValue(uint16_t key, uint8_t *value, bool canDefault) {
+	return nvmGet(&Preferences::getUChar, key, value, (uint8_t)DEFAULT_INT, VAR_UINT8, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, int16_t *value) {
-	return nvmGet(&Preferences::getShort, key, value, (int16_t)DEFAULT_INT, VAR_INT16);
+bool nvmGetValue(uint16_t key, int16_t *value, bool canDefault) {
+	return nvmGet(&Preferences::getShort, key, value, (int16_t)DEFAULT_INT, VAR_INT16, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, uint16_t *value) {
-	return nvmGet(&Preferences::getUShort, key, value, (uint16_t)DEFAULT_INT, VAR_UINT16);
+bool nvmGetValue(uint16_t key, uint16_t *value, bool canDefault) {
+	return nvmGet(&Preferences::getUShort, key, value, (uint16_t)DEFAULT_INT, VAR_UINT16, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, int32_t *value) {
-	return nvmGet(&Preferences::getInt, key, value, (int32_t)DEFAULT_INT, VAR_INT32);
+bool nvmGetValue(uint16_t key, int32_t *value, bool canDefault) {
+	return nvmGet(&Preferences::getInt, key, value, (int32_t)DEFAULT_INT, VAR_INT32, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, uint32_t *value) {
-	return nvmGet(&Preferences::getUInt, key, value, (uint32_t)DEFAULT_INT, VAR_UINT32);
+bool nvmGetValue(uint16_t key, uint32_t *value, bool canDefault) {
+	return nvmGet(&Preferences::getUInt, key, value, (uint32_t)DEFAULT_INT, VAR_UINT32, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, int64_t *value) {
-	return nvmGet(&Preferences::getLong64, key, value, (int64_t)DEFAULT_INT, VAR_INT64);
+bool nvmGetValue(uint16_t key, int64_t *value, bool canDefault) {
+	return nvmGet(&Preferences::getLong64, key, value, (int64_t)DEFAULT_INT, VAR_INT64, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, uint64_t *value) {
-	return nvmGet(&Preferences::getULong64, key, value, (uint64_t)DEFAULT_INT, VAR_UINT64);
+bool nvmGetValue(uint16_t key, uint64_t *value, bool canDefault) {
+	return nvmGet(&Preferences::getULong64, key, value, (uint64_t)DEFAULT_INT, VAR_UINT64, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, float *value) {
-	return nvmGet(&Preferences::getFloat, key, value, (float)DEFAULT_FLOAT, VAR_FLOAT);
+bool nvmGetValue(uint16_t key, float *value, bool canDefault) {
+	return nvmGet(&Preferences::getFloat, key, value, (float)DEFAULT_FLOAT, VAR_FLOAT, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, double *value) {
-	return nvmGet(&Preferences::getDouble, key, value, (double)DEFAULT_FLOAT, VAR_DOUBLE);
+bool nvmGetValue(uint16_t key, double *value, bool canDefault) {
+	return nvmGet(&Preferences::getDouble, key, value, (double)DEFAULT_FLOAT, VAR_DOUBLE, canDefault);
+}
+
+bool nvmGetValue(uint16_t key, char* value, uint8_t maxLength) {
+
+	if (!nvmStarted()) {
+		return false;
+	}
+
+	if (!validCharPointer(value)) {
+		return false;
+	}
+
+	char keyStr[CHAR_KEY_SIZE];
+	keyToChar(key, keyStr);
+
+	size_t charSize = preferences.getString(keyStr, value, maxLength);
+	uint8_t valueLen = charArraySize(value);
+
+	if (valueLen != charSize) {
+		#ifdef __NVM_DEBUG__
+			printNVM();
+			Serial.println(F("Error getting value"));
+		#endif
+		return false;
+	}
+
+	#ifdef __NVM_DEBUG__
+		printGotValue(VAR_CHAR_ARRAY, key, value, GOT_VALUE);
+	#endif
+
+	return true;
 }
 
 #endif

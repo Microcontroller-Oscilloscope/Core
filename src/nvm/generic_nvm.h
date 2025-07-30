@@ -40,8 +40,33 @@ enum VarType {
 	VAR_INT16, VAR_UINT16,
 	VAR_INT32, VAR_UINT32,
 	VAR_INT64, VAR_UINT64,
-	VAR_FLOAT, VAR_DOUBLE
+	VAR_FLOAT, VAR_DOUBLE,
+	VAR_CHAR_ARRAY, VAR_STRING
 };
+
+#define END_OF_CHAR '\0'
+#define CHAR_LEN_ERROR UINT8_MAX
+
+#define CAN_DEFAULT true
+#define CAN_NOT_DEFAULT false
+
+/**
+ * Tests if char array is a null pointer
+ * 
+ * @param value array to test
+ * 
+ * @return if array isn't null
+ */
+bool validCharPointer(char* value);
+
+/**
+ * Gets the size of a char array within 254 including '\0'
+ * 
+ * @param value array to test
+ * 
+ * @return size of array or error
+ */
+uint8_t charArraySize(char* value);
 
 #ifdef __NVM_DEBUG__
 
@@ -181,6 +206,17 @@ bool nvmWriteValue(uint16_t key, float value);
  */
 bool nvmWriteValue(uint16_t key, double value);
 
+/**
+ * Writes value to nvm
+ * 
+ * @param key key of nvm address
+ * @param value value to write to nvm
+ * @param maxLength maximum length of string to write
+ * 
+ * @return if write was valid
+ */
+bool nvmWriteValue(uint16_t key, char* value, uint8_t maxLength);
+
 /****************************
  * NVM Get Methods
 ****************************/
@@ -190,109 +226,131 @@ bool nvmWriteValue(uint16_t key, double value);
  * 
  * @param key key of nvm address
  * @param value variable to store result to
+ * @param canDefault whether value should be default or not
  * 
  * @return if get was successful
  */
-bool nvmGetValue(uint16_t key, bool *value);
+bool nvmGetValue(uint16_t key, bool *value, bool canDefault = CAN_DEFAULT);
 
 /**
  * Gets value from nvm
  * 
  * @param key key of nvm address
  * @param value variable to store result to
+ * @param canDefault whether value should be default or not
  * 
  * @return if get was successful
  */
-bool nvmGetValue(uint16_t key, int8_t *value);
+bool nvmGetValue(uint16_t key, int8_t *value, bool canDefault = CAN_DEFAULT);
 
 /**
  * Gets value from nvm
  * 
  * @param key key of nvm address
  * @param value variable to store result to
+ * @param canDefault whether value should be default or not
  * 
  * @return if get was successful
  */
-bool nvmGetValue(uint16_t key, uint8_t *value);
+bool nvmGetValue(uint16_t key, uint8_t *value, bool canDefault = CAN_DEFAULT);
 
 /**
  * Gets value from nvm
  * 
  * @param key key of nvm address
  * @param value variable to store result to
+ * @param canDefault whether value should be default or not
  * 
  * @return if get was successful
  */
-bool nvmGetValue(uint16_t key, int16_t *value);
+bool nvmGetValue(uint16_t key, int16_t *value, bool canDefault = CAN_DEFAULT);
 
 /**
  * Gets value from nvm
  * 
  * @param key key of nvm address
  * @param value variable to store result to
+ * @param canDefault whether value should be default or not
  * 
  * @return if get was successful
  */
-bool nvmGetValue(uint16_t key, uint16_t *value);
+bool nvmGetValue(uint16_t key, uint16_t *value, bool canDefault = CAN_DEFAULT);
 
 /**
  * Gets value from nvm
  * 
  * @param key key of nvm address
  * @param value variable to store result to
+ * @param canDefault whether value should be default or not
  * 
  * @return if get was successful
  */
-bool nvmGetValue(uint16_t key, int32_t *value);
+bool nvmGetValue(uint16_t key, int32_t *value, bool canDefault = CAN_DEFAULT);
 
 /**
  * Gets value from nvm
  * 
  * @param key key of nvm address
  * @param value variable to store result to
+ * @param canDefault whether value should be default or not
  * 
  * @return if get was successful
  */
-bool nvmGetValue(uint16_t key, uint32_t *value);
+bool nvmGetValue(uint16_t key, uint32_t *value, bool canDefault = CAN_DEFAULT);
 
 /**
  * Gets value from nvm
  * 
  * @param key key of nvm address
  * @param value variable to store result to
+ * @param canDefault whether value should be default or not
  * 
  * @return if get was successful
  */
-bool nvmGetValue(uint16_t key, int64_t *value);
+bool nvmGetValue(uint16_t key, int64_t *value, bool canDefault = CAN_DEFAULT);
 
 /**
  * Gets value from nvm
  * 
  * @param key key of nvm address
  * @param value variable to store result to
+ * @param canDefault whether value should be default or not
  * 
  * @return if get was successful
  */
-bool nvmGetValue(uint16_t key, uint64_t *value);
+bool nvmGetValue(uint16_t key, uint64_t *value, bool canDefault = CAN_DEFAULT);
 
 /**
  * Gets value from nvm
  * 
  * @param key key of nvm address
  * @param value variable to store result to
+ * @param canDefault whether value should be default or not
  * 
  * @return if get was successful
  */
-bool nvmGetValue(uint16_t key, float *value);
+bool nvmGetValue(uint16_t key, float *value, bool canDefault = CAN_DEFAULT);
 
 /**
  * Gets value from nvm
  * 
  * @param key key of nvm address
  * @param value variable to store result to
+ * @param canDefault whether value should be default or not
  * 
  * @return if get was successful
  */
-bool nvmGetValue(uint16_t key, double *value);
+bool nvmGetValue(uint16_t key, double *value, bool canDefault = CAN_DEFAULT);
+
+/**
+ * Gets value from nvm
+ * 
+ * @param key key of nvm address
+ * @param value value to write to nvm
+ * @param maxLength maximum length of string to get
+ * 
+ * @return if write was valid
+ */
+bool nvmGetValue(uint16_t key, char* value, uint8_t maxLength);
 
 #endif
