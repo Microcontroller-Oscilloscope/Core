@@ -50,6 +50,10 @@ enum VarType {
 #define CAN_DEFAULT true
 #define CAN_NOT_DEFAULT false
 
+#define DEFAULT_INT 0
+#define DEFAULT_BOOL false
+#define DEFAULT_FLOAT NAN
+
 /**
  * Tests if two char arrays are the same value
  * 

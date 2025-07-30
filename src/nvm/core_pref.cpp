@@ -20,10 +20,6 @@
 
 #ifndef NVM_EEPROM
 
-#define DEFAULT_INT 0
-#define DEFAULT_BOOL false
-#define DEFAULT_FLOAT NAN
-
 #define GOT_VALUE true
 #define WROTE_VALUE false
 
