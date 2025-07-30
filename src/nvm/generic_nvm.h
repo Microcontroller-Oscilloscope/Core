@@ -51,6 +51,16 @@ enum VarType {
 #define CAN_NOT_DEFAULT false
 
 /**
+ * Tests if two char arrays are the same value
+ * 
+ * @param first first char array to test
+ * @param second second char array to test
+ * 
+ * @return if they are the same
+ */
+bool sameString(char* first, char* second);
+
+/**
  * Tests if char array is a null pointer
  * 
  * @param value array to test

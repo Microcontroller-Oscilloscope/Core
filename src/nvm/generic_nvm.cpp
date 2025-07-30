@@ -18,6 +18,21 @@
 
 #include "generic_nvm.h"
 
+bool sameString(char* first, char* second) {
+	uint8_t firstSize = charArraySize(first);
+	uint8_t secondSize = charArraySize(second);
+
+	if (firstSize != secondSize || firstSize == 0) {
+		return false;
+	}
+
+	if (strcmp(first, second) != 0) {
+		return false;
+	}
+
+	return true;
+}
+
 bool validCharPointer(char* value) {
 	if (value == nullptr) {
 		#ifdef __NVM_DEBUG__

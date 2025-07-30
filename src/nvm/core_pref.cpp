@@ -351,6 +351,14 @@ bool nvmGetValue(uint16_t key, char* value, uint8_t maxLength) {
 		return false;
 	}
 
+	if (maxLength == 0U) {
+		#ifdef __NVM_DEBUG__
+			printNVM();
+			Serial.println(F("Max length 0 not accepted"));
+		#endif
+		return false;
+	}
+
 	char keyStr[CHAR_KEY_SIZE];
 	keyToChar(key, keyStr);
 
