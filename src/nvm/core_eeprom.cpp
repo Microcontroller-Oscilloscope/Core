@@ -248,17 +248,32 @@ bool nvmWriteValue(uint16_t key, double value) {
 	return nvmWrite(key, value);
 }
 
+bool nvmWriteValue(uint16_t key, char* value, uint8_t maxLength) {
+	return true;
+}
+
 /**
  * Gets value from nvm
  * 
  * @param key key of nvm address
  * @param value value to write to nvm
+ * @param defaultValue default value from get
+ * @param canDefault if recieving value can default
  * 
  * @return if get was successful
  */
 template <typename T>
-bool nvmGetVal(uint16_t key, T *value) {
+bool nvmGetVal(uint16_t key, T *value, T defaultValue, bool canDefault) {
 	EEPROM.get((int)key, *value);
+
+	if (*value == defaultValue && !canDefault) {
+		#ifdef __NVM_DEBUG__
+			printNVM();
+			Serial.print(F("EEPROM defaulted"));
+			return false;
+		#endif
+	}
+
 	return true;
 }
 
@@ -267,23 +282,25 @@ bool nvmGetVal(uint16_t key, T *value) {
  * 
  * @param key key of nvm address
  * @param value value to write to nvm
+ * @param defaultValue default value from get
+ * @param canDefault if recieving value can default
  * 
  * @return if get was successful
  */
 template <typename T>
-bool nvmGet(uint16_t key, T *value) {
+bool nvmGet(uint16_t key, T *value, T defaultValue, bool canDefault) {
 	if (!nvmStarted()) {
 		return false;
 	}
 
-	bool result = nvmGetVal(key, value);
+	bool result = nvmGetVal(key, value, defaultValue, canDefault);
 
 	if (!result) {
 		#ifdef __ERROR_DEBUG__
 			printError();
 			Serial.print(F("EEPROM couldn't get value '"));
 			Serial.print(*value);
-			Serial.print(F("' to key "));
+			Serial.print(F("' from key "));
 			Serial.println(key);
 		#endif
 	}
@@ -306,16 +323,18 @@ bool nvmGet(uint16_t key, T *value) {
  * 
  * @param key key of nvm address
  * @param value value to write to nvm
+ * @param defaultValue default value from get
+ * @param canDefault if recieving value can default
  * 
  * @return if get was successful
  */
 template <typename T>
-bool nvmGet64(uint16_t key, T *value) {
+bool nvmGet64(uint16_t key, T *value, T defaultValue, bool canDefault) {
 	if (!nvmStarted()) {
 		return false;
 	}
 
-	bool result = nvmGetVal(key, value);
+	bool result = nvmGetVal(key, value, defaultValue, canDefault);
 
 	if (!result) {
 		#ifdef __ERROR_DEBUG__
@@ -340,56 +359,60 @@ bool nvmGet64(uint16_t key, T *value) {
 
 #endif
 
-bool nvmGetValue(uint16_t key, bool *value) {
-	return nvmGet(key, value);
+bool nvmGetValue(uint16_t key, bool *value, bool canDefault) {
+	return nvmGet(key, value, (bool)DEFAULT_BOOL, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, int8_t *value) {
-	return nvmGet(key, value);
+bool nvmGetValue(uint16_t key, int8_t *value, bool canDefault) {
+	return nvmGet(key, value, (int8_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, uint8_t *value) {
-	return nvmGet(key, value);
+bool nvmGetValue(uint16_t key, uint8_t *value, bool canDefault) {
+	return nvmGet(key, value, (uint8_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, int16_t *value) {
-	return nvmGet(key, value);
+bool nvmGetValue(uint16_t key, int16_t *value, bool canDefault) {
+	return nvmGet(key, value, (int16_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, uint16_t *value) {
-	return nvmGet(key, value);
+bool nvmGetValue(uint16_t key, uint16_t *value, bool canDefault) {
+	return nvmGet(key, value, (uint16_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, int32_t *value) {
-	return nvmGet(key, value);
+bool nvmGetValue(uint16_t key, int32_t *value, bool canDefault) {
+	return nvmGet(key, value, (int32_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, uint32_t *value) {
-	return nvmGet(key, value);
+bool nvmGetValue(uint16_t key, uint32_t *value, bool canDefault) {
+	return nvmGet(key, value, (uint32_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, int64_t *value) {
+bool nvmGetValue(uint16_t key, int64_t *value, bool canDefault) {
 	#ifdef INT64_SUPPORT
-	return nvmGet(key, value);
+	return nvmGet(key, value, (int64_t)DEFAULT_INT, canDefault);
 	#else
-	return nvmGet64(key, value);
+	return nvmGet64(key, value, (int64_t)DEFAULT_INT, canDefault);
 	#endif
 }
 
-bool nvmGetValue(uint16_t key, uint64_t *value) {
+bool nvmGetValue(uint16_t key, uint64_t *value, bool canDefault) {
 	#ifdef INT64_SUPPORT
-	return nvmGet(key, value);
+	return nvmGet(key, value, (uint64_t)DEFAULT_INT, canDefault);
 	#else
-	return nvmGet64(key, value);
+	return nvmGet64(key, value, (uint64_t)DEFAULT_INT, canDefault);
 	#endif
 }
 
-bool nvmGetValue(uint16_t key, float *value) {
-	return nvmGet(key, value);
+bool nvmGetValue(uint16_t key, float *value, bool canDefault) {
+	return nvmGet(key, value, (float)DEFAULT_FLOAT, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, double *value) {
-	return nvmGet(key, value);
+bool nvmGetValue(uint16_t key, double *value, bool canDefault) {
+	return nvmGet(key, value, (double)DEFAULT_FLOAT, canDefault);
+}
+
+bool nvmGetValue(uint16_t key, char* value, uint8_t maxLength) {
+	return true;
 }
 
 #endif
