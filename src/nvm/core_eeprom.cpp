@@ -249,6 +249,58 @@ bool nvmWriteValue(uint16_t key, double value) {
 }
 
 bool nvmWriteValue(uint16_t key, char* value, uint8_t maxLength) {
+
+	if (!nvmStarted()) {
+		return false;
+	}
+
+	uint8_t valueLen = charArraySize(value);
+
+	if (valueLen == 0) {
+		#ifdef __NVM_DEBUG__
+			printNVM();
+			Serial.println(F("Null pointer was given"));
+		#endif
+		return false;
+	}
+	else if (valueLen > maxLength) {
+		#ifdef __NVM_DEBUG__
+			printNVM();
+			Serial.println(F("Max length not long enough"));
+		#endif
+		return false;
+	}
+	else if (valueLen == CHAR_LEN_ERROR) {
+		#ifdef __NVM_DEBUG__
+			printNVM();
+			Serial.println(F("Invalid input was given"));
+		#endif
+		return false;
+	}
+
+	for (uint8_t i = 0U; i < valueLen; i++) {
+		bool result = nvmWrite(key + i, value[i]);
+
+		if (!result) {
+			#ifdef __ERROR_DEBUG__
+				printError();
+				Serial.print(F("EEPROM couldn't write value '"));
+				Serial.print(value);
+				Serial.print(F("' to key "));
+				Serial.println(key);
+			#endif
+			return false;
+		}
+	}
+
+	#ifdef __NVM_DEBUG__
+		printNVM();
+		Serial.print(F("EEPROM wrote value '"));
+		Serial.print(value);
+		Serial.print(F("' from key "));
+		Serial.println(key);
+	#endif
+
 	return true;
 }
 
@@ -412,7 +464,62 @@ bool nvmGetValue(uint16_t key, double *value, bool canDefault) {
 }
 
 bool nvmGetValue(uint16_t key, char* value, uint8_t maxLength) {
-	return true;
+
+	if (!nvmStarted()) {
+		return false;
+	}
+
+	if (!validCharPointer(value)) {
+		return false;
+	}
+
+	if (maxLength == 0U) {
+		#ifdef __NVM_DEBUG__
+			printNVM();
+			Serial.println(F("Max length 0 not accepted"));
+		#endif
+		return false;
+	}
+
+	char result[maxLength];
+	bool ended = false;
+
+	for (uint8_t i = 0U; i < maxLength; i++) {
+		char letter;
+		bool valid = nvmGet(key+i, &letter, (char)DEFAULT_INT, CAN_DEFAULT);
+		if (!valid) {
+			return false;
+		}
+		result[i] = letter;
+		if (letter == END_OF_CHAR) {
+			i = maxLength;
+			ended = true;
+		}
+	}
+
+	if (!ended) {
+		#ifdef __ERROR_DEBUG__
+			printNVM();
+			Serial.println(F("String too long"));
+		#endif
+		return false;
+	}
+
+	for (uint8_t i = 0U; i < maxLength; i++) {
+		value[i] = result[i];
+		if (result[i] == END_OF_CHAR) {
+			#ifdef __NVM_DEBUG__
+				printNVM();
+				Serial.print(F("EEPROM get value '"));
+				Serial.print(value);
+				Serial.print(F("' from key "));
+				Serial.println(key);
+			#endif
+			return true;
+		}
+	}
+
+	return false;
 }
 
 #endif
