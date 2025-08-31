@@ -25,7 +25,7 @@
 /**
  * Prints formatted tag to serial monitor '[tag]:'
  * 
- * @param tag tag formatted with F()
+ * @param tag tag formatted with F({String})
  * @return void
  */
 void printTag(const __FlashStringHelper * tag);
@@ -49,11 +49,28 @@ void printNVM(void);
 #endif
 
 /**
- * Prints critical error tag '[!!!]'
+ * Prints critical error tag '[!!!]:'
  */
 void printCritError(void);
 
 #ifndef INT64_SUPPORT
+
+/**
+ * Converts to n power of input datatypes
+ * 
+ * @param base base of exponent
+ * @param power power of exponent
+ * 
+ * @return final value
+ */
+template <typename T>
+uint64_t toNPower(T base, T power) {
+	uint64_t value = 1;
+	for (T i = 0; i < power; i++) {
+		value *= base;
+	}
+	return value;
+}
 
 /**
  * Prints a 64 bit integer to the serial monitor
@@ -63,30 +80,40 @@ void printCritError(void);
 template <typename T>
 void printInt64(T value) {
 
-	bool sign = false;
-
-	if (value < 0) {
-		sign = true;
-	}
-
+	// prints 0
 	if (value == 0) {
-		Serial.print(F("0"));
+		Serial.print("0");
 		return;
 	}
 
-	String final = "";
+	if (value < 0) {
+		Serial.print(F("-"));
+		value *= -1;
 
-	while (value) {
-		int64_t digit = value % 10;
-		int8_t sdigit = abs(digit);
-		final = (String)sdigit + final;
-		value = (value - digit) / 10;
+		// prints I64 min
+		if (value < 0) {
+			Serial.print(F("-9223372036854775808"));
+			return;
+		}
 	}
 
-	if (sign) Serial.print(F("-"));
-	Serial.print(final);
+	int8_t digits = 0;
+	uint64_t temp = (uint64_t)value;
+
+	// gets count of digits
+	while (temp > 0) {
+		digits++;
+		temp = temp/10U;
+	}
+
+	// prints digits
+	for (int8_t i = digits - 1; i >= 0; i--) {
+		uint64_t power = toNPower((uint8_t)10, (uint8_t)i);
+		uint64_t leftover = value % power;
+		Serial.print((uint8_t)((value - leftover) / power));
+		value -= value - leftover;
+	}
 }
 
 #endif
-
 #endif
