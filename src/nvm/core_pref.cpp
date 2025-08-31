@@ -18,7 +18,7 @@
 
 #include "core_pref.h"
 
-#ifndef NVM_EEPROM
+#ifdef NVM_PREF
 
 #define GOT_VALUE true
 #define WROTE_VALUE false
@@ -26,7 +26,6 @@
 #define CHAR_KEY_SIZE 3
 
 bool started = false;
-uint16_t nvmSize = 0U;
 Preferences preferences;
 
 #ifdef __NVM_DEBUG__
@@ -78,10 +77,7 @@ enum NVMStartCode nvmInit(uint16_t setNVMSize) {
 		return NVM_INVALID_SIZE;
 	}
 
-	nvmSize = setNVMSize;
-
 	#ifdef __NVM_BEGIN__
-		//const char *name = "Osc";
 		started = preferences.begin("Osc", false);
 	#else
 		started = true;
@@ -122,20 +118,6 @@ void keyToChar(uint16_t key, char* keyStr) {
 	keyStr[1] = key1;
 	keyStr[2] = '\0';
 }
-
-typedef size_t	(Preferences::*PrefPutB)	(const char*, bool);
-typedef size_t	(Preferences::*PrefPutI8)	(const char*, int8_t);
-typedef size_t	(Preferences::*PrefPutUI8)	(const char*, uint8_t);
-typedef size_t	(Preferences::*PrefPutI16)	(const char*, int16_t);
-typedef size_t	(Preferences::*PrefPutUI16)	(const char*, uint16_t);
-typedef size_t	(Preferences::*PrefPutI32)	(const char*, int32_t);
-typedef size_t	(Preferences::*PrefPutUI32)	(const char*, uint32_t);
-typedef size_t	(Preferences::*PrefPutI64)	(const char*, int64_t);
-typedef size_t	(Preferences::*PrefPutUI64)	(const char*, uint64_t);
-typedef size_t	(Preferences::*PrefPutF)	(const char*, float);
-typedef size_t	(Preferences::*PrefPutD)	(const char*, double);
-typedef size_t	(Preferences::*PrefPutC)	(const char*, const char*);
-typedef size_t	(Preferences::*PrefPutS)	(const char*, String);
 
 template <typename PTR, typename VAL>
 bool nvmWrite(PTR prefptr, const uint16_t key, VAL value, VarType var) {
@@ -251,20 +233,6 @@ bool nvmWriteValue(uint16_t key, char* value, uint8_t maxLength) {
 
 	return (bool)result;
 }
-
-typedef bool		(Preferences::*PrefGetB)	(const char*, bool);
-typedef int8_t		(Preferences::*PrefGetI8)	(const char*, int8_t);
-typedef uint8_t		(Preferences::*PrefGetUI8)	(const char*, uint8_t);
-typedef int16_t		(Preferences::*PrefGetI16)	(const char*, int16_t);
-typedef uint16_t	(Preferences::*PrefGetUI16)	(const char*, uint16_t);
-typedef int32_t		(Preferences::*PrefGetI32)	(const char*, int32_t);
-typedef uint32_t	(Preferences::*PrefGetUI32)	(const char*, uint32_t);
-typedef int64_t		(Preferences::*PrefGetI64)	(const char*, int64_t);
-typedef uint64_t	(Preferences::*PrefGetUI64)	(const char*, uint64_t);
-typedef float		(Preferences::*PrefGetF)	(const char*, float);
-typedef double		(Preferences::*PrefGetD)	(const char*, double);
-typedef size_t		(Preferences::*PrefGetC)	(const char*, char*, size_t);
-typedef String		(Preferences::*PrefGetS)	(const char*, String);
 
 template <typename PTR, typename VAL>
 bool nvmGet(PTR prefptr, const uint16_t key, VAL *value, VAL defValue, VarType var, bool canDefault) {

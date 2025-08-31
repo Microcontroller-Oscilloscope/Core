@@ -1,5 +1,5 @@
 /*
-	core_pref.h - methods for Preferences usage
+	osc_err.h - handles critical errors
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,16 +16,20 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "../compile_flags/compile_flags.h"
-
-#ifndef COREPREF_H
-#define COREPREF_H
-
-#ifdef NVM_PREF
+#ifndef OSC_ERR_H
+#define OSC_ERR_H
 
 #include <Arduino.h>
-#include <Preferences.h>
-#include "generic_nvm.h"
+#include "osc_err_list.h"
+#include "../debug.h"
 
-#endif
+#define OSC_ERR_DELAY 1000
+
+/**
+ * Keeps program in an error loop to alert user
+ * 
+ * @param err error code to display
+ */
+void errorLoop(OSC_ERR err);
+
 #endif

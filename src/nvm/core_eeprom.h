@@ -16,12 +16,12 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "../compile_flags.h"
+#include "../compile_flags/compile_flags.h"
 
 #ifndef COREEEPROM_H
 #define COREEEPROM_H
 
-#ifndef NVM_PREF
+#ifdef NVM_EEPROM
 
 #include <Arduino.h>
 #include "generic_nvm.h"

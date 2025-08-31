@@ -1,0 +1,76 @@
+;	platformio.ini.txt - sample configuration for generic board
+;	Copyright (C) 2025 Camren Chraplak
+;
+;	This program is free software: you can redistribute it and/or modify
+;	it under the terms of the GNU General Public License as published by
+;	the Free Software Foundation, either version 3 of the License, or
+;	(at your option) any later version.
+;
+;	This program is distributed in the hope that it will be useful,
+;	but WITHOUT ANY WARRANTY; without even the implied warranty of
+;	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;	GNU General Public License for more details.
+;
+;	You should have received a copy of the GNU General Public License
+;	along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+; PlatformIO Project Configuration File
+;
+;   Build options: build flags, source filter
+;   Upload options: custom upload port, speed and extra flags
+;   Library options: dependencies, extra library storages
+;   Advanced options: extra scripting
+;
+; Please visit documentation for the other options and examples
+; https://docs.platformio.org/page/projectconf.html
+
+[platformio]
+default_envs = {board}
+
+[env]
+platform = {platform}
+board = {board}
+framework = arduino
+monitor_speed = {monitor_speed}
+
+build_flags =
+	; Configuration Flags
+	;-D __NVM_BEGIN__ ; Calls begin function for NVM
+	;-D __NVM_BEGIN_SIZE__ ; Calls begin function with NVM size
+	;-D __NVM_BEGIN_RETURN__ ; Checks return parameter of nvm begin
+	;-D __NVM_COMMIT__ ; Calls commit function for NVM
+
+	; Sets constants for board
+	-include "${PROJECT_DIR}/src/board_consts.h"
+
+lib_deps =
+	https://github.com/Microcontroller-Oscilloscope/Core
+
+[env:{board}]
+build_type = release
+test_filter = *
+
+build_flags =
+	${env.build_flags}
+
+	; Debug Flags
+	-D __ERROR_DEBUG__ ; Debug for general error statements
+	-D __NVM_DEBUG__ ; Debug for data related to NVM
+
+lib_deps =
+	${env.lib_deps}
+
+[env:test_env]
+build_type = test
+test_framework = unity
+
+build_flags =
+	${env.build_flags}
+
+	; Testing Flag
+	-D __TEST_CASES__
+
+lib_deps =
+	${env.lib_deps}
+
+	https://github.com/Microcontroller-Oscilloscope/UnityTests

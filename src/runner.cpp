@@ -1,5 +1,5 @@
 /*
-	core_pref.h - methods for Preferences usage
+	runner.cpp - execution point for code
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,16 +16,10 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "../compile_flags/compile_flags.h"
+#include "runner.h"
 
-#ifndef COREPREF_H
-#define COREPREF_H
+#include "compile_flags/compile_warnings.h"
 
-#ifdef NVM_PREF
-
-#include <Arduino.h>
-#include <Preferences.h>
-#include "generic_nvm.h"
-
-#endif
-#endif
+void runProgram(void) {
+	delay(1000);
+}

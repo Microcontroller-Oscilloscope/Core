@@ -16,10 +16,8 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef EEPROMADDRESSES_H
-#define EEPROMADDRESSES_H
-
-#include <Arduino.h>
+#ifndef EEPROM_ADDRESSES_H
+#define EEPROM_ADDRESSES_H
 
 #define BYTE1_SIZE 1U
 #define BYTE2_SIZE 2U
@@ -27,13 +25,13 @@
 #define BYTE8_SIZE 8U
 
 /****************************
- * Network Config
+ * Network Size Config
  * 
  * NOTE: the size includes the terminating
  * character to the char array
 ****************************/
 
-// max string size for network SSID(name)
+// max string size for network SSID (name)
 #ifndef SSID_STRING_SIZE
 #define SSID_STRING_SIZE 32U
 #endif
@@ -47,10 +45,30 @@
  * NVM Methods
 ****************************/
 
-// EEPROM version
-#define EEPROM_VERSION_SIZE BYTE1_SIZE
-#define EEPROM_VERSION_KEY 0U
-#define EEPROM_VERSION 33
+#define NVM_START_KEY 0U
+
+// NVM version
+#define NVM_VERSION_SIZE BYTE2_SIZE
+#define NVM_VERSION_KEY NVM_START_KEY
+#define NVM_VERSION 1
+
+/****************************
+ * Channel Config
+****************************/
+
+#define CH_START_KEY NVM_VERSION_KEY + NVM_VERSION_SIZE
+
+#define CH_PIN_SIZE BYTE1_SIZE
+#define CH_SIZE CH_PIN_SIZE
+
+/****************************
+ * Network Config
+****************************/
+
+#define NETWORK_START_KEY CH_START_KEY + (CH_SIZE * 1)
+
+#define SSID_KEY NETWORK_START_KEY
+#define PASS_KEY SSID_KEY + SSID_STRING_SIZE
 
 // network credentials
 #define SSID_SIZE BYTE1_SIZE * SSID_STRING_SIZE

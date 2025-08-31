@@ -16,17 +16,22 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#ifndef COMPILE_FLAGS_H
+#define COMPILE_FLAGS_H
+
 /****************************
  * Debug Flags
 ****************************/
 
 /**
  * Debug flag to show undefined methods
+ * Only uncomment when debugging
  */
 //#define DEBUG_INSPECT
 
 /**
  * Debug flag to show undefined nvm methods
+ * Only uncomment when debugging
  */
 //#define DEBUG_NVM
 
@@ -38,21 +43,21 @@
  * Arduino Uno r3
  */
 #ifdef ARDUINO_AVR_UNO
-#define UNOR3
+	#define UNOR3
 #endif
 
 /**
  * ESP32 Devkit C v4
  */
 #ifdef ESP32
-#define ESP32DEVC
+	#define ESP32DEVC
 #endif
 
 /**
  * Raspberry Pi Pico
  */
 #ifdef ARDUINO_RASPBERRY_PI_PICO
-#define PICO
+	#define PICO
 #endif
 
 /****************************
@@ -63,14 +68,18 @@
  * Uses EEPROM method for NVM storage
  */
 #if defined(UNOR3) || defined(PICO)
-#define NVM_EEPROM
+	#if DEFAULT_NVM
+		#define NVM_EEPROM
+	#endif
 #endif
 
 /**
  * Uses Preferences method for NVM storage
  */
 #if defined(ESP32DEVC)
-#define NVM_PREF
+	#if DEFAULT_NVM
+		#define NVM_PREF
+	#endif
 #endif
 
 /****************************
@@ -81,14 +90,14 @@
  * Supports 64 bit operations natively
  */
 #if defined(ESP32DEVC) || defined(PICO)
-#define INT64_SUPPORT
+	#define INT64_SUPPORT
 #endif
 
 /**
  * Only compiles char array operations to needed platforms
  */
 #if defined(UNOR3)
-#define NO_CHAR_ARRAY_SUPPORT
+	#define NO_CHAR_ARRAY_SUPPORT
 #endif
 
 /****************************
@@ -100,11 +109,11 @@
  */
 #ifdef DEBUG_NVM
 
-#define __NVM_BEGIN__
-#define __NVM_BEGIN_SIZE__
-#define __NVM_COMMIT__
-#undef INT64_SUPPORT
-#define DEBUG_INSPECT
+	#define __NVM_BEGIN__
+	#define __NVM_BEGIN_SIZE__
+	#define __NVM_COMMIT__
+	#undef INT64_SUPPORT
+	#define DEBUG_INSPECT
 
 #endif
 
@@ -113,10 +122,11 @@
  */
 #ifdef DEBUG_INSPECT
 
-#undef NVM_PREF
-#undef NVM_EEPROM
-#define __ERROR_DEBUG__
-#define __NVM_DEBUG__
-#define __TAG_DEBUG__
+	#undef NVM_PREF
+	#undef NVM_EEPROM
+	#define __ERROR_DEBUG__
+	#define __NVM_DEBUG__
+
+#endif
 
 #endif

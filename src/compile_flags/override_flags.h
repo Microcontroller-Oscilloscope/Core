@@ -1,5 +1,5 @@
 /*
-	core_pref.h - methods for Preferences usage
+	override_flags.h - constant variables per board override
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,16 +16,27 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "../compile_flags/compile_flags.h"
+#ifndef OVERRIDE_FLAGS_H
+#define OVERRIDE_FLAGS_H
 
-#ifndef COREPREF_H
-#define COREPREF_H
-
-#ifdef NVM_PREF
-
-#include <Arduino.h>
-#include <Preferences.h>
-#include "generic_nvm.h"
-
+#ifndef BAUD_RATE
+	#define BAUD_RATE 9600 // baud rate to print to console
+	#define W_OVERRIDEN
 #endif
+
+#ifndef NVM_SIZE
+	#define NVM_SIZE 0 // size in bytes of NVM
+	#define W_OVERRIDEN
+#endif
+
+#ifndef WAIT_RUN
+	#define WAIT_RUN 0 // how long to wait for program to run in ms
+	#define W_OVERRIDEN
+#endif
+
+#ifndef DEFAULT_NVM
+	#define DEFAULT_NVM true // whether to use the default nvm methods over custom nvm methods
+	#define W_OVERRIDEN
+#endif
+
 #endif

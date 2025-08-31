@@ -1,5 +1,5 @@
 /*
-	core_pref.h - methods for Preferences usage
+	entry.h - entry point for code
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,16 +16,17 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "../compile_flags/compile_flags.h"
-
-#ifndef COREPREF_H
-#define COREPREF_H
-
-#ifdef NVM_PREF
+#ifndef ENTRY_H
+#define ENTRY_H
 
 #include <Arduino.h>
-#include <Preferences.h>
-#include "generic_nvm.h"
+#include "compile_flags/override_flags.h"
+#include "nvm/generic_nvm.h"
+#include "osc_err/osc_err.h"
 
-#endif
+/**
+ * Sets up and starts program
+ */
+void startProgram(void);
+
 #endif

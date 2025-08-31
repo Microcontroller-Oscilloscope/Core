@@ -1,5 +1,5 @@
 /*
-	core_pref.h - methods for Preferences usage
+	osc_err_list.h - lists critical errors
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,16 +16,14 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "../compile_flags/compile_flags.h"
+#ifndef OSC_ERR_LIST_H
+#define OSC_ERR_LIST_H
 
-#ifndef COREPREF_H
-#define COREPREF_H
+enum OSC_ERR {
+	NVM_INIT_FAIL, // NVM failed to initialize
+	NVM_WRITE_FAIL, // NVM failed write operation
+	NVM_GET_FAIL, // NVM failed get operation
+	NVM_NULL_POINTER_FAIL // NVM function pointer was null
+};
 
-#ifdef NVM_PREF
-
-#include <Arduino.h>
-#include <Preferences.h>
-#include "generic_nvm.h"
-
-#endif
 #endif

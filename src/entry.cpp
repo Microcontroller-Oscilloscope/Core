@@ -1,5 +1,5 @@
 /*
-	core_pref.h - methods for Preferences usage
+	entry.cpp - entry point for code
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,16 +16,29 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "../compile_flags/compile_flags.h"
+#include "entry.h"
 
-#ifndef COREPREF_H
-#define COREPREF_H
+void startProgram(void) {
 
-#ifdef NVM_PREF
+	// starts serial monitor
+	Serial.begin(BAUD_RATE);
 
-#include <Arduino.h>
-#include <Preferences.h>
-#include "generic_nvm.h"
+	delay(WAIT_RUN);
 
-#endif
-#endif
+	/*if (nvmInit(NVM_SIZE) != NVM_OK) {
+		errorLoop(NVM_INIT_FAIL);
+	}*/
+
+	/*if (!nvmWriteValue(5, false)) {
+		errorLoop(NVM_WRITE_FAIL);
+	}
+
+	bool result;
+	if (!nvmGetValue(5, &result)) {
+		errorLoop(NVM_GET_FAIL);
+	}
+
+	if (!nvmGetValue(5, &result, CAN_NOT_DEFAULT)) {
+		errorLoop(NVM_GET_FAIL);
+	}*/
+}

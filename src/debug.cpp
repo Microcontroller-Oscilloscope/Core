@@ -18,15 +18,11 @@
 
 #include "debug.h"
 
-#if defined(__TAG_DEBUG__) || defined(__ERROR_DEBUG__) || defined(__NVM_DEBUG__)
-
 void printTag(const __FlashStringHelper * tag) {
 	Serial.print(F("["));
 	Serial.print(tag);
 	Serial.print(F("]:"));
 }
-
-#endif
 
 #ifdef __ERROR_DEBUG__
 void printError(void) {
@@ -39,3 +35,7 @@ void printNVM(void) {
 	printTag(F("NVM"));
 }
 #endif
+
+void printCritError(void) {
+	printTag(F("!!!"));
+}

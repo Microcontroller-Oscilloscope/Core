@@ -20,9 +20,8 @@
 #define DEBUG_H
 
 #include <Arduino.h>
-#include "compile_flags.h"
+#include "compile_flags/compile_flags.h"
 
-#ifdef __TAG_DEBUG__
 /**
  * Prints formatted tag to serial monitor '[tag]:'
  * 
@@ -30,7 +29,6 @@
  * @return void
  */
 void printTag(const __FlashStringHelper * tag);
-#endif
 
 #ifdef __ERROR_DEBUG__
 /**
@@ -49,6 +47,11 @@ void printError(void);
  */
 void printNVM(void);
 #endif
+
+/**
+ * Prints critical error tag '[!!!]'
+ */
+void printCritError(void);
 
 #ifndef INT64_SUPPORT
 

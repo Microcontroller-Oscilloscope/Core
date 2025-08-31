@@ -1,5 +1,5 @@
 /*
-	core_pref.h - methods for Preferences usage
+	nvm.h - includes relevant NVM implementation
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -18,14 +18,15 @@
 
 #include "../compile_flags/compile_flags.h"
 
-#ifndef COREPREF_H
-#define COREPREF_H
-
-#ifdef NVM_PREF
-
-#include <Arduino.h>
-#include <Preferences.h>
-#include "generic_nvm.h"
-
-#endif
+#if defined(NVM_EEPROM)
+	#include "core_eeprom.h"
+#elif defined(NVM_PREF)
+	#include "core_pref.h"
+#else
+	#if !DEFAULT_NVM
+		#include <custom_nvm.h>
+		#define W_CUSTOM_NVM
+	#else
+		#error No NVM Enabled
+	#endif
 #endif

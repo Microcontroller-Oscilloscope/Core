@@ -18,12 +18,11 @@
 
 #include "core_eeprom.h"
 
-#ifndef NVM_PREF
+#ifdef NVM_EEPROM
 
 #include <EEPROM.h>
 
 bool started = false;
-uint16_t nvmSize = 0U;
 
 /**
  * Gets if nvm is started and debugs it
@@ -58,14 +57,12 @@ enum NVMStartCode nvmInit(uint16_t setNVMSize) {
 		return NVM_INVALID_SIZE;
 	}
 
-	nvmSize = nvmSize;
-
 	#ifdef __NVM_BEGIN__
 		#ifdef __NVM_BEGIN_SIZE__
 			#ifdef __NVM_BEGIN_RETURN__
-				started = EEPROM.begin(nvmSize);
+				started = EEPROM.begin(setNVMSize);
 			#else
-				EEPROM.begin(nvmSize);
+				EEPROM.begin(setNVMSize);
 				started = true;
 			#endif
 		#else

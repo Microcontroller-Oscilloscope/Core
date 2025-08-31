@@ -1,5 +1,5 @@
 /*
-	core_pref.h - methods for Preferences usage
+	compile_warnings.h - checks no issues with compilation
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,16 +16,19 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "../compile_flags/compile_flags.h"
+#ifndef COMPILE_WARNINGS_H
+#define COMPILE_WARNINGS_H
 
-#ifndef COREPREF_H
-#define COREPREF_H
+#include "compile_flags.h"
+#include "override_flags.h"
+#include "../nvm/nvm.h"
 
-#ifdef NVM_PREF
-
-#include <Arduino.h>
-#include <Preferences.h>
-#include "generic_nvm.h"
-
+#ifdef W_CUSTOM_NVM
+	#warning Using custom NVM method
 #endif
+
+#ifdef W_OVERRIDEN
+	#warning "Value(s) from 'board_consts.h' not found. '{project directory}/src/board_consts.h' might be missing. Using default value(s)."
+#endif
+
 #endif

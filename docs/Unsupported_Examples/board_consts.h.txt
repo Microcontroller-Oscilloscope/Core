@@ -1,5 +1,5 @@
 /*
-	core_pref.h - methods for Preferences usage
+	board_consts.h - constant variables per board
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,16 +16,19 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "../compile_flags/compile_flags.h"
+#ifndef BOARD_CONSTS_H
+#define BOARD_CONSTS_H
 
-#ifndef COREPREF_H
-#define COREPREF_H
+// baud rate to print to console
+#define BAUD_RATE 9600
 
-#ifdef NVM_PREF
+// size in bytes of NVM
+#define NVM_SIZE 0
 
-#include <Arduino.h>
-#include <Preferences.h>
-#include "generic_nvm.h"
+// how long to wait for program to run in ms
+#define WAIT_RUN 0
 
-#endif
+// whether to use the default nvm methods over custom nvm methods
+#define DEFAULT_NVM true
+
 #endif
