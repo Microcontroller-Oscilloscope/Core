@@ -21,7 +21,7 @@
 
 #ifndef BAUD_RATE
 	#define BAUD_RATE 9600 // baud rate to print to console
-	#define W_OVERRIDEN
+	#define W_INI_OVERRIDEN
 #endif
 
 #ifndef NVM_SIZE

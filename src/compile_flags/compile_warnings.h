@@ -28,7 +28,11 @@
 #endif
 
 #ifdef W_OVERRIDEN
-	#warning "Value(s) from 'board_consts.h' not found. '{project directory}/src/board_consts.h' might be missing. Using default value(s)."
+	#warning Value(s) from 'board_consts.h' not found. '{project directory}/src/board_consts.h' might be missing. Using default value(s).
+#endif
+
+#ifdef W_INI_OVERRIDEN
+	#warning Value(s) from 'platformio.ini' not found. '{project directory}/platformio.ini' might have values missing. Using default value(s).
 #endif
 
 #endif
