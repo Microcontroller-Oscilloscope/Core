@@ -108,7 +108,27 @@ bool nvmMaxSize(nvm_size_t *size) {
 }
 
 NVMDefaultCode nvmSetDefaults(void) {
-	return NVM_DEFAULT_FAIL_INIT;
+	// ensures NVM_SIZE isn't too big for microcontroller
+	nvm_size_t nvmMaxValue;
+	if (nvmMaxSize(&nvmMaxValue)) {
+		if (NVM_SIZE > nvmMaxValue) {
+			errorLoop(NVM_SIZE_TOO_BIG_FAIL);
+			return NVM_DEFAULT_SIZE_TOO_BIG;
+		}
+	}
+	else {
+		// if nvm not started or unable to get size
+		return NVM_DEFAULT_FAIL_MAX_SIZE;
+	}
+
+	// writes critical values
+	NVMDefaultCode code = nvmSetCritDefaults(nvmMaxValue);
+	if (code != NVM_DEFAULT_OK) {
+		return code;
+	}
+
+	//writes platform values
+	return nvmSetEnvDefaults();
 }
 
 /**

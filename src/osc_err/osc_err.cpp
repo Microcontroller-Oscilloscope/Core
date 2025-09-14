@@ -19,9 +19,11 @@
 #include "osc_err.h"
 
 void errorLoop(OSC_ERR err) {
-	while(true) {
-		printCritError();
-		Serial.println(err);
-		delay(OSC_ERR_DELAY);
-	}
+	#ifndef __TEST_CASES__
+		while(true) {
+			printCritError();
+			Serial.println(err);
+			delay(OSC_ERR_DELAY);
+		}
+	#endif
 }

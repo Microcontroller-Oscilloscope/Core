@@ -198,9 +198,7 @@ NVMDefaultCode nvmSetDefaults(void) {
 	nvm_size_t nvmMaxValue;
 	if (nvmMaxSize(&nvmMaxValue)) {
 		if (NVM_SIZE > nvmMaxValue) {
-			#ifndef __TEST_CASES__
-				errorLoop(NVM_SIZE_TOO_BIG_FAIL);
-			#endif
+			errorLoop(NVM_SIZE_TOO_BIG_FAIL);
 			return NVM_DEFAULT_SIZE_TOO_BIG;
 		}
 	}
