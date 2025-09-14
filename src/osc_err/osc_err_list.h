@@ -19,11 +19,18 @@
 #ifndef OSC_ERR_LIST_H
 #define OSC_ERR_LIST_H
 
+/**
+ * List of errors that hang microcontroller
+ */
 enum OSC_ERR {
+
+	// 0-9
 	NVM_INIT_FAIL, // NVM failed to initialize
 	NVM_WRITE_FAIL, // NVM failed write operation
 	NVM_GET_FAIL, // NVM failed get operation
-	NVM_NULL_POINTER_FAIL // NVM function pointer was null
+	NVM_NULL_POINTER_FAIL, // NVM function pointer was null
+	NVM_SIZE_TOO_BIG_FAIL, // NVM_SIZE in board consts is over max
+	NVM_SIZE_TOO_SMALL_FAIL, // NVM_SIZE in board consts is too small for data
 };
 
 #endif

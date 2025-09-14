@@ -19,10 +19,12 @@
 #ifndef EEPROM_ADDRESSES_H
 #define EEPROM_ADDRESSES_H
 
-#define BYTE1_SIZE 1U
-#define BYTE2_SIZE 2U
-#define BYTE4_SIZE 4U
-#define BYTE8_SIZE 8U
+#include <Arduino.h>
+
+#define BYTE1_SIZE 1
+#define BYTE2_SIZE 2
+#define BYTE4_SIZE 4
+#define BYTE8_SIZE 8
 
 /****************************
  * Network Size Config
@@ -42,35 +44,70 @@
 #endif
 
 /****************************
+ * Critical Config
+ * 
+ * config needed for both normal
+ * operations and unit testing
+****************************/
+
+#define CRIT_START_KEY 0
+
+#define NVM_AVAILABLE_SIZE BYTE4_SIZE
+#define NVM_AVAILABLE_KEY CRIT_START_KEY
+#define NVM_AVAILABLE_DEFAULT 0U
+
+#define CRIT_END_KEY CRIT_START_KEY + NVM_AVAILABLE_SIZE
+
+/****************************
  * NVM Methods
 ****************************/
 
-#define NVM_START_KEY 0U
+#define NVM_START_KEY CRIT_END_KEY
 
 // NVM version
 #define NVM_VERSION_SIZE BYTE2_SIZE
+#define NVM_VERSION_TYPE uint16_t
 #define NVM_VERSION_KEY NVM_START_KEY
 #define NVM_VERSION 1
+
+#define NVM_END_KEY NVM_VERSION_KEY + NVM_VERSION_SIZE
 
 /****************************
  * Channel Config
 ****************************/
 
-#define CH_START_KEY NVM_VERSION_KEY + NVM_VERSION_SIZE
+#define CH_START_KEY NVM_END_KEY
 
 #define CH_PIN_SIZE BYTE1_SIZE
 #define CH_SIZE CH_PIN_SIZE
+
+#define CH_END_KEY CH_START_KEY + (CH_SIZE * 1)
 
 /****************************
  * Network Config
 ****************************/
 
-#define NETWORK_START_KEY CH_START_KEY + (CH_SIZE * 1)
+#define NETWORK_START_KEY CH_END_KEY
 
 #define SSID_KEY NETWORK_START_KEY
 #define PASS_KEY SSID_KEY + SSID_STRING_SIZE
 
 // network credentials
 #define SSID_SIZE BYTE1_SIZE * SSID_STRING_SIZE
+
+#define NETWORK_END_KEY NETWORK_START_KEY + SSID_SIZE
+
+/****************************
+ * Size Config
+****************************/
+
+// nvm size needed for normal operation
+#define NVM_NORMAL_SIZE NETWORK_END_KEY
+
+#ifndef __TEST_CASES__
+	#if NVM_NORMAL_SIZE > NVM_SIZE
+		#error NVM_SIZE not large enough for normal operations
+	#endif
+#endif
 
 #endif

@@ -19,6 +19,13 @@
 #ifndef COMPILE_FLAGS_H
 #define COMPILE_FLAGS_H
 
+// version of microcontroller oscilloscope core
+#define OSC_CORE_MAJOR_VERSION 0
+#define OSC_CORE_MINOR_VERSION 2
+#define OSC_CORE_PATCH_VERSION 0
+
+#include "override_flags.h"
+
 /****************************
  * Debug Flags
 ****************************/
@@ -109,11 +116,15 @@
  */
 #ifdef DEBUG_NVM
 
-	#define __NVM_BEGIN__
-	#define __NVM_BEGIN_SIZE__
-	#define __NVM_COMMIT__
-	#undef INT64_SUPPORT
-	#define DEBUG_INSPECT
+	#ifndef NVM_EEPROM
+		#define NVM_EEPROM
+	#endif
+	#ifndef NVM_PREF
+		#define NVM_PREF
+	#endif
+	#ifndef DEBUG_INSPECT
+		#define DEBUG_INSPECT
+	#endif
 
 #endif
 
@@ -122,10 +133,12 @@
  */
 #ifdef DEBUG_INSPECT
 
-	#undef NVM_PREF
-	#undef NVM_EEPROM
-	#define __ERROR_DEBUG__
-	#define __NVM_DEBUG__
+	#ifndef __ERROR_DEBUG__
+		#define __ERROR_DEBUG__
+	#endif
+	#ifndef __NVM_DEBUG__
+		#define __NVM_DEBUG__
+	#endif
 
 #endif
 

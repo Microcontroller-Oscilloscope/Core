@@ -21,16 +21,23 @@
 
 #include <Arduino.h>
 #include "../debug.h"
+#include "eeprom_addresses.h"
+#include "../compile_flags/override_flags.h"
+#include "../osc_err/osc_err.h"
 
+// defualt size for nvm storage
 #define DEFAULT_NVM_SIZE 0U
 
-#define LEAST_BYTE 0b11111111
-#define SECOND_LEAST_BYTE 0b1111111100000000
-#define SECOND_MOST_BYTE 0b111111110000000000000000
-#define MOST_BYTE 0b11111111000000000000000000000000
+// binary for one byte
+#define ONE_BYTE 0b11111111
 
 // result of NVM initialization
 enum NVMStartCode {NVM_OK, NVM_STARTED, NVM_FAILED, NVM_INVALID_SIZE};
+
+// result of NVM reset
+enum NVMDefaultCode {NVM_DEFAULT_OK, NVM_DEFAULT_SIZE_TOO_BIG,
+		NVM_DEFAULT_FAIL_WRITE, NVM_DEFAULT_FAIL_CLEAR, NVM_DEFAULT_FAIL_MAX_SIZE, 
+		NVM_DEFAULT_FAIL_STOP, NVM_DEFAULT_FAIL_INIT};
 
 // variable type for retrieving values
 enum VarType {
@@ -44,7 +51,9 @@ enum VarType {
 	VAR_CHAR_ARRAY, VAR_STRING
 };
 
+// end of char array code
 #define END_OF_CHAR '\0'
+// max length of char array
 #define CHAR_LEN_ERROR UINT8_MAX
 
 #define CAN_DEFAULT true
@@ -55,6 +64,11 @@ enum VarType {
 #define DEFAULT_FLOAT NAN
 
 #ifndef NO_CHAR_ARRAY_SUPPORT
+
+typedef uint16_t nvm_size_t;
+#define NVM_MAX_SIZE_BYTES sizeof(nvm_size_t)
+#define NVM_OVER_SIZE (~((nvm_size_t)0U))
+#define NVM_MAX_SIZE NVM_OVER_SIZE ^ (nvm_size_t)(1U)
 
 /**
  * Tests if two char arrays are the same value
@@ -108,10 +122,55 @@ void printVarType(enum VarType varType);
  * 
  * @return code from trying to initialize
  */
-enum NVMStartCode nvmInit(uint16_t nvmSize);
+enum NVMStartCode nvmInit(nvm_size_t nvmSize);
 
 // pointer for nvm init methods
-typedef NVMStartCode (*nvmInitPTR) (uint16_t);
+typedef NVMStartCode (*nvmInitPTR) (nvm_size_t);
+
+/**
+ * Gets max size of nvm method
+ * 
+ * @param size amount of bytes in nvm
+ * 
+ * @return if retrieval was successful
+ */
+bool nvmMaxSize(nvm_size_t *size);
+
+/**
+ * Resets nvm settings to default settings
+ * 
+ * @warning WILL CLEAR NVM DATA
+ * 
+ * @return code from setting default values
+ */
+NVMDefaultCode nvmSetDefaults(void);
+
+/**
+ * Writes critical values for nvm
+ * 
+ * @param nvmMaxValue max size of nvm
+ * 
+ * @note will reset critical values
+ * 
+ * @return code resulting from operations
+ */
+NVMDefaultCode nvmSetCritDefaults(nvm_size_t nvmMaxValue);
+
+/**
+ * Sets variables needed for general or test environment
+ * 
+ * @note will reset environment values
+ * 
+ * @return code resulting from operations
+ */
+NVMDefaultCode nvmSetEnvDefaults(void);
+
+/**
+ * Prints debug messages for setting nvm defaults
+ * 
+ * @param message message to print
+ */
+void printDefaultDebug(const __FlashStringHelper *message);
 
 /****************************
  * NVM Write Methods
@@ -125,10 +184,10 @@ typedef NVMStartCode (*nvmInitPTR) (uint16_t);
  * 
  * @return if write was valid
  */
-bool nvmWriteValue(uint16_t key, bool value);
+bool nvmWriteValue(nvm_size_t key, bool value);
 
 // pointer for nvm write bool methods
-typedef bool (*nvmWriteBoolPTR) (uint16_t, bool);
+typedef bool (*nvmWriteBoolPTR) (nvm_size_t, bool);
 
 /**
  * Writes value to nvm
@@ -138,10 +197,10 @@ typedef bool (*nvmWriteBoolPTR) (uint16_t, bool);
  * 
  * @return if write was valid
  */
-bool nvmWriteValue(uint16_t key, int8_t value);
+bool nvmWriteValue(nvm_size_t key, int8_t value);
 
 // pointer for nvm write i8 methods
-typedef bool (*nvmWriteI8PTR) (uint16_t, int8_t);
+typedef bool (*nvmWriteI8PTR) (nvm_size_t, int8_t);
 
 /**
  * Writes value to nvm
@@ -151,10 +210,10 @@ typedef bool (*nvmWriteI8PTR) (uint16_t, int8_t);
  * 
  * @return if write was valid
  */
-bool nvmWriteValue(uint16_t key, uint8_t value);
+bool nvmWriteValue(nvm_size_t key, uint8_t value);
 
 // pointer for nvm write u8 methods
-typedef bool (*nvmWriteU8PTR) (uint16_t, uint8_t);
+typedef bool (*nvmWriteU8PTR) (nvm_size_t, uint8_t);
 
 /**
  * Writes value to nvm
@@ -164,10 +223,10 @@ typedef bool (*nvmWriteU8PTR) (uint16_t, uint8_t);
  * 
  * @return if write was valid
  */
-bool nvmWriteValue(uint16_t key, int16_t value);
+bool nvmWriteValue(nvm_size_t key, int16_t value);
 
 // pointer for nvm write i16 methods
-typedef bool (*nvmWriteI16PTR) (uint16_t, int16_t);
+typedef bool (*nvmWriteI16PTR) (nvm_size_t, int16_t);
 
 /**
  * Writes value to nvm
@@ -177,10 +236,10 @@ typedef bool (*nvmWriteI16PTR) (uint16_t, int16_t);
  * 
  * @return if write was valid
  */
-bool nvmWriteValue(uint16_t key, uint16_t value);
+bool nvmWriteValue(nvm_size_t key, uint16_t value);
 
 // pointer for nvm write u16 methods
-typedef bool (*nvmWriteU16PTR) (uint16_t, uint16_t);
+typedef bool (*nvmWriteU16PTR) (nvm_size_t, uint16_t);
 
 /**
  * Writes value to nvm
@@ -190,10 +249,10 @@ typedef bool (*nvmWriteU16PTR) (uint16_t, uint16_t);
  * 
  * @return if write was valid
  */
-bool nvmWriteValue(uint16_t key, int32_t value);
+bool nvmWriteValue(nvm_size_t key, int32_t value);
 
 // pointer for nvm write i32 methods
-typedef bool (*nvmWriteI32PTR) (uint16_t, int32_t);
+typedef bool (*nvmWriteI32PTR) (nvm_size_t, int32_t);
 
 /**
  * Writes value to nvm
@@ -203,10 +262,10 @@ typedef bool (*nvmWriteI32PTR) (uint16_t, int32_t);
  * 
  * @return if write was valid
  */
-bool nvmWriteValue(uint16_t key, uint32_t value);
+bool nvmWriteValue(nvm_size_t key, uint32_t value);
 
 // pointer for nvm write u32 methods
-typedef bool (*nvmWriteU32PTR) (uint16_t, uint32_t);
+typedef bool (*nvmWriteU32PTR) (nvm_size_t, uint32_t);
 
 /**
  * Writes value to nvm
@@ -216,10 +275,10 @@ typedef bool (*nvmWriteU32PTR) (uint16_t, uint32_t);
  * 
  * @return if write was valid
  */
-bool nvmWriteValue(uint16_t key, int64_t value);
+bool nvmWriteValue(nvm_size_t key, int64_t value);
 
 // pointer for nvm write i64 methods
-typedef bool (*nvmWriteI64PTR) (uint16_t, int64_t);
+typedef bool (*nvmWriteI64PTR) (nvm_size_t, int64_t);
 
 /**
  * Writes value to nvm
@@ -229,10 +288,10 @@ typedef bool (*nvmWriteI64PTR) (uint16_t, int64_t);
  * 
  * @return if write was valid
  */
-bool nvmWriteValue(uint16_t key, uint64_t value);
+bool nvmWriteValue(nvm_size_t key, uint64_t value);
 
 // pointer for nvm write u64 methods
-typedef bool (*nvmWriteU64PTR) (uint16_t, uint64_t);
+typedef bool (*nvmWriteU64PTR) (nvm_size_t, uint64_t);
 
 /**
  * Writes value to nvm
@@ -242,10 +301,10 @@ typedef bool (*nvmWriteU64PTR) (uint16_t, uint64_t);
  * 
  * @return if write was valid
  */
-bool nvmWriteValue(uint16_t key, float value);
+bool nvmWriteValue(nvm_size_t key, float value);
 
 // pointer for nvm write float methods
-typedef bool (*nvmWriteFloatPTR) (uint16_t, float);
+typedef bool (*nvmWriteFloatPTR) (nvm_size_t, float);
 
 /**
  * Writes value to nvm
@@ -255,10 +314,10 @@ typedef bool (*nvmWriteFloatPTR) (uint16_t, float);
  * 
  * @return if write was valid
  */
-bool nvmWriteValue(uint16_t key, double value);
+bool nvmWriteValue(nvm_size_t key, double value);
 
 // pointer for nvm write double methods
-typedef bool (*nvmWriteDoublePTR) (uint16_t, double);
+typedef bool (*nvmWriteDoublePTR) (nvm_size_t, double);
 
 #ifndef NO_CHAR_ARRAY_SUPPORT
 
@@ -271,10 +330,10 @@ typedef bool (*nvmWriteDoublePTR) (uint16_t, double);
  * 
  * @return if write was valid
  */
-bool nvmWriteValue(uint16_t key, char* value, uint8_t maxLength);
+bool nvmWriteValue(nvm_size_t key, char* value, uint8_t maxLength);
 
 // pointer for nvm write char array methods
-typedef bool (*nvmWriteCharArrayPTR) (uint16_t, char*, uint8_t);
+typedef bool (*nvmWriteCharArrayPTR) (nvm_size_t, char*, uint8_t);
 
 #endif
 
@@ -291,10 +350,10 @@ typedef bool (*nvmWriteCharArrayPTR) (uint16_t, char*, uint8_t);
  * 
  * @return if get was successful
  */
-bool nvmGetValue(uint16_t key, bool *value, bool canDefault = CAN_DEFAULT);
+bool nvmGetValue(nvm_size_t key, bool *value, bool canDefault = CAN_DEFAULT);
 
 // pointer for nvm get bool methods
-typedef bool (*nvmGetBoolPTR) (uint16_t, bool*, bool);
+typedef bool (*nvmGetBoolPTR) (nvm_size_t, bool*, bool);
 
 /**
  * Gets value from nvm
@@ -305,10 +364,10 @@ typedef bool (*nvmGetBoolPTR) (uint16_t, bool*, bool);
  * 
  * @return if get was successful
  */
-bool nvmGetValue(uint16_t key, int8_t *value, bool canDefault = CAN_DEFAULT);
+bool nvmGetValue(nvm_size_t key, int8_t *value, bool canDefault = CAN_DEFAULT);
 
 // pointer for nvm get i8 methods
-typedef bool (*nvmGetI8PTR) (uint16_t, int8_t*, bool);
+typedef bool (*nvmGetI8PTR) (nvm_size_t, int8_t*, bool);
 
 /**
  * Gets value from nvm
@@ -319,10 +378,10 @@ typedef bool (*nvmGetI8PTR) (uint16_t, int8_t*, bool);
  * 
  * @return if get was successful
  */
-bool nvmGetValue(uint16_t key, uint8_t *value, bool canDefault = CAN_DEFAULT);
+bool nvmGetValue(nvm_size_t key, uint8_t *value, bool canDefault = CAN_DEFAULT);
 
 // pointer for nvm get u8 methods
-typedef bool (*nvmGetU8PTR) (uint16_t, uint8_t*, bool);
+typedef bool (*nvmGetU8PTR) (nvm_size_t, uint8_t*, bool);
 
 /**
  * Gets value from nvm
@@ -333,10 +392,10 @@ typedef bool (*nvmGetU8PTR) (uint16_t, uint8_t*, bool);
  * 
  * @return if get was successful
  */
-bool nvmGetValue(uint16_t key, int16_t *value, bool canDefault = CAN_DEFAULT);
+bool nvmGetValue(nvm_size_t key, int16_t *value, bool canDefault = CAN_DEFAULT);
 
 // pointer for nvm get i16 methods
-typedef bool (*nvmGetI16PTR) (uint16_t, int16_t*, bool);
+typedef bool (*nvmGetI16PTR) (nvm_size_t, int16_t*, bool);
 
 /**
  * Gets value from nvm
@@ -347,10 +406,10 @@ typedef bool (*nvmGetI16PTR) (uint16_t, int16_t*, bool);
  * 
  * @return if get was successful
  */
-bool nvmGetValue(uint16_t key, uint16_t *value, bool canDefault = CAN_DEFAULT);
+bool nvmGetValue(nvm_size_t key, uint16_t *value, bool canDefault = CAN_DEFAULT);
 
 // pointer for nvm get u16 methods
-typedef bool (*nvmGetU16PTR) (uint16_t, uint16_t*, bool);
+typedef bool (*nvmGetU16PTR) (nvm_size_t, uint16_t*, bool);
 
 /**
  * Gets value from nvm
@@ -361,10 +420,10 @@ typedef bool (*nvmGetU16PTR) (uint16_t, uint16_t*, bool);
  * 
  * @return if get was successful
  */
-bool nvmGetValue(uint16_t key, int32_t *value, bool canDefault = CAN_DEFAULT);
+bool nvmGetValue(nvm_size_t key, int32_t *value, bool canDefault = CAN_DEFAULT);
 
 // pointer for nvm get i32 methods
-typedef bool (*nvmGetI32PTR) (uint16_t, int32_t*, bool);
+typedef bool (*nvmGetI32PTR) (nvm_size_t, int32_t*, bool);
 
 /**
  * Gets value from nvm
@@ -375,10 +434,10 @@ typedef bool (*nvmGetI32PTR) (uint16_t, int32_t*, bool);
  * 
  * @return if get was successful
  */
-bool nvmGetValue(uint16_t key, uint32_t *value, bool canDefault = CAN_DEFAULT);
+bool nvmGetValue(nvm_size_t key, uint32_t *value, bool canDefault = CAN_DEFAULT);
 
 // pointer for nvm get u32 methods
-typedef bool (*nvmGetU32PTR) (uint16_t, uint32_t*, bool);
+typedef bool (*nvmGetU32PTR) (nvm_size_t, uint32_t*, bool);
 
 /**
  * Gets value from nvm
@@ -389,10 +448,10 @@ typedef bool (*nvmGetU32PTR) (uint16_t, uint32_t*, bool);
  * 
  * @return if get was successful
  */
-bool nvmGetValue(uint16_t key, int64_t *value, bool canDefault = CAN_DEFAULT);
+bool nvmGetValue(nvm_size_t key, int64_t *value, bool canDefault = CAN_DEFAULT);
 
 // pointer for nvm get i64 methods
-typedef bool (*nvmGetI64PTR) (uint16_t, int64_t*, bool);
+typedef bool (*nvmGetI64PTR) (nvm_size_t, int64_t*, bool);
 
 /**
  * Gets value from nvm
@@ -403,10 +462,10 @@ typedef bool (*nvmGetI64PTR) (uint16_t, int64_t*, bool);
  * 
  * @return if get was successful
  */
-bool nvmGetValue(uint16_t key, uint64_t *value, bool canDefault = CAN_DEFAULT);
+bool nvmGetValue(nvm_size_t key, uint64_t *value, bool canDefault = CAN_DEFAULT);
 
 // pointer for nvm get u64 methods
-typedef bool (*nvmGetU64PTR) (uint16_t, uint64_t*, bool);
+typedef bool (*nvmGetU64PTR) (nvm_size_t, uint64_t*, bool);
 
 /**
  * Gets value from nvm
@@ -417,10 +476,10 @@ typedef bool (*nvmGetU64PTR) (uint16_t, uint64_t*, bool);
  * 
  * @return if get was successful
  */
-bool nvmGetValue(uint16_t key, float *value, bool canDefault = CAN_DEFAULT);
+bool nvmGetValue(nvm_size_t key, float *value, bool canDefault = CAN_DEFAULT);
 
 // pointer for nvm get float methods
-typedef bool (*nvmGetFloatPTR) (uint16_t, float*, bool);
+typedef bool (*nvmGetFloatPTR) (nvm_size_t, float*, bool);
 
 /**
  * Gets value from nvm
@@ -431,10 +490,10 @@ typedef bool (*nvmGetFloatPTR) (uint16_t, float*, bool);
  * 
  * @return if get was successful
  */
-bool nvmGetValue(uint16_t key, double *value, bool canDefault = CAN_DEFAULT);
+bool nvmGetValue(nvm_size_t key, double *value, bool canDefault = CAN_DEFAULT);
 
 // pointer for nvm get double methods
-typedef bool (*nvmGetDoublePTR) (uint16_t, double*, bool);
+typedef bool (*nvmGetDoublePTR) (nvm_size_t, double*, bool);
 
 #ifndef NO_CHAR_ARRAY_SUPPORT
 
@@ -447,10 +506,10 @@ typedef bool (*nvmGetDoublePTR) (uint16_t, double*, bool);
  * 
  * @return if write was valid
  */
-bool nvmGetValue(uint16_t key, char* value, uint8_t maxLength);
+bool nvmGetValue(nvm_size_t key, char* value, uint8_t maxLength);
 
 // pointer for nvm get char array methods
-typedef bool (*nvmGetCharArrayPTR) (uint16_t, char*, uint8_t);
+typedef bool (*nvmGetCharArrayPTR) (nvm_size_t, char*, uint8_t);
 
 #endif
 

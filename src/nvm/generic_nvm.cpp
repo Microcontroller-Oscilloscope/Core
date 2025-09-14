@@ -48,14 +48,20 @@ bool validCharPointer(char* value) {
 
 uint8_t charArraySize(char* value) {
 
-	if (value == nullptr) {
+	if (!validCharPointer(value)) {
 		return 0U;
 	}
 
-	for (uint8_t i = 0U; i < CHAR_LEN_ERROR - 1; i++) {
+	/*for (uint8_t i = 0U; i < CHAR_LEN_ERROR - 1; i++) {
 		if (value[i] == END_OF_CHAR) {
 			return i + 1U;
 		}
+	}*/
+
+	size_t length = strlen(value);
+
+	if (length < CHAR_LEN_ERROR - 1) {
+		return length + 1U;
 	}
 
 	#ifdef __NVM_DEBUG__
@@ -116,4 +122,32 @@ void printVarType(enum VarType varType) {
 	}
 }
 
+#endif
+
+void printDefaultDebug(const __FlashStringHelper *message) {
+	#ifdef __NVM_DEBUG__
+		printNVM();
+		Serial.println(message);
+	#endif
+}
+
+#define FAILED_WRITE_MESSAGE() printDefaultDebug(F("nvm failed write"))
+
+NVMDefaultCode nvmSetCritDefaults(nvm_size_t nvmMaxValue) {
+	if (!nvmWriteValue(NVM_AVAILABLE_KEY, nvmMaxValue)) {
+		FAILED_WRITE_MESSAGE();
+		return NVM_DEFAULT_FAIL_WRITE;
+	}
+
+	return NVM_DEFAULT_OK;
+}
+
+#ifdef __TEST_CASES__
+NVMDefaultCode nvmSetEnvDefaults(void) {
+	return NVM_DEFAULT_OK;
+}
+#else
+NVMDefaultCode nvmSetEnvDefaults(void) {
+	return NVM_DEFAULT_OK;
+}
 #endif

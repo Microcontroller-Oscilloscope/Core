@@ -21,7 +21,7 @@
 
 #include <Arduino.h>
 #include "compile_flags/override_flags.h"
-#include "nvm/generic_nvm.h"
+#include "nvm/nvm.h"
 #include "osc_err/osc_err.h"
 
 /**
