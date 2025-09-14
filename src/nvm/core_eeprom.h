@@ -25,8 +25,8 @@
 
 #include <Arduino.h>
 #include "generic_nvm.h"
-#include "eeprom_addresses.h"
-#include "../debug.h"
+//#include "eeprom_addresses.h"
+//#include "../debug.h"
 
 #endif
 #endif

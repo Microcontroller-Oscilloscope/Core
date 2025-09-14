@@ -63,12 +63,12 @@ enum VarType {
 #define DEFAULT_BOOL false
 #define DEFAULT_FLOAT NAN
 
-#ifndef NO_CHAR_ARRAY_SUPPORT
-
 typedef uint16_t nvm_size_t;
 #define NVM_MAX_SIZE_BYTES sizeof(nvm_size_t)
 #define NVM_OVER_SIZE (~((nvm_size_t)0U))
 #define NVM_MAX_SIZE NVM_OVER_SIZE ^ (nvm_size_t)(1U)
+
+#ifndef NO_CHAR_ARRAY_SUPPORT
 
 /**
  * Tests if two char arrays are the same value
