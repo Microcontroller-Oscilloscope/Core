@@ -21,7 +21,7 @@
 
 // version of microcontroller oscilloscope core
 #define OSC_CORE_MAJOR_VERSION 0
-#define OSC_CORE_MINOR_VERSION 2
+#define OSC_CORE_MINOR_VERSION 3
 #define OSC_CORE_PATCH_VERSION 0
 
 #include "../boards/board.h"
