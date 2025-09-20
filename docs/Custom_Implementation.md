@@ -17,6 +17,7 @@ An example confiugration is shown [here](#example-configuration-for-custom-nvm).
 - Make sure code compiles
 - Configure `platformio.ini` to run in test mode [example here](#platformioini)
 - Run tests
+	- If error occurs where it can't find `unity.h`, ensure you run the PlatformIO command `Test` to install Unity library
 	- While not strictly required for the new functionality to work, this confirms it works with the project and that edge cases are handled properly
 - Restore `platformio.ini` after tests are complete
 

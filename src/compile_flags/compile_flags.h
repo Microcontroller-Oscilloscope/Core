@@ -24,7 +24,7 @@
 #define OSC_CORE_MINOR_VERSION 2
 #define OSC_CORE_PATCH_VERSION 0
 
-#include "override_flags.h"
+#include "../boards/board.h"
 
 /****************************
  * Debug Flags
@@ -43,32 +43,7 @@
 //#define DEBUG_NVM
 
 /****************************
- * Selected Board
-****************************/
-
-/**
- * Arduino Uno r3
- */
-#ifdef ARDUINO_AVR_UNO
-	#define UNOR3
-#endif
-
-/**
- * ESP32 Devkit C v4
- */
-#ifdef ESP32
-	#define ESP32DEVC
-#endif
-
-/**
- * Raspberry Pi Pico
- */
-#ifdef ARDUINO_RASPBERRY_PI_PICO
-	#define PICO
-#endif
-
-/****************************
- * EEPROM Config
+ * NVM Config
 ****************************/
 
 /**
@@ -131,7 +106,7 @@
 /**
  * Defines flags to show all hidden methods
  */
-#ifdef DEBUG_INSPECT
+#if defined(DEBUG_INSPECT) && !defined(__TEST_CASES__)
 
 	#ifndef __ERROR_DEBUG__
 		#define __ERROR_DEBUG__

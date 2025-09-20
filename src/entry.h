@@ -20,7 +20,7 @@
 #define ENTRY_H
 
 #include <Arduino.h>
-#include "compile_flags/override_flags.h"
+#include "compile_flags/compile_flags.h"
 #include "nvm/nvm.h"
 #include "osc_err/osc_err.h"
 

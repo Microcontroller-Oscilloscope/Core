@@ -1,5 +1,5 @@
 /*
-	runner.h - execution point for code
+	board_uno.h - configuration flags for Arduino Uno
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,15 +16,36 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef RUNNER_H
-#define RUNNER_H
+#ifndef BOARD_UNO_H
+#define BOARD_UNO_H
 
-#include <Arduino.h>
-#include "compile_flags/compile_flags.h"
+#include "../board_generic.h"
 
-/**
- * Runs Program
- */
-void runProgram(void);
+#ifdef ARDUINO_AVR_UNO
+	#define UNOR3
+	#define BOARD_FOUND
+#endif
 
+#ifdef UNOR3
+
+	/****************************
+	 * Board Overrides
+	****************************/
+
+	#ifndef NVM_SIZE
+		#define NVM_SIZE 1024 // size in bytes of NVM
+	#endif
+
+	#ifndef CORE_COUNT
+		#define CORE_COUNT 1 // amount of CPU cores available to board
+	#endif
+
+	/****************************
+	 * NVM Config
+	****************************/
+
+	#if !NVM_CHECK()
+	#endif
+
+#endif
 #endif

@@ -1,5 +1,5 @@
 /*
-	override_flags.h - constant variables per board override
+	board_generic.h - configuration flags for generic board
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,27 +16,37 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef OVERRIDE_FLAGS_H
-#define OVERRIDE_FLAGS_H
+#ifndef BOARD_GENERIC_H
+#define BOARD_GENERIC_H
 
-#ifndef BAUD_RATE
-	#define BAUD_RATE 9600 // baud rate to print to console
-	#define W_INI_OVERRIDEN
-#endif
+// default nvm size when flash is used instead of dedicated EEPROM
+#define FLASH_NVM_SIZE 4096
 
-#ifndef NVM_SIZE
-	#define NVM_SIZE 0 // size in bytes of NVM
-	#define W_OVERRIDEN
-#endif
+// checks if any default nvm methods are called
+#define NVM_CHECK() (defined(__NVM_BEGIN__) || defined(__NVM_BEGIN_SIZE__) || defined(__NVM_BEGIN_RETURN__) || defined(__NVM_COMMIT__))
+
+/****************************
+ * Checks Optional Flags
+****************************/
 
 #ifndef WAIT_RUN
 	#define WAIT_RUN 0 // how long to wait for program to run in ms
-	#define W_OVERRIDEN
+#else
+	#if WAIT_RUN < 0
+		#error WAIT_RUN must be whole number 0 or greater in ms
+	#endif
 #endif
+
+/****************************
+ * Checks Custom Config Flags
+****************************/
 
 #ifndef DEFAULT_NVM
 	#define DEFAULT_NVM true // whether to use the default nvm methods over custom nvm methods
-	#define W_OVERRIDEN
+#else
+	#if DEFAULT_NVM != true && DEFAULT_NVM != false
+		#error DEFAULT_NVM must be 'true' or 'false'
+	#endif
 #endif
 
 #endif

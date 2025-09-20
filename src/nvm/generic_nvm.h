@@ -22,7 +22,7 @@
 #include <Arduino.h>
 #include "../debug.h"
 #include "eeprom_addresses.h"
-#include "../compile_flags/override_flags.h"
+#include "../compile_flags/compile_flags.h"
 #include "../osc_err/osc_err.h"
 
 // defualt size for nvm storage

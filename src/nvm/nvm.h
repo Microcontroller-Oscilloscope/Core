@@ -18,9 +18,9 @@
 
 #include "../compile_flags/compile_flags.h"
 
-#if defined(NVM_EEPROM)
+#if defined(NVM_EEPROM) && DEFAULT_NVM
 	#include "core_eeprom.h"
-#elif defined(NVM_PREF)
+#elif defined(NVM_PREF) && DEFAULT_NVM
 	#include "core_pref.h"
 #else
 	#if !DEFAULT_NVM
