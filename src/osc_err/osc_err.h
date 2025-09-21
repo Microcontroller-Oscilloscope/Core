@@ -21,7 +21,7 @@
 
 #include <Arduino.h>
 #include "osc_err_list.h"
-#include "../debug.h"
+#include "../status/debug.h"
 
 #define OSC_ERR_DELAY 1000
 
