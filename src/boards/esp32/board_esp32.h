@@ -45,8 +45,12 @@
 	****************************/
 
 	#if !NVM_CHECK()
-		#define __NVM_BEGIN__ // Calls begin function for NVM
-		#define __NVM_BEGIN_RETURN__ // Checks return parameter of nvm begin
+		#ifndef __NVM_BEGIN__
+			#define __NVM_BEGIN__ // Calls begin function for NVM
+		#endif
+		#ifndef __NVM_BEGIN_RETURN__
+			#define __NVM_BEGIN_RETURN__ // Checks return parameter of nvm begin
+		#endif
 	#endif
 
 #endif

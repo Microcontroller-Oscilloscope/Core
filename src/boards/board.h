@@ -24,7 +24,9 @@
 #include "esp32/board_esp32.h"
 #include "pico/board_pico.h"
 
-#define DEFAULT_BAUD_RATE 9600 // default baud rate for microcontrollers
+#ifndef DEFAULT_BAUD_RATE
+	#define DEFAULT_BAUD_RATE 9600 // default baud rate for microcontrollers
+#endif
 
 /****************************
  * Checks Required Flags
@@ -73,27 +75,26 @@
 
 /****************************
  * Checks Includes
- * TODO: Add checks
 ****************************/
 
-/*#ifndef __ENABLED_ENV__
-	#error __ENABLED_ENV__ not found. Include 'ini/generic.ini' under 'extra_configs = '
+// checks flags for all configurations
+#ifndef __ENABLED_ENV__
+	#error '__ENABLED_ENV__' not found. Include 'ini/generic.ini' under 'extra_configs ='
+#endif
+#ifndef __ENABLED_BASE__
+	#error '__ENABLED_BASE__' not found. Include your boards '.ini' file
 #endif
 
 #ifndef __TEST_CASES__
+	// checks flags for release configurations
 	#ifndef __ENABLED_RELEASE__
-		#error __ENABLED_RELEASE__ not found
-	#endif
-	#ifndef __ENABLED_BOARD_RELEASE__
-		#error __ENABLED_BOARD_RELEASE__ not found
+		#error '__ENABLED_RELEASE__' not found. Include 'ini/generic.ini' and your boards '.ini' under 'extra_configs ='. Ensure 'extends = env, base, release_env, dev_base, dev_board' is included
 	#endif
 #else
+	// checks flags for test configurations
 	#ifndef __ENABLED_TEST__
-		#error __ENABLED_TEST__ not found
+		#error '__ENABLED_TEST__' not found. Include 'ini/generic.ini' and your boards '.ini' under 'extra_configs ='. Ensure 'extends = env, base, test_env, dev_base, dev_board_test' is included
 	#endif
-	#ifndef __ENABLED_BOARD_TEST__
-		#error __ENABLED_BOARD_TEST__ not found
-	#endif
-#endif*/
+#endif
 
 #endif

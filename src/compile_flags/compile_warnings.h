@@ -26,4 +26,16 @@
 	#warning Using custom NVM method
 #endif
 
+#ifdef __ENABLED_DEV_RELEASE__
+	#warning Compiling in Dev mode for release
+#endif
+
+#ifdef __ENABLED_DEV_TEST__
+	#warning Compiling in Dev mode for Unity testing
+#endif
+
+#if defined(__ENABLED_DEV_RELEASE__) || defined(__ENABLED_DEV_TEST__)
+	#warning No NVM flags are enabled in board header files. Ensure they are included in the board .ini files
+#endif
+
 #endif
