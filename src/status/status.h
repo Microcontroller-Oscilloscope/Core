@@ -1,5 +1,5 @@
 /*
-	entry.h - entry point for code
+	status.h - toggle status light
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,18 +16,31 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef ENTRY_H
-#define ENTRY_H
+#ifndef STATUS_H
+#define STATUS_H
 
 #include <Arduino.h>
-#include "compile_flags/compile_flags.h"
-#include "nvm/nvm.h"
-#include "osc_err/osc_err.h"
-#include "status/status.h"
+#include "../compile_flags/compile_flags.h"
 
 /**
- * Sets up and starts program
+ * List of status codes for LED
  */
-void startProgram(void);
+enum STATUS_CODE {
+	BOARD_OK, // board is in an operable state
+	BOARD_CONNECTING, // board is trying to connect to device
+	BOARD_CRIT_ERROR, // board encountered a critical error
+};
+
+/**
+ * Initializes status pin configuration
+ */
+void initStatus(void);
+
+/**
+ * Sets status of the board's LED
+ * 
+ * @param status status code to show
+ */
+void setStatus(STATUS_CODE status);
 
 #endif

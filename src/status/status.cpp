@@ -1,5 +1,5 @@
 /*
-	entry.h - entry point for code
+	status.cpp - toggle status light
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,18 +16,26 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef ENTRY_H
-#define ENTRY_H
+#include "status.h"
 
-#include <Arduino.h>
-#include "compile_flags/compile_flags.h"
-#include "nvm/nvm.h"
-#include "osc_err/osc_err.h"
-#include "status/status.h"
+void initStatus(void) {
+	pinMode(STATUS_LED_PIN, OUTPUT);
+}
 
 /**
- * Sets up and starts program
+ * Resets status LED pin to off
  */
-void startProgram(void);
+void resetStatus(void) {
+	digitalWrite(STATUS_LED_PIN, LOW);
+}
 
-#endif
+void setStatus(STATUS_CODE status) {
+
+	resetStatus();
+	if (status == BOARD_OK) {
+		digitalWrite(STATUS_LED_PIN, HIGH);
+	}
+	else {
+		
+	}
+}
