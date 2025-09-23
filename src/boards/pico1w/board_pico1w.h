@@ -1,5 +1,5 @@
 /*
-	board_uno.h - configuration flags for Arduino Uno
+	board_pico1w.h - configuration flags for Raspberry Pi Pico W
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,40 +16,20 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef BOARD_UNO_H
-#define BOARD_UNO_H
+#ifndef BOARD_PICO1W_H
+#define BOARD_PICO1W_H
 
 #include "../board_generic.h"
 
-#ifdef ARDUINO_AVR_UNO
-	#define UNOR3
+#ifdef ARDUINO_RASPBERRY_PI_PICO_W
+	#define PICO1W
+	#define PICO
 	#define BOARD_FOUND
 #endif
 
-#ifdef UNOR3
+#ifdef PICO1W
 
-	/****************************
-	 * Board Overrides
-	****************************/
-
-	#ifndef NVM_SIZE
-		#define NVM_SIZE 1024 // size in bytes of NVM
-	#endif
-
-	#ifndef CORE_COUNT
-		#define CORE_COUNT 1 // amount of CPU cores available to board
-	#endif
-
-	#ifndef STATUS_LED_PIN
-		#define STATUS_LED_PIN 13 // pin for status LED
-	#endif
-
-	/****************************
-	 * NVM Config
-	****************************/
-
-	#if !NVM_CHECK()
-	#endif
+	#include "../inherited/board_pico.h"
 
 #endif
 #endif

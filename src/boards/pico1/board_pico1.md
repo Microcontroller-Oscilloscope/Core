@@ -1,6 +1,6 @@
-# Raspberry Pi Pico/Pico W
+# Raspberry Pi Pico
 
-This repository contains the code necessary to run the `Raspberry Pi Pico/Pico W` microcontroller oscilloscope. This repository requires the [Core](https://github.com/Microcontroller-Oscilloscope/Core) to function and [Unity Tests](https://github.com/Microcontroller-Oscilloscope/UnityTests) to verify its functionality.
+This repository contains the code necessary to run the `Raspberry Pi Pico` microcontroller oscilloscope. This repository requires the [Core](https://github.com/Microcontroller-Oscilloscope/Core) to function and [Unity Tests](https://github.com/Microcontroller-Oscilloscope/UnityTests) to verify its functionality.
 
 Mark Descriptions:<br>
 &check;: Fully supported<br>
@@ -30,5 +30,5 @@ Rise Time: ?
 | Optional Features | Support |
 | -- | -- |
 | Multi Core | - |
-| Wifi Connectivity | - (only Pico W) |
-| Bluetooth Connectivity | - (only Pico W) |
+| Wifi Connectivity | &cross; |
+| Bluetooth Connectivity | &cross; |

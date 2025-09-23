@@ -16,42 +16,20 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef BOARD_PICO_H
-#define BOARD_PICO_H
+#ifndef BOARD_PICO1_H
+#define BOARD_PICO1_H
 
 #include "../board_generic.h"
 
 #ifdef ARDUINO_RASPBERRY_PI_PICO
+	#define PICO1
 	#define PICO
 	#define BOARD_FOUND
 #endif
 
-#ifdef PICO
+#ifdef PICO1
 
-	/****************************
-	 * Board Overrides
-	****************************/
-
-	#ifndef NVM_SIZE
-		#define NVM_SIZE FLASH_NVM_SIZE // size in bytes of NVM
-	#endif
-
-	#ifndef CORE_COUNT
-		#define CORE_COUNT 2 // amount of CPU cores available to board
-	#endif
-
-	/****************************
-	 * NVM Config
-	****************************/
-
-	#if !NVM_CHECK()
-		#ifndef __NVM_BEGIN__
-			#define __NVM_BEGIN__ // Calls begin function for NVM
-		#endif
-		#ifndef __NVM_BEGIN_SIZE__
-			#define __NVM_BEGIN_SIZE__ // Calls begin function with NVM size
-		#endif
-	#endif
+	#include "../inherited/board_pico.h"
 
 #endif
 #endif

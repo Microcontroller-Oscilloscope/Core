@@ -22,7 +22,8 @@
 #include "board_generic.h"
 #include "uno/board_uno.h"
 #include "esp32/board_esp32.h"
-#include "pico/board_pico.h"
+#include "pico1/board_pico1.h"
+#include "pico1w/board_pico1w.h"
 
 #ifndef DEFAULT_BAUD_RATE
 	#define DEFAULT_BAUD_RATE 9600 // default baud rate for microcontrollers
