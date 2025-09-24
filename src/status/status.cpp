@@ -17,25 +17,108 @@
 */
 
 #include "status.h"
+#include <Arduino.h>
+#include "../compile_flags/compile_flags.h"
 
-void initStatus(void) {
-	pinMode(STATUS_LED_PIN, OUTPUT);
-}
+// if status LEDs are enabled
+#define STATUS_LED_DEFINED() defined(STATUS_LED_PIN) || defined(EXTERNAL_STATUS_LED_PIN)
+
+#if STATUS_LED_DEFINED()
 
 /**
- * Resets status LED pin to off
+ * Sets LED timer for set amount of time
+ * 
+ * @param delayTime amount to delay
  */
-void resetStatus(void) {
-	digitalWrite(STATUS_LED_PIN, LOW);
+void setLEDTimer(uint16_t delayTime);
+
+/**
+ * Cancels timer for LED when switching states
+ */
+void cancelLEDTimer();
+
+#if defined(PICO1W)
+
+	#include <pico/time.h>
+
+	struct repeating_timer ledTimer; // LED timer
+	bool ledToggle = false; // LED toggle state
+
+	/**
+	 * Blinks LED on and off
+	 * 
+	 * @param t pico timer
+	 * 
+	 * @return if write was successfull
+	 */
+	bool blinkLED(struct repeating_timer *t) {
+		ledToggle = !ledToggle;
+		#ifdef STATUS_LED_PIN
+			digitalWrite(STATUS_LED_PIN, ledToggle);
+		#endif
+		#ifdef EXTERNAL_STATUS_LED_PIN
+			digitalWrite(EXTERNAL_STATUS_LED_PIN, ledToggle);
+		#endif
+		return true;
+	}
+
+	void cancelLEDTimer() {
+		cancel_repeating_timer(&ledTimer);
+	}
+
+	void setLEDTimer(uint16_t delayTime) {
+		add_repeating_timer_ms(delayTime, blinkLED, NULL, &ledTimer);
+	}
+
+#else // no LED timers enabled
+
+	void cancelLEDTimer() {}
+	void setLEDTimer(uint16_t delayTime) {}
+
+#endif
+#endif
+
+/**
+ * Resets LEDs to off
+ */
+void resetLEDs() {
+	#ifdef STATUS_LED_PIN
+		digitalWrite(STATUS_LED_PIN, LOW);
+	#endif
+	#ifdef EXTERNAL_STATUS_LED_PIN
+		digitalWrite(EXTERNAL_STATUS_LED_PIN, LOW);
+	#endif
+}
+
+void initStatus(void) {
+	#ifdef STATUS_LED_PIN
+		pinMode(STATUS_LED_PIN, OUTPUT);
+	#endif
+	#ifdef EXTERNAL_STATUS_LED_PIN
+		pinMode(EXTERNAL_STATUS_LED_PIN, OUTPUT);
+	#endif
 }
 
 void setStatus(STATUS_CODE status) {
 
-	resetStatus();
-	if (status == BOARD_OK) {
-		digitalWrite(STATUS_LED_PIN, HIGH);
-	}
-	else {
-		
-	}
+	#if STATUS_LED_DEFINED()
+
+		cancelLEDTimer();
+		resetLEDs();
+		if (status == BOARD_OK) {
+			#ifdef STATUS_LED_PIN
+				digitalWrite(STATUS_LED_PIN, HIGH);
+			#endif
+			#ifdef EXTERNAL_STATUS_LED_PIN
+				digitalWrite(EXTERNAL_STATUS_LED_PIN, HIGH);
+			#endif
+		}
+		else if (status == BOARD_CONNECTING) {
+			setLEDTimer(CONNECTING_DELAY);
+		}
+		else if (status == BOARD_CRIT_ERROR) {
+			setLEDTimer(CRIT_ERROR_DELAY);
+		}
+
+	#endif
 }

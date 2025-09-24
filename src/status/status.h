@@ -19,9 +19,6 @@
 #ifndef STATUS_H
 #define STATUS_H
 
-#include <Arduino.h>
-#include "../compile_flags/compile_flags.h"
-
 /**
  * List of status codes for LED
  */
@@ -30,6 +27,9 @@ enum STATUS_CODE {
 	BOARD_CONNECTING, // board is trying to connect to device
 	BOARD_CRIT_ERROR, // board encountered a critical error
 };
+
+#define CONNECTING_DELAY 1000 // LED blink delay for connecting in ms
+#define CRIT_ERROR_DELAY 100 // LED blink delay for critical errors in ms
 
 /**
  * Initializes status pin configuration

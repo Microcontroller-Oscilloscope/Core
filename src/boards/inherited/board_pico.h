@@ -39,6 +39,10 @@
 		#define STATUS_LED_PIN LED_BUILTIN // pin for status LED
 	#endif
 
+	#ifndef EXTERNAL_LED_PIN
+		#define EXTERNAL_STATUS_LED_PIN 22 // pin for external status LED
+	#endif
+
 	/****************************
 	 * NVM Config
 	****************************/

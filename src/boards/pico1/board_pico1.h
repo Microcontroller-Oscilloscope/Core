@@ -1,5 +1,5 @@
 /*
-	board_pico.h - configuration flags for Raspberry Pi Pico
+	board_pico1.h - configuration flags for Raspberry Pi Pico
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
