@@ -37,15 +37,21 @@ void setLEDTimer(uint16_t delayTime);
  */
 void cancelLEDTimer();
 
+/**
+ * Sets up timers for each board
+ */
+void timerInit();
+
+bool ledToggle = false; // LED toggle state
+
 #if defined(PICO1W)
 
 	#include <pico/time.h>
 
 	struct repeating_timer ledTimer; // LED timer
-	bool ledToggle = false; // LED toggle state
 
 	/**
-	 * Blinks LED on and off
+	 * Blinks LEDs on and off
 	 * 
 	 * @param t pico timer
 	 * 
@@ -62,6 +68,8 @@ void cancelLEDTimer();
 		return true;
 	}
 
+	void timerInit() {}
+
 	void cancelLEDTimer() {
 		cancel_repeating_timer(&ledTimer);
 	}
@@ -70,8 +78,46 @@ void cancelLEDTimer();
 		add_repeating_timer_ms(delayTime, blinkLED, NULL, &ledTimer);
 	}
 
+#elif defined(ESP32DEVC)
+
+	hw_timer_t *ledTimer = NULL; // LED timer
+
+	#define PRE_SCALAR 80 // prescalar for hardware timer
+	#define US_TO_MS 1000 // converts micro seconds to milli seconds
+
+	/**
+	 * Blinks LEDs on and off
+	 */
+	void IRAM_ATTR blinkLED() {
+		ledToggle = !ledToggle;
+		#ifdef STATUS_LED_PIN
+			digitalWrite(STATUS_LED_PIN, ledToggle);
+		#endif
+		#ifdef EXTERNAL_STATUS_LED_PIN
+			digitalWrite(EXTERNAL_STATUS_LED_PIN, ledToggle);
+		#endif
+	}
+
+	void timerInit() {
+		ledTimer = timerBegin(LED_TIMER, PRE_SCALAR, true);
+		timerAttachInterrupt(ledTimer, &blinkLED, true);
+	}
+
+	void cancelLEDTimer() {
+		timerAlarmDisable(ledTimer);
+		timerStop(ledTimer);
+	}
+
+	void setLEDTimer(uint16_t delayTime) {
+		uint64_t timerTicks = US_TO_MS * delayTime;
+		timerAlarmWrite(ledTimer, timerTicks, true);
+		timerAlarmEnable(ledTimer);
+		timerStart(ledTimer);
+	}
+
 #else // no LED timers enabled
 
+	void timerInit() {}
 	void cancelLEDTimer() {}
 	void setLEDTimer(uint16_t delayTime) {}
 
@@ -96,6 +142,9 @@ void initStatus(void) {
 	#endif
 	#ifdef EXTERNAL_STATUS_LED_PIN
 		pinMode(EXTERNAL_STATUS_LED_PIN, OUTPUT);
+	#endif
+	#if STATUS_LED_DEFINED()
+		timerInit();
 	#endif
 }
 

@@ -40,6 +40,10 @@
 		#define CORE_COUNT 2 // amount of CPU cores available to board
 	#endif
 
+	#ifndef EXTERNAL_LED_PIN
+		#define EXTERNAL_STATUS_LED_PIN 23 // pin for external status LED
+	#endif
+
 	/****************************
 	 * NVM Config
 	****************************/
@@ -52,6 +56,14 @@
 			#define __NVM_BEGIN_RETURN__ // Checks return parameter of nvm begin
 		#endif
 	#endif
+
+	/****************************
+	 * Timer Config
+	 * 
+	 * Only 4 hardware timers available
+	****************************/
+
+	#define LED_TIMER 0 // Used hardware timer for blinking status LED
 
 #endif
 #endif
