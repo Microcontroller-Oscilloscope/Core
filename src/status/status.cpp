@@ -115,6 +115,114 @@ bool ledToggle = false; // LED toggle state
 		timerStart(ledTimer);
 	}
 
+#elif defined(UNOR3)
+
+	#define COMPARE_MULTIPLIER (F_CPU / 1000000U) // value to mutliply by ms delay
+
+	/**
+	 * Blinks LEDs on and off
+	 */
+	ISR (TIMER1_COMPA_vect) {
+		ledToggle = !ledToggle;
+		#ifdef STATUS_LED_PIN
+			digitalWrite(STATUS_LED_PIN, ledToggle);
+		#endif
+		#ifdef EXTERNAL_STATUS_LED_PIN
+			digitalWrite(EXTERNAL_STATUS_LED_PIN, ledToggle);
+		#endif
+	}
+
+	enum HARDWARE_TIMER {
+		HARD_TIMER0, // hardware timer 0, 8 bit counter
+		HARD_TIMER1, // hardware timer 1, 16 bit counter
+		HARD_TIMER2, // hardware timer 2, 8 bit counter
+	};
+
+	enum PRE_SCALAR {
+		SCALAR_STOP, // stops timer
+		SCALAR_1, // timer prescalar of 1, timers 0-2
+		SCALAR_8, // timer prescalar of 8, timers 0-2
+		SCALAR_32, // timer prescalar of 32, timer 2
+		SCALAR_64, // timer prescalar of 64, timers 0-2
+		SCALAR_128, // timer prescalar of 128, timer 2
+		SCALAR_256, // timer prescalar of 256, timers 0-2
+		SCALAR_1024, // timer prescalar of 1024, timers 0-2
+	};
+
+	void setTimer(HARDWARE_TIMER timer, PRE_SCALAR scalar, uint16_t compare_count) {
+
+		if ((timer == HARD_TIMER0 || timer == HARD_TIMER2) && compare_count >= UINT8_MAX) {
+			compare_count = UINT8_MAX - 1;
+		}
+		if ((timer == HARD_TIMER0 || timer == HARD_TIMER1) && (scalar == SCALAR_32 || scalar == SCALAR_128)) {
+			return;
+		}
+
+		if (timer == HARD_TIMER0) {
+			cli();
+			TCCR0A = 0;
+			TCCR0B = 0;
+			TCNT0 = 0;
+			OCR0A = compare_count;
+			TCCR0A |= (1 << WGM01);
+			if (scalar == SCALAR_STOP) {
+				TCCR0B &= ~(0b00000000 | ((1 << CS00) | (1 << CS01) | (1 << CS02)));
+			}
+			else {
+				if (scalar == SCALAR_1 || scalar == SCALAR_64 || scalar == SCALAR_1024) {
+					TCCR0B |= (1 << CS00);
+				}
+				if (scalar == SCALAR_8 || scalar == SCALAR_64) {
+					TCCR0B |= (1 << CS01);
+				}
+				if (scalar == SCALAR_256 || scalar == SCALAR_1024) {
+					TCCR0B |= (1 << CS02);
+				}
+			}
+			TIMSK0 |= (1 << OCIE0A);
+			sei();
+		}
+		else if (timer == HARD_TIMER1) {
+			cli();
+			TCCR1A = 0;
+			TCCR1B = 0;
+			TCNT1 = 0;
+			OCR1A = compare_count;
+			TCCR1B |= (1 << WGM12);
+			if (scalar == SCALAR_STOP) {
+				TCCR1B &= ~(0b00000000 | ((1 << CS10) | (1 << CS11) | (1 << CS12)));
+				TIMSK1 &= ~(0b00000000 | (1 << OCIE1A));
+			}
+			else {
+				if (scalar == SCALAR_1 || scalar == SCALAR_64 || scalar == SCALAR_1024) {
+					TCCR1B |= (1 << CS10);
+				}
+				if (scalar == SCALAR_8 || scalar == SCALAR_64) {
+					TCCR1B |= (1 << CS11);
+				}
+				if (scalar == SCALAR_256 || scalar == SCALAR_1024) {
+					TCCR1B |= (1 << CS12);
+				}
+				TIMSK1 |= (1 << OCIE1A);
+			}
+			sei();
+		}
+		else if (timer == HARD_TIMER2) {
+			cli();
+			sei();
+		}
+	}
+
+	void timerInit() {}
+
+	void cancelLEDTimer() {
+		setTimer(HARD_TIMER1, SCALAR_STOP, 0U);
+	}
+
+	void setLEDTimer(uint16_t delayTime) {
+		setTimer(HARD_TIMER1, SCALAR_1024, COMPARE_MULTIPLIER * delayTime);
+	}
+
 #else // no LED timers enabled
 
 	void timerInit() {}
