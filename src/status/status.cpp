@@ -209,6 +209,27 @@ bool ledToggle = false; // LED toggle state
 		}
 		else if (timer == HARD_TIMER2) {
 			cli();
+			TCCR2A = 0;
+			TCCR2B = 0;
+			TCNT2  = 0;
+			OCR2A = compare_count;
+			TCCR2A |= (1 << WGM21);
+			if (scalar == SCALAR_STOP) {
+				TCCR2B &= ~(0b00000000 | ((1 << CS20) | (1 << CS21) | (1 << CS22)));
+				TIMSK2 &= ~(0b00000000 | (1 << OCIE2A));
+			}
+			else {
+				if (scalar == SCALAR_1 || scalar == SCALAR_32 || scalar == SCALAR_128 || scalar == SCALAR_1024) {
+					TCCR2B |= (1 << CS20);
+				}
+				if (scalar == SCALAR_8 || scalar == SCALAR_32 || scalar == SCALAR_256 || scalar == SCALAR_1024) {
+					TCCR2B |= (1 << CS21);
+				}
+				if (scalar == SCALAR_64 || scalar == SCALAR_128 || scalar == SCALAR_256 || scalar == SCALAR_1024) {
+					TCCR2B |= (1 << CS22);
+				}
+				TIMSK2 |= (1 << OCIE2A);
+			}
 			sei();
 		}
 	}
