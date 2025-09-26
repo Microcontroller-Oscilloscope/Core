@@ -56,6 +56,12 @@
 		#endif
 	#endif
 
+	/****************************
+	 * Timer Config
+	 * 
+	 * Only 16 hardware alarm timers available
+	****************************/
+
 #endif
 
 #endif
