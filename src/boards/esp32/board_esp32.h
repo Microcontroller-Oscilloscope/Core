@@ -63,7 +63,47 @@
 	 * Only 4 hardware timers available
 	****************************/
 
-	#define LED_TIMER 0 // Used hardware timer for blinking status LED
+	#include <stdint.h>
+
+	// available hardware timers
+	enum HARDWARE_TIMER_T { // hardware timer type
+		HARD_TIMER0, // hardware timer 0, 64 bit counter
+		HARD_TIMER1, // hardware timer 1, 64 bit counter
+		HARD_TIMER2, // hardware timer 2, 64 bit counter
+		HARD_TIMER3, // hardware timer 3, 64 bit counter
+	};
+	typedef HARDWARE_TIMER_T hardware_timer_t; // hardware timer type
+
+	// available pre scalars
+	typedef uint16_t prescalar_t; // pre scalar type
+
+	// other timer definitions
+	typedef uint64_t timertick_t; // timer tick type
+	typedef void (*hard_timer_function_ptr_t) (void); // timer callback function pointer
+
+	// timer references
+	#define HARD_TIMER0_REFERENCE hardTimer0Function // reference for timer 0 function
+	#define HARD_TIMER1_REFERENCE hardTimer1Function // reference for timer 1 function
+	#define HARD_TIMER2_REFERENCE hardTimer2Function // reference for timer 2 function
+	#define HARD_TIMER3_REFERENCE hardTimer3Function // reference for timer 3 function
+
+	// timer functions
+	#define HARD_TIMER0_FUNCTION() void IRAM_ATTR HARD_TIMER0_REFERENCE() // starter function for timer 0
+	#define HARD_TIMER1_FUNCTION() void IRAM_ATTR HARD_TIMER1_REFERENCE() // starter function for timer 1
+	#define HARD_TIMER2_FUNCTION() void IRAM_ATTR HARD_TIMER2_REFERENCE() // starter function for timer 2
+	#define HARD_TIMER3_FUNCTION() void IRAM_ATTR HARD_TIMER3_REFERENCE() // starter function for timer 3
+
+	#define HARD_TIMER_END() // end of function for timers
+
+	/****************************
+	 * LED Timer Config
+	****************************/
+
+	#define HARD_TIMER_LED HARD_TIMER0 // hardware timer for status LEDs
+	#define HARD_TIMER_LED_FUNCTION() HARD_TIMER0_FUNCTION() // starter function for status LED
+	#define HARD_TIMER_LED_REFERENCE HARD_TIMER0_REFERENCE // reference for status LED function
+
+	#define LED_TIMER HARD_TIMER0 // Used hardware timer for blinking status LED
 
 #endif
 #endif

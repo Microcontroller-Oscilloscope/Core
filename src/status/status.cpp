@@ -44,6 +44,20 @@ void timerInit();
 
 bool ledToggle = false; // LED toggle state
 
+/**
+ * Blinks LEDs on and off
+ */
+HARD_TIMER_LED_FUNCTION() {
+	ledToggle = !ledToggle;
+	#ifdef STATUS_LED_PIN
+		digitalWrite(STATUS_LED_PIN, ledToggle);
+	#endif
+	#ifdef EXTERNAL_STATUS_LED_PIN
+		digitalWrite(EXTERNAL_STATUS_LED_PIN, ledToggle);
+	#endif
+	HARD_TIMER_END();
+}
+
 #if defined(PICO1W)
 
 	#include <pico/time.h>
@@ -80,57 +94,23 @@ bool ledToggle = false; // LED toggle state
 
 #elif defined(ESP32DEVC)
 
-	hw_timer_t *ledTimer = NULL; // LED timer
-
 	#define PRE_SCALAR 80 // prescalar for hardware timer
 	#define US_TO_MS 1000 // converts micro seconds to milli seconds
 
-	/**
-	 * Blinks LEDs on and off
-	 */
-	void IRAM_ATTR blinkLED() {
-		ledToggle = !ledToggle;
-		#ifdef STATUS_LED_PIN
-			digitalWrite(STATUS_LED_PIN, ledToggle);
-		#endif
-		#ifdef EXTERNAL_STATUS_LED_PIN
-			digitalWrite(EXTERNAL_STATUS_LED_PIN, ledToggle);
-		#endif
-	}
-
 	void timerInit() {
-		ledTimer = timerBegin(LED_TIMER, PRE_SCALAR, true);
-		timerAttachInterrupt(ledTimer, &blinkLED, true);
+		initHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, PRE_SCALAR);
 	}
-
 	void cancelLEDTimer() {
-		timerAlarmDisable(ledTimer);
-		timerStop(ledTimer);
+		cancelHardTimer(HARD_TIMER_LED);
 	}
-
 	void setLEDTimer(uint16_t delayTime) {
 		uint64_t timerTicks = US_TO_MS * delayTime;
-		timerAlarmWrite(ledTimer, timerTicks, true);
-		timerAlarmEnable(ledTimer);
-		timerStart(ledTimer);
+		setHardTimer(HARD_TIMER_LED, timerTicks);
 	}
 
 #elif defined(UNOR3)
 
 	#define COMPARE_MULTIPLIER (F_CPU / 1000000L) // value to mutliply by ms delay
-
-	/**
-	 * Blinks LEDs on and off
-	 */
-	ISR (TIMER1_COMPA_vect) {
-		ledToggle = !ledToggle;
-		#ifdef STATUS_LED_PIN
-			digitalWrite(STATUS_LED_PIN, ledToggle);
-		#endif
-		#ifdef EXTERNAL_STATUS_LED_PIN
-			digitalWrite(EXTERNAL_STATUS_LED_PIN, ledToggle);
-		#endif
-	}
 
 	void timerInit() {}
 

@@ -65,7 +65,14 @@
 		HARD_TIMER2, // hardware timer 2, 8 bit counter
 	};
 
+	#define HARD_TIMER0_FUNCTION() ISR (TIMER0_COMPA_vect) // starter function for timer 0
+	#define HARD_TIMER1_FUNCTION() ISR (TIMER1_COMPA_vect) // starter function for timer 1
+	#define HARD_TIMER2_FUNCTION() ISR (TIMER2_COMPA_vect) // starter function for timer 2
+
+	#define HARD_TIMER_END() // end of function for timers
+
 	#define HARD_TIMER_LED HARD_TIMER1 // hardware timer for status LEDs
+	#define HARD_TIMER_LED_FUNCTION() HARD_TIMER1_FUNCTION() // starter function for status LED
 
 	enum PRE_SCALAR {
 		SCALAR_1, // timer prescalar of 1, timers 0-2
@@ -76,13 +83,6 @@
 		SCALAR_256, // timer prescalar of 256, timers 0-2
 		SCALAR_1024, // timer prescalar of 1024, timers 0-2
 	};
-
-	/**
-	 * Stops hardware timer from executing
-	 * 
-	 * @param timer timer to stop
-	 */
-	void cancelHardTimer(HARDWARE_TIMER timer);
 
 	/**
 	 * Configure hardware timer

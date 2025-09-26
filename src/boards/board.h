@@ -59,6 +59,34 @@
 #endif
 
 /****************************
+ * Configures Common Board Functions
+****************************/
+
+/**
+ * Initializes hardware timer
+ * 
+ * @param timer timer to initialize
+ * @param function function to call back
+ * @param scalar scalar for function call
+ */
+void initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar);
+
+/**
+ * Stops hardware timer from executing
+ * 
+ * @param timer timer to stop
+ */
+void cancelHardTimer(hardware_timer_t timer);
+
+/**
+ * Starts hardware timer execution
+ * 
+ * @param timer timer to start
+ * @param timerTicks timer ticks per cycle
+ */
+void setHardTimer(hardware_timer_t timer, timertick_t timerTicks);
+
+/****************************
  * Changes Flags When Testing
 ****************************/
 
