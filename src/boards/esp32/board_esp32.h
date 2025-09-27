@@ -103,7 +103,5 @@
 	#define HARD_TIMER_LED_FUNCTION() HARD_TIMER0_FUNCTION() // starter function for status LED
 	#define HARD_TIMER_LED_REFERENCE HARD_TIMER0_REFERENCE // reference for status LED function
 
-	#define LED_TIMER HARD_TIMER0 // Used hardware timer for blinking status LED
-
 #endif
 #endif

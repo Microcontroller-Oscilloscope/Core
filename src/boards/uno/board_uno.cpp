@@ -22,7 +22,9 @@
 
 #include <Arduino.h>
 
-void cancelHardTimer(HARDWARE_TIMER timer) {
+void initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar) {}
+
+void cancelHardTimer(hardware_timer_t timer) {
 	if (timer == HARD_TIMER0) {
 		cli();
 		TCCR0B &= ~(0b00000000 | ((1 << CS00) | (1 << CS01) | (1 << CS02)));
@@ -43,8 +45,7 @@ void cancelHardTimer(HARDWARE_TIMER timer) {
 	}
 }
 
-void setHardTimer(HARDWARE_TIMER timer, PRE_SCALAR scalar, uint16_t timerTicks) {
-
+void setHardTimer(hardware_timer_t timer, prescalar_t scalar, timertick_t timerTicks) {
 	if ((timer == HARD_TIMER0 || timer == HARD_TIMER2) && timerTicks >= UINT8_MAX) {
 		timerTicks = UINT8_MAX - 1;
 	}

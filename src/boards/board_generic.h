@@ -27,6 +27,13 @@
 		|| defined(__NVM_BEGIN_RETURN__) || defined(__NVM_COMMIT__)) \
 		|| !defined(__ENABLED_DEV_RELEASE__) || !defined(__ENABLED_DEV_TEST__)
 
+/**
+ * Void function for void parameters
+ */
+void nothing();
+
+#define VOID_FUNCTION_NAME nothing // name of empty void function
+
 /****************************
  * Checks Optional Flags
 ****************************/

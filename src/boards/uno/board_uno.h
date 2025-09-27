@@ -59,22 +59,14 @@
 
 	#include <stdint.h>
 
-	enum HARDWARE_TIMER {
+	enum HARDWARE_TIMER_T {
 		HARD_TIMER0, // hardware timer 0, 8 bit counter
 		HARD_TIMER1, // hardware timer 1, 16 bit counter
 		HARD_TIMER2, // hardware timer 2, 8 bit counter
 	};
+	typedef HARDWARE_TIMER_T hardware_timer_t; // hardware timer type
 
-	#define HARD_TIMER0_FUNCTION() ISR (TIMER0_COMPA_vect) // starter function for timer 0
-	#define HARD_TIMER1_FUNCTION() ISR (TIMER1_COMPA_vect) // starter function for timer 1
-	#define HARD_TIMER2_FUNCTION() ISR (TIMER2_COMPA_vect) // starter function for timer 2
-
-	#define HARD_TIMER_END() // end of function for timers
-
-	#define HARD_TIMER_LED HARD_TIMER1 // hardware timer for status LEDs
-	#define HARD_TIMER_LED_FUNCTION() HARD_TIMER1_FUNCTION() // starter function for status LED
-
-	enum PRE_SCALAR {
+	enum PRE_SCALAR_T {
 		SCALAR_1, // timer prescalar of 1, timers 0-2
 		SCALAR_8, // timer prescalar of 8, timers 0-2
 		SCALAR_32, // timer prescalar of 32, timer 2
@@ -84,18 +76,89 @@
 		SCALAR_1024, // timer prescalar of 1024, timers 0-2
 	};
 
+	// available pre scalars
+	typedef PRE_SCALAR_T prescalar_t; // pre scalar type
+
+	// other timer definitions
+	typedef uint16_t timertick_t; // timer tick type
+	typedef void (*hard_timer_function_ptr_t) (void); // timer callback function pointer
+
+	// timer references
+	#define HARD_TIMER0_REFERENCE VOID_FUNCTION_NAME // reference for timer 0 function
+	#define HARD_TIMER1_REFERENCE VOID_FUNCTION_NAME // reference for timer 1 function
+	#define HARD_TIMER2_REFERENCE VOID_FUNCTION_NAME // reference for timer 2 function
+
+	// timer functions
+
 	/**
-	 * Configure hardware timer
+	 * Starter function for timer 0
 	 * 
-	 * @param timer timer to start
-	 * @param scalar scalar of timer
-	 * @param timerTicks compare ticks
+	 * F_CPU = 16,000,000
 	 * 
-	 * @note F_CPU = 16,000,000
-	 * @note F_DER = desired frequency (Hz)
-	 * @note timerTicks = [F_CPU / (scalar * F_DER)] - 1
+	 * F_DER = desired frequency (Hz)
+	 * 
+	 * timerTicks = [F_CPU / (scalar * F_DER)] - 1
+	 * 
+	 * @note HARD_TIMER0_FUNCTION() {
+	 * @note 	{contents}
+	 * @note 	HARD_TIMER_END();
+	 * @note }
+	 * 
+	 * @warning 8-bit counter
+	 * @warning scalars: 1, 8, 64, 256, 1024
 	 */
-	void setHardTimer(HARDWARE_TIMER timer, PRE_SCALAR scalar, uint16_t timerTicks);
+	#define HARD_TIMER0_FUNCTION() ISR (TIMER0_COMPA_vect)
+
+	/**
+	 * Starter function for timer 1
+	 * 
+	 * F_CPU = 16,000,000
+	 * 
+	 * F_DER = desired frequency (Hz)
+	 * 
+	 * timerTicks = [F_CPU / (scalar * F_DER)] - 1
+	 * 
+	 * @note HARD_TIMER1_FUNCTION() {
+	 * @note 	{contents}
+	 * @note 	HARD_TIMER_END();
+	 * @note }
+	 * 
+	 * @warning 16-bit counter
+	 * @warning scalars: 1, 8, 64, 256, 1024
+	 */
+	#define HARD_TIMER1_FUNCTION() ISR (TIMER1_COMPA_vect)
+
+	/**
+	 * Starter function for timer 2
+	 * 
+	 * F_CPU = 16,000,000
+	 * 
+	 * F_DER = desired frequency (Hz)
+	 * 
+	 * timerTicks = [F_CPU / (scalar * F_DER)] - 1
+	 * 
+	 * @note HARD_TIMER2_FUNCTION() {
+	 * @note 	{contents}
+	 * @note 	HARD_TIMER_END();
+	 * @note }
+	 * 
+	 * @warning 8-bit counter
+	 * @warning scalars: 1, 8, 32, 64, 128, 256, 1024
+	 */
+	#define HARD_TIMER2_FUNCTION() ISR (TIMER2_COMPA_vect)
+
+	#define HARD_TIMER_END() // end of function for timers
+
+	/****************************
+	 * LED Timer Config
+	****************************/
+
+	#define HARD_TIMER_LED HARD_TIMER1 // hardware timer for status LEDs
+	#define HARD_TIMER_LED_FUNCTION() HARD_TIMER1_FUNCTION() // starter function for status LED
+	#define HARD_TIMER_LED_REFERENCE HARD_TIMER0_REFERENCE // reference for status LED function
+	
+	#define HARD_TIMER_LED_SCALAR SCALAR_1024 // pre scalar for LED timer
+	#define HARD_TIMER_LED_TICK_MULTIPLIER (F_CPU / 1000000L) // multiplier for timer ticks
 
 #endif
 #endif

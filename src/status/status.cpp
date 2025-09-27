@@ -58,19 +58,12 @@ HARD_TIMER_LED_FUNCTION() {
 	HARD_TIMER_END();
 }
 
-#if defined(PICO1W)
+/*#if defined(PICO1W)
 
 	#include <pico/time.h>
 
 	struct repeating_timer ledTimer; // LED timer
 
-	/**
-	 * Blinks LEDs on and off
-	 * 
-	 * @param t pico timer
-	 * 
-	 * @return if write was successfull
-	 */
 	bool blinkLED(struct repeating_timer *t) {
 		ledToggle = !ledToggle;
 		#ifdef STATUS_LED_PIN
@@ -110,16 +103,15 @@ HARD_TIMER_LED_FUNCTION() {
 
 #elif defined(UNOR3)
 
-	#define COMPARE_MULTIPLIER (F_CPU / 1000000L) // value to mutliply by ms delay
-
-	void timerInit() {}
-
+	void timerInit() {
+		initHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR);
+	}
 	void cancelLEDTimer() {
 		cancelHardTimer(HARD_TIMER_LED);
 	}
-
 	void setLEDTimer(uint16_t delayTime) {
-		setHardTimer(HARD_TIMER_LED, SCALAR_1024, COMPARE_MULTIPLIER * delayTime);
+		timertick_t timerTicks = HARD_TIMER_LED_TICK_MULTIPLIER * delayTime;
+		setHardTimer(HARD_TIMER_LED, HARD_TIMER_LED_SCALAR, timerTicks);
 	}
 
 #else // no LED timers enabled
@@ -128,7 +120,7 @@ HARD_TIMER_LED_FUNCTION() {
 	void cancelLEDTimer() {}
 	void setLEDTimer(uint16_t delayTime) {}
 
-#endif
+#endif*/
 #endif
 
 /**
@@ -151,7 +143,7 @@ void initStatus(void) {
 		pinMode(EXTERNAL_STATUS_LED_PIN, OUTPUT);
 	#endif
 	#if STATUS_LED_DEFINED()
-		timerInit();
+		initHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR);
 	#endif
 }
 
@@ -159,8 +151,18 @@ void setStatus(STATUS_CODE status) {
 
 	#if STATUS_LED_DEFINED()
 
-		cancelLEDTimer();
-		resetLEDs();
+		// reset timers and LEDs
+		cancelHardTimer(HARD_TIMER_LED);
+		ledToggle = false;
+
+		#ifdef STATUS_LED_PIN
+			digitalWrite(STATUS_LED_PIN, LOW);
+		#endif
+		#ifdef EXTERNAL_STATUS_LED_PIN
+			digitalWrite(EXTERNAL_STATUS_LED_PIN, LOW);
+		#endif
+
+		// sets LEDs
 		if (status == BOARD_OK) {
 			#ifdef STATUS_LED_PIN
 				digitalWrite(STATUS_LED_PIN, HIGH);
@@ -170,10 +172,10 @@ void setStatus(STATUS_CODE status) {
 			#endif
 		}
 		else if (status == BOARD_CONNECTING) {
-			setLEDTimer(CONNECTING_DELAY);
+			setHardTimer(HARD_TIMER_LED, HARD_TIMER_LED_SCALAR, HARD_TIMER_LED_TICK_MULTIPLIER * CONNECTING_DELAY);
 		}
 		else if (status == BOARD_CRIT_ERROR) {
-			setLEDTimer(CRIT_ERROR_DELAY);
+			setHardTimer(HARD_TIMER_LED, HARD_TIMER_LED_SCALAR, HARD_TIMER_LED_TICK_MULTIPLIER * CRIT_ERROR_DELAY);
 		}
 
 	#endif
