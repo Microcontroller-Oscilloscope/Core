@@ -21,6 +21,7 @@
 #ifdef ESP32DEVC
 
 #include <esp32-hal-timer.h>
+#include "../../timer.h"
 
 #define TIMER_COUNT_ZERO 0U // value for setting timer tick count to 0
 

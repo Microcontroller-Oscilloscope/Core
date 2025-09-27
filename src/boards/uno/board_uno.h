@@ -107,63 +107,6 @@
 	// timer functions
 
 	/**
-	 * Starter function for timer 0
-	 * 
-	 * F_CPU = 16,000,000
-	 * 
-	 * F_DER = desired frequency (Hz)
-	 * 
-	 * timerTicks = [F_CPU / (scalar * F_DER)] - 1
-	 * 
-	 * @note HARD_TIMER0_FUNCTION() {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning 8-bit counter
-	 * @warning scalars: 1, 8, 64, 256, 1024
-	 */
-	//#define HARD_TIMER_FUNCTION0() ISR (TIMER0_COMPA_vect)
-
-	/**
-	 * Starter function for timer 1
-	 * 
-	 * F_CPU = 16,000,000
-	 * 
-	 * F_DER = desired frequency (Hz)
-	 * 
-	 * timerTicks = [F_CPU / (scalar * F_DER)] - 1
-	 * 
-	 * @note HARD_TIMER1_FUNCTION() {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning 16-bit counter
-	 * @warning scalars: 1, 8, 64, 256, 1024
-	 */
-	//#define HARD_TIMER_FUNCTION1() ISR (TIMER1_COMPA_vect)
-
-	/**
-	 * Starter function for timer 2
-	 * 
-	 * F_CPU = 16,000,000
-	 * 
-	 * F_DER = desired frequency (Hz)
-	 * 
-	 * timerTicks = [F_CPU / (scalar * F_DER)] - 1
-	 * 
-	 * @note HARD_TIMER2_FUNCTION() {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning 8-bit counter
-	 * @warning scalars: 1, 8, 32, 64, 128, 256, 1024
-	 */
-	//#define HARD_TIMER_FUNCTION2() ISR (TIMER2_COMPA_vect)
-
-	/**
 	 * Selects timer function from given id
 	 * 
 	 * F_CPU = 16,000,000
@@ -183,8 +126,6 @@
 	 * @warning scalars: 1, 8, 64, 256, 1024. timer 2 additional scalars: 32, 128
 	 */
 	#define HARD_TIMER_FUNCTION(id) ISR (CONCATENATE3(TIMER, id, _COMPA_vect))
-
-	//#define HARD_TIMER_FUNCTION(id) CONCATENATE(HARD_TIMER_FUNCTION, id)()
 
 	#define HARD_TIMER_END() // end of function for timers
 

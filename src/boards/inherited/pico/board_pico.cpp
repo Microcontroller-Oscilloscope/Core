@@ -21,6 +21,7 @@
 #ifdef PICO
 
 #include <pico/time.h>
+#include "../../../timer.h"
 
 struct repeating_timer timers[NUM_TIMERS]; // hardware timers
 

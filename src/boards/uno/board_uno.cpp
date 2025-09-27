@@ -21,6 +21,7 @@
 #ifdef UNOR3
 
 #include <Arduino.h>
+#include "../../timer.h"
 
 bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar) {
 	return true;
