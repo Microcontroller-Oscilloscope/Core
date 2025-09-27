@@ -34,6 +34,8 @@ void nothing();
 
 #define VOID_FUNCTION_NAME nothing // name of empty void function
 
+#include <stdint.h>
+
 /****************************
  * Checks Optional Flags
 ****************************/

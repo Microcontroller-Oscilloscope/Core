@@ -82,10 +82,11 @@ void cancelHardTimer(hardware_timer_t timer);
  * Starts hardware timer execution
  * 
  * @param timer timer to start
+ * @param function function to call back
  * @param scalar scalar for function call
  * @param timerTicks timer ticks per cycle
  */
-void setHardTimer(hardware_timer_t timer, prescalar_t scalar, timertick_t timerTicks);
+void setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks);
 
 /****************************
  * Changes Flags When Testing

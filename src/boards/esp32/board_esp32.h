@@ -63,8 +63,6 @@
 	 * Only 4 hardware timers available
 	****************************/
 
-	#include <stdint.h>
-
 	// available hardware timers
 	enum HARDWARE_TIMER_T { // hardware timer type
 		HARD_TIMER0, // hardware timer 0, 64 bit counter

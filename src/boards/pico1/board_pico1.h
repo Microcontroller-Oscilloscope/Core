@@ -29,7 +29,7 @@
 
 #ifdef PICO1
 
-	#include "../inherited/board_pico.h"
+	#include "../inherited/pico/board_pico.h"
 
 #endif
 #endif

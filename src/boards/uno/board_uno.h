@@ -57,8 +57,7 @@
 	 * Only 3 hardware timers available
 	****************************/
 
-	#include <stdint.h>
-
+	// available hardware timers
 	enum HARDWARE_TIMER_T {
 		HARD_TIMER0, // hardware timer 0, 8 bit counter
 		HARD_TIMER1, // hardware timer 1, 16 bit counter
@@ -66,6 +65,7 @@
 	};
 	typedef HARDWARE_TIMER_T hardware_timer_t; // hardware timer type
 
+	// available pre scalars
 	enum PRE_SCALAR_T {
 		SCALAR_1, // timer prescalar of 1, timers 0-2
 		SCALAR_8, // timer prescalar of 8, timers 0-2
@@ -75,8 +75,6 @@
 		SCALAR_256, // timer prescalar of 256, timers 0-2
 		SCALAR_1024, // timer prescalar of 1024, timers 0-2
 	};
-
-	// available pre scalars
 	typedef PRE_SCALAR_T prescalar_t; // pre scalar type
 
 	// other timer definitions
