@@ -22,35 +22,41 @@
 
 #include <Arduino.h>
 
-void initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar) {}
+bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar) {
+	return true;
+}
 
-void cancelHardTimer(hardware_timer_t timer) {
+bool cancelHardTimer(hardware_timer_t timer) {
 	if (timer == HARD_TIMER0) {
 		cli();
 		TCCR0B &= ~(0b00000000 | ((1 << CS00) | (1 << CS01) | (1 << CS02)));
 		TIMSK0 &= ~(0b00000000 | (1 << OCIE0A));
 		sei();
+		return true;
 	}
 	else if (timer == HARD_TIMER1) {
 		cli();
 		TCCR1B &= ~(0b00000000 | ((1 << CS10) | (1 << CS11) | (1 << CS12)));
 		TIMSK1 &= ~(0b00000000 | (1 << OCIE1A));
 		sei();
+		return true;
 	}
 	else if (timer == HARD_TIMER2) {
 		cli();
 		TCCR2B &= ~(0b00000000 | ((1 << CS20) | (1 << CS21) | (1 << CS22)));
 		TIMSK2 &= ~(0b00000000 | (1 << OCIE2A));
 		sei();
+		return true;
 	}
+	return false;
 }
 
-void setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks) {
+bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks) {
 	if ((timer == HARD_TIMER0 || timer == HARD_TIMER2) && timerTicks >= UINT8_MAX) {
 		timerTicks = UINT8_MAX - 1;
 	}
 	if ((timer == HARD_TIMER0 || timer == HARD_TIMER1) && (scalar == SCALAR_32 || scalar == SCALAR_128)) {
-		return;
+		return false;
 	}
 
 	if (timer == HARD_TIMER0) {
@@ -71,6 +77,7 @@ void setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
 		}
 		TIMSK0 |= (1 << OCIE0A);
 		sei();
+		return true;
 	}
 	else if (timer == HARD_TIMER1) {
 		cli();
@@ -90,6 +97,7 @@ void setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
 		}
 		TIMSK1 |= (1 << OCIE1A);
 		sei();
+		return true;
 	}
 	else if (timer == HARD_TIMER2) {
 		cli();
@@ -109,7 +117,9 @@ void setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
 		}
 		TIMSK2 |= (1 << OCIE2A);
 		sei();
+		return true;
 	}
+	return false;
 }
 
 #endif

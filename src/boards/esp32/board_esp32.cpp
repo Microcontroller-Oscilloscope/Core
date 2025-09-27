@@ -20,7 +20,9 @@
 
 #ifdef ESP32DEVC
 
-#include <Esp.h>
+#include <esp32-hal-timer.h>
+
+#define TIMER_COUNT_ZERO 0U // value for setting timer tick count to 0
 
 hw_timer_t *timer0 = NULL; // timer 0 pointer
 hw_timer_t *timer1 = NULL; // timer 1 pointer
@@ -28,81 +30,64 @@ hw_timer_t *timer2 = NULL; // timer 2 pointer
 hw_timer_t *timer3 = NULL; // timer 3 pointer
 
 /**
- * Initializes hardware timer
+ * Gets timer based on desired timer
  * 
- * @param timer hardware timer to configure
- * @param scalar scalar to count to
+ * @param timer timer to select
+ * 
+ * @return pointer to timer selected
  */
-void initHardTimerInternal(hw_timer_t **timer, void (*function)(void), prescalar_t scalar, hardware_timer_t timerID) {
-	*timer = timerBegin(timerID, scalar, true);
-	timerAttachInterrupt(*timer, function, true);
-}
-
-void initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar) {
+hw_timer_t** getTimer(hardware_timer_t timer) {
 	if (timer == HARD_TIMER0) {
-		initHardTimerInternal(&timer0, function, scalar, HARD_TIMER0);
+		return &timer0;
 	}
 	else if (timer == HARD_TIMER1) {
-		initHardTimerInternal(&timer1, function, scalar, HARD_TIMER1);
+		return &timer1;
 	}
 	else if (timer == HARD_TIMER2) {
-		initHardTimerInternal(&timer2, function, scalar, HARD_TIMER2);
+		return &timer2;
 	}
 	else if (timer == HARD_TIMER3) {
-		initHardTimerInternal(&timer3, function, scalar, HARD_TIMER3);
+		return &timer3;
 	}
+	return nullptr;
 }
 
-/**
- * Cancels hardware timer
- * 
- * @param timer hardware timer to cancel
- */
-void cancelHardTimerInternal(hw_timer_t *timer) {
-	timerAlarmDisable(timer);
-	timerStop(timer);
+bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar) {
+	
+	hw_timer_t** timerPtr = getTimer(timer);
+	if (timerPtr == nullptr) {
+		return false;
+	}
+
+	*timerPtr = timerBegin(timer, scalar, true);
+	timerAttachInterrupt(*timerPtr, function, true);
+	return true;
 }
 
-void cancelHardTimer(hardware_timer_t timer) {
-	if (timer == HARD_TIMER0) {
-		cancelHardTimerInternal(timer0);
+bool cancelHardTimer(hardware_timer_t timer) {
+	
+	hw_timer_t** timerPtr = getTimer(timer);
+	if (timerPtr == nullptr) {
+		return false;
 	}
-	else if (timer == HARD_TIMER1) {
-		cancelHardTimerInternal(timer1);
-	}
-	else if (timer == HARD_TIMER2) {
-		cancelHardTimerInternal(timer2);
-	}
-	else if (timer == HARD_TIMER3) {
-		cancelHardTimerInternal(timer3);
-	}
+
+	timerAlarmDisable(*timerPtr);
+	timerStop(*timerPtr);
+	timerWrite(*timerPtr, TIMER_COUNT_ZERO);
+	return true;
 }
 
-/**
- * Sets hardware timer duration
- * 
- * @param timer hardware timer to start
- * @param timerTicks timer ticks for function triggering
- */
-void setHardTimerInternal(hw_timer_t *timer, timertick_t timerTicks) {
-	timerAlarmWrite(timer, timerTicks, true);
-	timerAlarmEnable(timer);
-	timerStart(timer);
-}
+bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks) {
+	
+	hw_timer_t** timerPtr = getTimer(timer);
+	if (timerPtr == nullptr) {
+		return false;
+	}
 
-void setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks) {
-	if (timer == HARD_TIMER0) {
-		setHardTimerInternal(timer0, timerTicks);
-	}
-	else if (timer == HARD_TIMER1) {
-		setHardTimerInternal(timer1, timerTicks);
-	}
-	else if (timer == HARD_TIMER2) {
-		setHardTimerInternal(timer2, timerTicks);
-	}
-	else if (timer == HARD_TIMER3) {
-		setHardTimerInternal(timer3, timerTicks);
-	}
+	timerAlarmWrite(*timerPtr, timerTicks, true);
+	timerAlarmEnable(*timerPtr);
+	timerStart(*timerPtr);
+	return true;
 }
 
 #endif

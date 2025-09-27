@@ -102,23 +102,34 @@ struct repeating_timer* getTimer(hardware_timer_t timer) {
 	}
 }
 
-void initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar) {
-
+bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar) {
+	return true;
 }
 
-void cancelHardTimer(hardware_timer_t timer) {
-	//struct repeating_timer* timerPointer = getTimer(timer);
-	cancel_repeating_timer(getTimer(timer));
+bool cancelHardTimer(hardware_timer_t timer) {
+
+	struct repeating_timer* timerPtr = getTimer(timer);
+	if (timerPtr == nullptr) {
+		return false;
+	}
+
+	return cancel_repeating_timer(timerPtr);
 }
 
-void setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks) {
-	//struct repeating_timer* timerPointer = getTimer(timer);
+bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks) {
+	
+	struct repeating_timer* timerPtr = getTimer(timer);
+	if (timerPtr == nullptr) {
+		return false;
+	}
+
 	if (scalar == SCALAR_MS) {
-		add_repeating_timer_ms(timerTicks, function, NULL, getTimer(timer));
+		return add_repeating_timer_ms(timerTicks, function, NULL, timerPtr);
 	}
 	else if (scalar == SCALAR_US) {
-		add_repeating_timer_us(timerTicks, function, NULL, getTimer(timer));
+		return add_repeating_timer_us(timerTicks, function, NULL, timerPtr);
 	}
+	return false;
 }
 
 #endif

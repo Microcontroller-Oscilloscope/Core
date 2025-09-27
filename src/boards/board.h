@@ -68,15 +68,19 @@
  * @param timer timer to initialize
  * @param function function to call back
  * @param scalar scalar for function call
+ * 
+ * @return if timer was successfully initialized
  */
-void initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar);
+bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar);
 
 /**
  * Stops hardware timer from executing
  * 
  * @param timer timer to stop
+ * 
+ * @return if timer was successfully canceled
  */
-void cancelHardTimer(hardware_timer_t timer);
+bool cancelHardTimer(hardware_timer_t timer);
 
 /**
  * Starts hardware timer execution
@@ -85,8 +89,10 @@ void cancelHardTimer(hardware_timer_t timer);
  * @param function function to call back
  * @param scalar scalar for function call
  * @param timerTicks timer ticks per cycle
+ * 
+ * @return if timer was successfully set
  */
-void setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks);
+bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks);
 
 /****************************
  * Changes Flags When Testing

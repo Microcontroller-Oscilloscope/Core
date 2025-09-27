@@ -44,18 +44,6 @@
 
 #endif
 
-/**
- * Resets LEDs to off
- */
-void resetLEDs() {
-	#ifdef STATUS_LED_PIN
-		digitalWrite(STATUS_LED_PIN, LOW);
-	#endif
-	#ifdef EXTERNAL_STATUS_LED_PIN
-		digitalWrite(EXTERNAL_STATUS_LED_PIN, LOW);
-	#endif
-}
-
 void initStatus(void) {
 	#ifdef STATUS_LED_PIN
 		pinMode(STATUS_LED_PIN, OUTPUT);
@@ -75,7 +63,6 @@ void setStatus(STATUS_CODE status) {
 		// reset timers and LEDs
 		cancelHardTimer(HARD_TIMER_LED);
 		ledToggle = false;
-		resetLEDs();
 
 		#ifdef STATUS_LED_PIN
 			digitalWrite(STATUS_LED_PIN, LOW);
