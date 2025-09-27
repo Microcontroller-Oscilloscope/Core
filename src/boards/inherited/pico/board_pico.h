@@ -97,7 +97,7 @@
 	typedef bool (*hard_timer_function_ptr_t) (struct repeating_timer*); // timer callback function pointer
 
 	// timer references
-	#define HARD_TIMER0_REFERENCE hardTimer0Function // reference for timer 0 function
+	/*#define HARD_TIMER0_REFERENCE hardTimer0Function // reference for timer 0 function
 	#define HARD_TIMER1_REFERENCE hardTimer1Function // reference for timer 1 function
 	#define HARD_TIMER2_REFERENCE hardTimer2Function // reference for timer 2 function
 	#define HARD_TIMER3_REFERENCE hardTimer3Function // reference for timer 3 function
@@ -113,13 +113,18 @@
 	#define HARD_TIMER13_REFERENCE hardTimer13Function // reference for timer 13 function
 	#define HARD_TIMER14_REFERENCE hardTimer14Function // reference for timer 14 function
 	#define HARD_TIMER15_REFERENCE hardTimer15Function // reference for timer 15 function
+	*/
+
+	#define HARD_TIMER_REFERENCE(id) hardTimerFunction##id // reference for timer #id
 
 	// timer functions
 
 	/**
-	 * Starter function for timer 0
+	 * Starter function for timer #id
 	 * 
-	 * @note HARD_TIMER0_FUNCTION() {
+	 * @param id numeric value to append to function
+	 * 
+	 * @note HARD_TIMER_FUNCTION({id}) {
 	 * @note 	{contents}
 	 * @note 	HARD_TIMER_END();
 	 * @note }
@@ -127,202 +132,7 @@
 	 * @warning timerTicks: time in ms or us
 	 * @warning scalar: SCALAR_MS (millis) or SCALAR_US (micros)
 	 */
-	#define HARD_TIMER0_FUNCTION() bool HARD_TIMER0_REFERENCE(struct repeating_timer *t)
-
-	/**
-	 * Starter function for timer 1
-	 * 
-	 * @note HARD_TIMER1_FUNCTION() {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning timerTicks: time in ms or us
-	 * @warning scalar: SCALAR_MS (millis) or SCALAR_US (micros)
-	 */
-	#define HARD_TIMER1_FUNCTION() bool HARD_TIMER1_REFERENCE(struct repeating_timer *t)
-
-	/**
-	 * Starter function for timer 2
-	 * 
-	 * @note HARD_TIMER2_FUNCTION() {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning timerTicks: time in ms or us
-	 * @warning scalar: SCALAR_MS (millis) or SCALAR_US (micros)
-	 */
-	#define HARD_TIMER2_FUNCTION() bool HARD_TIMER2_REFERENCE(struct repeating_timer *t)
-	
-	/**
-	 * Starter function for timer 3
-	 * 
-	 * @note HARD_TIMER3_FUNCTION() {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning timerTicks: time in ms or us
-	 * @warning scalar: SCALAR_MS (millis) or SCALAR_US (micros)
-	 */
-	#define HARD_TIMER3_FUNCTION() bool HARD_TIMER3_REFERENCE(struct repeating_timer *t)
-	
-	/**
-	 * Starter function for timer 4
-	 * 
-	 * @note HARD_TIMER4_FUNCTION() {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning timerTicks: time in ms or us
-	 * @warning scalar: SCALAR_MS (millis) or SCALAR_US (micros)
-	 */
-	#define HARD_TIMER4_FUNCTION() bool HARD_TIMER4_REFERENCE(struct repeating_timer *t)
-	
-	/**
-	 * Starter function for timer 5
-	 * 
-	 * @note HARD_TIMER5_FUNCTION() {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning timerTicks: time in ms or us
-	 * @warning scalar: SCALAR_MS (millis) or SCALAR_US (micros)
-	 */
-	#define HARD_TIMER5_FUNCTION() bool HARD_TIMER5_REFERENCE(struct repeating_timer *t)
-	
-	/**
-	 * Starter function for timer 6
-	 * 
-	 * @note HARD_TIMER6_FUNCTION() {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning timerTicks: time in ms or us
-	 * @warning scalar: SCALAR_MS (millis) or SCALAR_US (micros)
-	 */
-	#define HARD_TIMER6_FUNCTION() bool HARD_TIMER6_REFERENCE(struct repeating_timer *t)
-	
-	/**
-	 * Starter function for timer 7
-	 * 
-	 * @note HARD_TIMER7_FUNCTION() {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning timerTicks: time in ms or us
-	 * @warning scalar: SCALAR_MS (millis) or SCALAR_US (micros)
-	 */
-	#define HARD_TIMER7_FUNCTION() bool HARD_TIMER7_REFERENCE(struct repeating_timer *t)
-	
-	/**
-	 * Starter function for timer 8
-	 * 
-	 * @note HARD_TIMER8_FUNCTION() {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning timerTicks: time in ms or us
-	 * @warning scalar: SCALAR_MS (millis) or SCALAR_US (micros)
-	 */
-	#define HARD_TIMER8_FUNCTION() bool HARD_TIMER8_REFERENCE(struct repeating_timer *t)
-	
-	/**
-	 * Starter function for timer 9
-	 * 
-	 * @note HARD_TIMER9_FUNCTION() {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning timerTicks: time in ms or us
-	 * @warning scalar: SCALAR_MS (millis) or SCALAR_US (micros)
-	 */
-	#define HARD_TIMER9_FUNCTION() bool HARD_TIMER9_REFERENCE(struct repeating_timer *t)
-	
-	/**
-	 * Starter function for timer 10
-	 * 
-	 * @note HARD_TIMER10_FUNCTION() {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning timerTicks: time in ms or us
-	 * @warning scalar: SCALAR_MS (millis) or SCALAR_US (micros)
-	 */
-	#define HARD_TIMER10_FUNCTION() bool HARD_TIMER10_REFERENCE(struct repeating_timer *t)
-	
-	/**
-	 * Starter function for timer 11
-	 * 
-	 * @note HARD_TIMER11_FUNCTION() {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning timerTicks: time in ms or us
-	 * @warning scalar: SCALAR_MS (millis) or SCALAR_US (micros)
-	 */
-	#define HARD_TIMER11_FUNCTION() bool HARD_TIMER11_REFERENCE(struct repeating_timer *t)
-	
-	/**
-	 * Starter function for timer 12
-	 * 
-	 * @note HARD_TIMER12_FUNCTION() {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning timerTicks: time in ms or us
-	 * @warning scalar: SCALAR_MS (millis) or SCALAR_US (micros)
-	 */
-	#define HARD_TIMER12_FUNCTION() bool HARD_TIMER12_REFERENCE(struct repeating_timer *t)
-	
-	/**
-	 * Starter function for timer 13
-	 * 
-	 * @note HARD_TIMER13_FUNCTION() {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning timerTicks: time in ms or us
-	 * @warning scalar: SCALAR_MS (millis) or SCALAR_US (micros)
-	 */
-	#define HARD_TIMER13_FUNCTION() bool HARD_TIMER13_REFERENCE(struct repeating_timer *t)
-	
-	/**
-	 * Starter function for timer 14
-	 * 
-	 * @note HARD_TIMER14_FUNCTION() {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning timerTicks: time in ms or us
-	 * @warning scalar: SCALAR_MS (millis) or SCALAR_US (micros)
-	 */
-	#define HARD_TIMER14_FUNCTION() bool HARD_TIMER14_REFERENCE(struct repeating_timer *t)
-	
-	/**
-	 * Starter function for timer 15
-	 * 
-	 * @note HARD_TIMER15_FUNCTION() {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning timerTicks: time in ms or us
-	 * @warning scalar: SCALAR_MS (millis) or SCALAR_US (micros)
-	 */
-	#define HARD_TIMER15_FUNCTION() bool HARD_TIMER15_REFERENCE(struct repeating_timer *t)
+	#define HARD_TIMER_FUNCTION(id) bool hardTimerFunction##id(struct repeating_timer *t)
 
 	#define HARD_TIMER_END() return true // end of function for timers
 
@@ -331,8 +141,8 @@
 	****************************/
 
 	#define HARD_TIMER_LED HARD_TIMER0 // hardware timer for status LEDs
-	#define HARD_TIMER_LED_FUNCTION() HARD_TIMER0_FUNCTION() // starter function for status LED
-	#define HARD_TIMER_LED_REFERENCE HARD_TIMER0_REFERENCE // reference for status LED function
+	#define HARD_TIMER_LED_FUNCTION() HARD_TIMER_FUNCTION(HARD_TIMER_LED) // starter function for status LED
+	#define HARD_TIMER_LED_REFERENCE HARD_TIMER_REFERENCE(HARD_TIMER_LED) // reference for status LED function
 
 	#define HARD_TIMER_LED_SCALAR SCALAR_MS // pre scalar for LED timer
 	#define HARD_TIMER_LED_TICK_MULTIPLIER 1 // multiplier for timer ticks
