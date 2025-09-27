@@ -62,14 +62,11 @@
  * Configures Common Board Functions
 ****************************/
 
-#define TEST_STRING "TESTOR"
-
 /**
  * Initializes hardware timer
  * 
  * @param timer timer to initialize
  * @param function function to call back
- * @note #TEST_STRING
  * @param scalar scalar for function call
  */
 void initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar);

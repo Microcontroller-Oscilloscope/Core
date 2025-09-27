@@ -88,10 +88,82 @@
 	#define HARD_TIMER3_REFERENCE hardTimer3Function // reference for timer 3 function
 
 	// timer functions
-	#define HARD_TIMER0_FUNCTION() void IRAM_ATTR HARD_TIMER0_REFERENCE() // starter function for timer 0
-	#define HARD_TIMER1_FUNCTION() void IRAM_ATTR HARD_TIMER1_REFERENCE() // starter function for timer 1
-	#define HARD_TIMER2_FUNCTION() void IRAM_ATTR HARD_TIMER2_REFERENCE() // starter function for timer 2
-	#define HARD_TIMER3_FUNCTION() void IRAM_ATTR HARD_TIMER3_REFERENCE() // starter function for timer 3
+
+	/**
+	 * Starter function for timer 0
+	 * 
+	 * APB_CLK = 80,000,000Hz
+	 * 
+	 * T_DER = desired time (s)
+	 * 
+	 * T_DER = timerTicks * (scalar / APB_CLK)
+	 * 
+	 * @note HARD_TIMER0_FUNCTION() {
+	 * @note 	{contents}
+	 * @note 	HARD_TIMER_END();
+	 * @note }
+	 * 
+	 * @warning 64-bit counter
+	 * @warning 64-bit scalar
+	 */
+	#define HARD_TIMER0_FUNCTION() void IRAM_ATTR HARD_TIMER0_REFERENCE()
+
+	/**
+	 * Starter function for timer 1
+	 * 
+	 * APB_CLK = 80,000,000Hz
+	 * 
+	 * T_DER = desired time (s)
+	 * 
+	 * T_DER = timerTicks * (scalar / APB_CLK)
+	 * 
+	 * @note HARD_TIMER1_FUNCTION() {
+	 * @note 	{contents}
+	 * @note 	HARD_TIMER_END();
+	 * @note }
+	 * 
+	 * @warning 64-bit counter
+	 * @warning 64-bit scalar
+	 */
+	#define HARD_TIMER1_FUNCTION() void IRAM_ATTR HARD_TIMER1_REFERENCE()
+
+	/**
+	 * Starter function for timer 2
+	 * 
+	 * APB_CLK = 80,000,000Hz
+	 * 
+	 * T_DER = desired time (s)
+	 * 
+	 * T_DER = timerTicks * (scalar / APB_CLK)
+	 * 
+	 * @note HARD_TIMER0_FUNCTION() {
+	 * @note 	{contents}
+	 * @note 	HARD_TIMER_END();
+	 * @note }
+	 * 
+	 * @warning 64-bit counter
+	 * @warning 64-bit scalar
+	 */
+	#define HARD_TIMER2_FUNCTION() void IRAM_ATTR HARD_TIMER2_REFERENCE()
+
+	/**
+	 * Starter function for timer 3
+	 * 
+	 * APB_CLK = 80,000,000Hz
+	 * 
+	 * T_DER = desired time (s)
+	 * 
+	 * T_DER = timerTicks * (scalar / APB_CLK)
+	 * 
+	 * @note HARD_TIMER0_FUNCTION() {
+	 * @note 	{contents}
+	 * @note 	HARD_TIMER_END();
+	 * @note }
+	 * 
+	 * @warning 64-bit counter
+	 * @warning 64-bit scalar
+	 */
+	#define HARD_TIMER3_FUNCTION() void IRAM_ATTR HARD_TIMER3_REFERENCE()
 
 	#define HARD_TIMER_END() // end of function for timers
 
@@ -102,6 +174,9 @@
 	#define HARD_TIMER_LED HARD_TIMER0 // hardware timer for status LEDs
 	#define HARD_TIMER_LED_FUNCTION() HARD_TIMER0_FUNCTION() // starter function for status LED
 	#define HARD_TIMER_LED_REFERENCE HARD_TIMER0_REFERENCE // reference for status LED function
+
+	#define HARD_TIMER_LED_SCALAR 80 // pre scalar for LED timer
+	#define HARD_TIMER_LED_TICK_MULTIPLIER 1000 // multiplier for timer ticks
 
 #endif
 #endif
