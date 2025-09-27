@@ -24,10 +24,21 @@
 
 #define TIMER_COUNT_ZERO 0U // value for setting timer tick count to 0
 
-hw_timer_t *timer0 = NULL; // timer 0 pointer
-hw_timer_t *timer1 = NULL; // timer 1 pointer
-hw_timer_t *timer2 = NULL; // timer 2 pointer
-hw_timer_t *timer3 = NULL; // timer 3 pointer
+// hardware timer pointers
+hw_timer_t *timers[NUM_TIMERS] = {
+	#if NUM_TIMERS >= 1
+		NULL,
+	#endif
+	#if NUM_TIMERS >= 2
+		NULL,
+	#endif
+	#if NUM_TIMERS >= 3
+		NULL,
+	#endif
+	#if NUM_TIMERS >= 4
+		NULL,
+	#endif
+};
 
 /**
  * Gets timer based on desired timer
@@ -37,17 +48,9 @@ hw_timer_t *timer3 = NULL; // timer 3 pointer
  * @return pointer to timer selected
  */
 hw_timer_t** getTimer(hardware_timer_t timer) {
-	if (timer == HARD_TIMER0) {
-		return &timer0;
-	}
-	else if (timer == HARD_TIMER1) {
-		return &timer1;
-	}
-	else if (timer == HARD_TIMER2) {
-		return &timer2;
-	}
-	else if (timer == HARD_TIMER3) {
-		return &timer3;
+
+	if (timer >= 0 && timer < NUM_TIMERS) {
+		return &timers[timer];
 	}
 	return nullptr;
 }

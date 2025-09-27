@@ -22,22 +22,7 @@
 
 #include <pico/time.h>
 
-struct repeating_timer timer0; // timer 0
-struct repeating_timer timer1; // timer 1
-struct repeating_timer timer2; // timer 2
-struct repeating_timer timer3; // timer 3
-struct repeating_timer timer4; // timer 4
-struct repeating_timer timer5; // timer 5
-struct repeating_timer timer6; // timer 6
-struct repeating_timer timer7; // timer 7
-struct repeating_timer timer8; // timer 8
-struct repeating_timer timer9; // timer 9
-struct repeating_timer timer10; // timer 10
-struct repeating_timer timer11; // timer 11
-struct repeating_timer timer12; // timer 12
-struct repeating_timer timer13; // timer 13
-struct repeating_timer timer14; // timer 14
-struct repeating_timer timer15; // timer 15
+struct repeating_timer timers[NUM_TIMERS]; // hardware timers
 
 /**
  * Gets timer based on desired timer
@@ -47,63 +32,19 @@ struct repeating_timer timer15; // timer 15
  * @return pointer to timer selected
  */
 struct repeating_timer* getTimer(hardware_timer_t timer) {
-	switch (timer) {
-		case(HARD_TIMER0):
-			return &timer0;
-		break;
-		case(HARD_TIMER1):
-			return &timer1;
-		break;
-		case(HARD_TIMER2):
-			return &timer2;
-		break;
-		case(HARD_TIMER3):
-			return &timer3;
-		break;
-		case(HARD_TIMER4):
-			return &timer4;
-		break;
-		case(HARD_TIMER5):
-			return &timer5;
-		break;
-		case(HARD_TIMER6):
-			return &timer6;
-		break;
-		case(HARD_TIMER7):
-			return &timer7;
-		break;
-		case(HARD_TIMER8):
-			return &timer8;
-		break;
-		case(HARD_TIMER9):
-			return &timer9;
-		break;
-		case(HARD_TIMER10):
-			return &timer10;
-		break;
-		case(HARD_TIMER11):
-			return &timer11;
-		break;
-		case(HARD_TIMER12):
-			return &timer12;
-		break;
-		case(HARD_TIMER13):
-			return &timer13;
-		break;
-		case(HARD_TIMER14):
-			return &timer14;
-		break;
-		case(HARD_TIMER15):
-			return &timer15;
-		break;
-		default:
-			return nullptr;
-		break;
+
+	if (timer >= 0 && timer < NUM_TIMERS) {
+		return &timers[timer];
 	}
+	return nullptr;
 }
 
 bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar) {
 	return true;
+}
+
+bool deconstructHardTimer(hardware_timer_t timer) {
+	return cancelHardTimer(timer);
 }
 
 bool cancelHardTimer(hardware_timer_t timer) {

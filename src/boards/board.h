@@ -103,6 +103,9 @@ bool cancelHardTimer(hardware_timer_t timer);
  */
 bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks);
 
+static_assert(NUM_TIMERS <= NUM_TIMERS_AVAILABLE, "NUM_TIMERS too large");
+static_assert(NUM_TIMERS > 0, "NUM_TIMERS too small");
+
 /****************************
  * Changes Flags When Testing
 ****************************/

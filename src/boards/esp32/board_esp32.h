@@ -63,12 +63,27 @@
 	 * Only 4 hardware timers available
 	****************************/
 
+	#define NUM_TIMERS_AVAILABLE 4 // amount of hardware timers available
+	#ifndef NUM_TIMERS
+		#define NUM_TIMERS 4 // amount of hardware timers to use
+	#endif
+
 	// available hardware timers
+	#define HARD_TIMER(id) CONCATENATE(HARD_TIMER, id) // timer #id
+
 	enum HARDWARE_TIMER_T { // hardware timer type
-		HARD_TIMER0, // hardware timer 0, 64 bit counter
-		HARD_TIMER1, // hardware timer 1, 64 bit counter
-		HARD_TIMER2, // hardware timer 2, 64 bit counter
-		HARD_TIMER3, // hardware timer 3, 64 bit counter
+		#if NUM_TIMERS >= 1
+			HARD_TIMER(0), // 64 bit counter
+		#endif
+		#if NUM_TIMERS >= 2
+			HARD_TIMER(1), // 64 bit counter
+		#endif
+		#if NUM_TIMERS >= 3
+			HARD_TIMER(2), // 64 bit counter
+		#endif
+		#if NUM_TIMERS >= 4
+			HARD_TIMER(3), // 64 bit counter
+		#endif
 	};
 	typedef HARDWARE_TIMER_T hardware_timer_t; // hardware timer type
 
@@ -80,7 +95,13 @@
 	typedef void (*hard_timer_function_ptr_t) (void); // timer callback function pointer
 
 	// timer references
-	#define HARD_TIMER_REFERENCE(id) hardTimerFunction##id // reference for timer #id
+
+	/**
+	 * Timer #id function reference
+	 * 
+	 * @param id timer id to select
+	 */
+	#define HARD_TIMER_REFERENCE(id) CONCATENATE(hardTimerFunction, id)
 
 	// timer functions
 
@@ -103,18 +124,15 @@
 	 * @warning 64-bit counter
 	 * @warning 64-bit scalar
 	 */
-	#define HARD_TIMER_FUNCTION(id) void IRAM_ATTR hardTimerFunction##id ()
+	#define HARD_TIMER_FUNCTION(id) void IRAM_ATTR CONCATENATE(hardTimerFunction, id) ()
 
 	#define HARD_TIMER_END() // end of function for timers
 
 	/****************************
 	 * LED Timer Config
 	****************************/
-
-	#define HARD_TIMER_LED HARD_TIMER0 // hardware timer for status LEDs
-	#define HARD_TIMER_LED_FUNCTION() HARD_TIMER_FUNCTION(HARD_TIMER_LED) // starter function for status LED
-	#define HARD_TIMER_LED_REFERENCE HARD_TIMER_REFERENCE(HARD_TIMER_LED) // reference for status LED function
-
+	
+	#define HARD_TIMER_LED_INDEX 0 // hardware timer index for status LEDs
 	#define HARD_TIMER_LED_SCALAR 80 // pre scalar for LED timer
 	#define HARD_TIMER_LED_TICK_MULTIPLIER 1000 // multiplier for timer ticks
 

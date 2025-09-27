@@ -19,6 +19,39 @@
 #ifndef BOARD_GENERIC_H
 #define BOARD_GENERIC_H
 
+/**
+ * macro for contatenating flags as numbers
+ * 
+ * @param a first input
+ * @param b second input
+ * 
+ * @return contatenated value
+ * 
+ * @note Example:
+ * @note #define NUMBER 1
+ * @note #define FUNCTION(id) CONCATENATE(function, id)
+ * @note FUNCTION(NUMBER)
+ * @note //returns 'function1' instead of 'functionNUMBER'
+ */
+#define CONCATENATE(a, b) a ## b
+
+/**
+ * macro for contatenating 3 flags as numbers
+ * 
+ * @param a first input
+ * @param b second input
+ * @param c third input
+ * 
+ * @return contatenated value
+ * 
+ * @note Example:
+ * @note #define NUMBER 1
+ * @note #define FUNCTION(id) CONCATENATE(function, id, name)
+ * @note FUNCTION(NUMBER)
+ * @note //returns 'function1name' instead of 'functionNUMBERname'
+ */
+#define CONCATENATE3(a, b, c) a ## b ## c
+
 // default nvm size when flash is used instead of dedicated EEPROM
 #define FLASH_NVM_SIZE 4096
 

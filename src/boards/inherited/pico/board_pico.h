@@ -64,24 +64,63 @@
 
 	#include <pico/time.h>
 
+	#define NUM_TIMERS_AVAILABLE 16 // amount of hardware timers available
+	#ifndef NUM_TIMERS
+		#define NUM_TIMERS 16 // amount of hardware timers to use
+	#endif
+
 	// available hardware timers
+	#define HARD_TIMER(id) CONCATENATE(HARD_TIMER, id) // timer #id
+
 	enum HARDWARE_TIMER_T { // hardware timer type
-		HARD_TIMER0, // hardware timer 0, 64 bit counter
-		HARD_TIMER1, // hardware timer 1, 64 bit counter
-		HARD_TIMER2, // hardware timer 2, 64 bit counter
-		HARD_TIMER3, // hardware timer 3, 64 bit counter
-		HARD_TIMER4, // hardware timer 4, 64 bit counter
-		HARD_TIMER5, // hardware timer 5, 64 bit counter
-		HARD_TIMER6, // hardware timer 6, 64 bit counter
-		HARD_TIMER7, // hardware timer 7, 64 bit counter
-		HARD_TIMER8, // hardware timer 8, 64 bit counter
-		HARD_TIMER9, // hardware timer 9, 64 bit counter
-		HARD_TIMER10, // hardware timer 10, 64 bit counter
-		HARD_TIMER11, // hardware timer 11, 64 bit counter
-		HARD_TIMER12, // hardware timer 12, 64 bit counter
-		HARD_TIMER13, // hardware timer 13, 64 bit counter
-		HARD_TIMER14, // hardware timer 14, 64 bit counter
-		HARD_TIMER15, // hardware timer 15, 64 bit counter
+		#if NUM_TIMERS >= 1
+			HARD_TIMER(0), // 64 bit counter
+		#endif
+		#if NUM_TIMERS >= 2
+			HARD_TIMER(1), // 64 bit counter
+		#endif
+		#if NUM_TIMERS >= 3
+			HARD_TIMER(2), // 64 bit counter
+		#endif
+		#if NUM_TIMERS >= 4
+			HARD_TIMER(3), // 64 bit counter
+		#endif
+		#if NUM_TIMERS >= 5
+			HARD_TIMER(4), // 64 bit counter
+		#endif
+		#if NUM_TIMERS >= 6
+			HARD_TIMER(5), // 64 bit counter
+		#endif
+		#if NUM_TIMERS >= 7
+			HARD_TIMER(6), // 64 bit counter
+		#endif
+		#if NUM_TIMERS >= 8
+			HARD_TIMER(7), // 64 bit counter
+		#endif
+		#if NUM_TIMERS >= 9
+			HARD_TIMER(8), // 64 bit counter
+		#endif
+		#if NUM_TIMERS >= 10
+			HARD_TIMER(9), // 64 bit counter
+		#endif
+		#if NUM_TIMERS >= 11
+			HARD_TIMER(10), // 64 bit counter
+		#endif
+		#if NUM_TIMERS >= 12
+			HARD_TIMER(11), // 64 bit counter
+		#endif
+		#if NUM_TIMERS >= 13
+			HARD_TIMER(12), // 64 bit counter
+		#endif
+		#if NUM_TIMERS >= 14
+			HARD_TIMER(13), // 64 bit counter
+		#endif
+		#if NUM_TIMERS >= 15
+			HARD_TIMER(14), // 64 bit counter
+		#endif
+		#if NUM_TIMERS >= 16
+			HARD_TIMER(15), // 64 bit counter
+		#endif
 	};
 	typedef HARDWARE_TIMER_T hardware_timer_t; // hardware timer type
 
@@ -97,25 +136,13 @@
 	typedef bool (*hard_timer_function_ptr_t) (struct repeating_timer*); // timer callback function pointer
 
 	// timer references
-	/*#define HARD_TIMER0_REFERENCE hardTimer0Function // reference for timer 0 function
-	#define HARD_TIMER1_REFERENCE hardTimer1Function // reference for timer 1 function
-	#define HARD_TIMER2_REFERENCE hardTimer2Function // reference for timer 2 function
-	#define HARD_TIMER3_REFERENCE hardTimer3Function // reference for timer 3 function
-	#define HARD_TIMER4_REFERENCE hardTimer4Function // reference for timer 4 function
-	#define HARD_TIMER5_REFERENCE hardTimer5Function // reference for timer 5 function
-	#define HARD_TIMER6_REFERENCE hardTimer6Function // reference for timer 6 function
-	#define HARD_TIMER7_REFERENCE hardTimer7Function // reference for timer 7 function
-	#define HARD_TIMER8_REFERENCE hardTimer8Function // reference for timer 8 function
-	#define HARD_TIMER9_REFERENCE hardTimer9Function // reference for timer 9 function
-	#define HARD_TIMER10_REFERENCE hardTimer10Function // reference for timer 10 function
-	#define HARD_TIMER11_REFERENCE hardTimer11Function // reference for timer 11 function
-	#define HARD_TIMER12_REFERENCE hardTimer12Function // reference for timer 12 function
-	#define HARD_TIMER13_REFERENCE hardTimer13Function // reference for timer 13 function
-	#define HARD_TIMER14_REFERENCE hardTimer14Function // reference for timer 14 function
-	#define HARD_TIMER15_REFERENCE hardTimer15Function // reference for timer 15 function
-	*/
 
-	#define HARD_TIMER_REFERENCE(id) hardTimerFunction##id // reference for timer #id
+	/**
+	 * Timer #id function reference
+	 * 
+	 * @param id timer id to select
+	 */
+	#define HARD_TIMER_REFERENCE(id) CONCATENATE(hardTimerFunction, id)
 
 	// timer functions
 
@@ -132,7 +159,7 @@
 	 * @warning timerTicks: time in ms or us
 	 * @warning scalar: SCALAR_MS (millis) or SCALAR_US (micros)
 	 */
-	#define HARD_TIMER_FUNCTION(id) bool hardTimerFunction##id(struct repeating_timer *t)
+	#define HARD_TIMER_FUNCTION(id) bool CONCATENATE(hardTimerFunction, id)(struct repeating_timer *t)
 
 	#define HARD_TIMER_END() return true // end of function for timers
 
@@ -140,10 +167,7 @@
 	 * LED Timer Config
 	****************************/
 
-	#define HARD_TIMER_LED HARD_TIMER0 // hardware timer for status LEDs
-	#define HARD_TIMER_LED_FUNCTION() HARD_TIMER_FUNCTION(HARD_TIMER_LED) // starter function for status LED
-	#define HARD_TIMER_LED_REFERENCE HARD_TIMER_REFERENCE(HARD_TIMER_LED) // reference for status LED function
-
+	#define HARD_TIMER_LED_INDEX 0 // hardware timer index for status LEDs
 	#define HARD_TIMER_LED_SCALAR SCALAR_MS // pre scalar for LED timer
 	#define HARD_TIMER_LED_TICK_MULTIPLIER 1 // multiplier for timer ticks
 

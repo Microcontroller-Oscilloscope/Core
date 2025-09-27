@@ -26,6 +26,10 @@ bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, p
 	return true;
 }
 
+bool deconstructHardTimer(hardware_timer_t timer) {
+	return true;
+}
+
 bool cancelHardTimer(hardware_timer_t timer) {
 	if (timer == HARD_TIMER0) {
 		cli();
