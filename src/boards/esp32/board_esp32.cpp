@@ -53,15 +53,40 @@ hw_timer_t** getTimer(hardware_timer_t timer) {
 }
 
 bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar) {
-	
+
 	hw_timer_t** timerPtr = getTimer(timer);
 	if (timerPtr == nullptr) {
 		return false;
 	}
 
-	*timerPtr = timerBegin(timer, scalar, true);
-	timerAttachInterrupt(*timerPtr, function, true);
-	return true;
+	if (*timerPtr == NULL) {
+		*timerPtr = timerBegin(timer, scalar, true);
+		timerAttachInterrupt(*timerPtr, function, true);
+		return true;
+	}
+
+	return false;
+}
+
+bool deconstructHardTimer(hardware_timer_t timer) {
+
+	hw_timer_t** timerPtr = getTimer(timer);
+	if (timerPtr == nullptr) {
+		return false;
+	}
+
+	if (*timerPtr != NULL) {
+
+		if (cancelHardTimer(timer)) {
+			timerDetachInterrupt(*timerPtr);
+			timerEnd(*timerPtr);
+			*timerPtr = NULL;
+			return true;
+		}
+
+	}
+	
+	return false;
 }
 
 bool cancelHardTimer(hardware_timer_t timer) {
@@ -71,10 +96,14 @@ bool cancelHardTimer(hardware_timer_t timer) {
 		return false;
 	}
 
-	timerAlarmDisable(*timerPtr);
-	timerStop(*timerPtr);
-	timerWrite(*timerPtr, TIMER_COUNT_ZERO);
-	return true;
+	if (*timerPtr != NULL) {
+		timerAlarmDisable(*timerPtr);
+		timerStop(*timerPtr);
+		timerWrite(*timerPtr, TIMER_COUNT_ZERO);
+		return true;
+	}
+
+	return false;
 }
 
 bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks) {
@@ -84,10 +113,16 @@ bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
 		return false;
 	}
 
-	timerAlarmWrite(*timerPtr, timerTicks, true);
-	timerAlarmEnable(*timerPtr);
-	timerStart(*timerPtr);
-	return true;
+	if (*timerPtr != NULL) {
+		if (!timerAlarmEnabled(*timerPtr)) {
+			timerAlarmWrite(*timerPtr, timerTicks, true);
+			timerAlarmEnable(*timerPtr);
+			timerStart(*timerPtr);
+			return true;
+		}
+	}
+
+	return false;
 }
 
 #endif

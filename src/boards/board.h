@@ -74,6 +74,15 @@
 bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar);
 
 /**
+ * De-initializes hardware timer
+ * 
+ * @param timer timer to initialize
+ * 
+ * @return if timer was successfully de-initialized
+ */
+bool deconstructHardTimer(hardware_timer_t timer);
+
+/**
  * Stops hardware timer from executing
  * 
  * @param timer timer to stop

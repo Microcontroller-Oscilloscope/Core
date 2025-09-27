@@ -62,6 +62,8 @@
 	 * Only 16 hardware alarm timers available
 	****************************/
 
+	#include <pico/time.h>
+
 	// available hardware timers
 	enum HARDWARE_TIMER_T { // hardware timer type
 		HARD_TIMER0, // hardware timer 0, 64 bit counter
