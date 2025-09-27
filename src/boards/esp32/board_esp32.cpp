@@ -90,7 +90,7 @@ void setHardTimerInternal(hw_timer_t *timer, timertick_t timerTicks) {
 	timerStart(timer);
 }
 
-void setHardTimer(hardware_timer_t timer, prescalar_t scalar, timertick_t timerTicks) {
+void setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks) {
 	if (timer == HARD_TIMER0) {
 		setHardTimerInternal(timer0, timerTicks);
 	}
