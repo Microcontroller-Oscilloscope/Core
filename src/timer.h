@@ -86,4 +86,4 @@ bool timerInitialized(hardware_timer_t timer);
 bool timerStarted(hardware_timer_t timer);
 
 static_assert(NUM_TIMERS <= NUM_TIMERS_AVAILABLE, "NUM_TIMERS too large");
-static_assert(NUM_TIMERS > 0, "NUM_TIMERS too small");
+static_assert(!(NUM_TIMERS == 0 && NUM_TIMERS_AVAILABLE > 0), "NUM_TIMERS too small");
