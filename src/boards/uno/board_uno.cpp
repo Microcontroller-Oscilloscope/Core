@@ -295,7 +295,7 @@ bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
 	}
 
 	if (timer == HARD_TIMER0) {
-		if (!TIMER_0_STARTED()) {
+		if (!TIMER_0_STARTED() && TIMER_0_INITIALIZED()) {
 			cli();
 			TIMER_0_COMP = 0;
 			TIMER_0_WAVEFORM = 0;
@@ -309,7 +309,7 @@ bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
 		}
 	}
 	else if (timer == HARD_TIMER1) {
-		if (!TIMER_1_STARTED()) {
+		if (!TIMER_1_STARTED() && TIMER_1_INITIALIZED()) {
 			cli();
 			TIMER_1_COMP = 0;
 			TIMER_1_WAVEFORM = 0;
@@ -323,7 +323,7 @@ bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
 		}
 	}
 	else if (timer == HARD_TIMER2) {
-		if (!TIMER_2_STARTED()) {
+		if (!TIMER_2_STARTED() && TIMER_2_INITIALIZED()) {
 			cli();
 			TIMER_2_COMP = 0;
 			TIMER_2_WAVEFORM = 0;

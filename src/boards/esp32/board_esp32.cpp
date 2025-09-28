@@ -56,6 +56,54 @@ hw_timer_t** getTimer(hardware_timer_t timer) {
 	return nullptr;
 }
 
+/**
+ * Gets if timer was initialized
+ * 
+ * @param timerPtr timer to test
+ * 
+ * @return if timer was initialized
+ */
+bool timerInitializedInternal(hw_timer_t** timerPtr) {
+	if (timerPtr == nullptr) {
+		return false;
+	}
+
+	if (*timerPtr != NULL) {
+		return true;
+	}
+
+	return false;
+}
+
+bool timerInitialized(hardware_timer_t timer) {
+	hw_timer_t** timerPtr = getTimer(timer);
+	return timerInitializedInternal(timerPtr);
+}
+
+/**
+ * Gets if timer was started
+ * 
+ * @param timerPtr timer to test
+ * 
+ * @return if timer was started
+ */
+bool timerStartedInternal(hw_timer_t** timerPtr) {
+	if (timerPtr == nullptr) {
+		return false;
+	}
+
+	if (timerAlarmEnabled(*timerPtr)) {
+		return true;
+	}
+
+	return false;
+}
+
+bool timerStarted(hardware_timer_t timer) {
+	hw_timer_t** timerPtr = getTimer(timer);
+	return timerStartedInternal(timerPtr);
+}
+
 bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar) {
 
 	hw_timer_t** timerPtr = getTimer(timer);
@@ -63,7 +111,7 @@ bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, p
 		return false;
 	}
 
-	if (*timerPtr == NULL) {
+	if (!timerInitializedInternal(timerPtr)) {
 		*timerPtr = timerBegin(timer, scalar, true);
 		timerAttachInterrupt(*timerPtr, function, true);
 		return true;
@@ -79,7 +127,7 @@ bool deconstructHardTimer(hardware_timer_t timer) {
 		return false;
 	}
 
-	if (*timerPtr != NULL) {
+	if (timerInitializedInternal(timerPtr)) {
 
 		if (cancelHardTimer(timer)) {
 			timerDetachInterrupt(*timerPtr);
@@ -100,7 +148,7 @@ bool cancelHardTimer(hardware_timer_t timer) {
 		return false;
 	}
 
-	if (*timerPtr != NULL) {
+	if (timerStartedInternal(timerPtr)) {
 		timerAlarmDisable(*timerPtr);
 		timerStop(*timerPtr);
 		timerWrite(*timerPtr, TIMER_COUNT_ZERO);
@@ -117,13 +165,11 @@ bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
 		return false;
 	}
 
-	if (*timerPtr != NULL) {
-		if (!timerAlarmEnabled(*timerPtr)) {
-			timerAlarmWrite(*timerPtr, timerTicks, true);
-			timerAlarmEnable(*timerPtr);
-			timerStart(*timerPtr);
-			return true;
-		}
+	if (timerInitializedInternal(timerPtr) && !timerStartedInternal(timerPtr)) {
+		timerAlarmWrite(*timerPtr, timerTicks, true);
+		timerAlarmEnable(*timerPtr);
+		timerStart(*timerPtr);
+		return true;
 	}
 
 	return false;
