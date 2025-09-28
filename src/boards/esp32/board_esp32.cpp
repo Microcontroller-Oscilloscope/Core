@@ -26,7 +26,7 @@
 #define TIMER_COUNT_ZERO 0U // value for setting timer tick count to 0
 
 // hardware timer pointers
-hw_timer_t *timers[NUM_TIMERS] = {
+hw_timer_t *timers[] = {
 	#if NUM_TIMERS >= 1
 		NULL,
 	#endif
