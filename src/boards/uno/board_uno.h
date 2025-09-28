@@ -114,6 +114,7 @@
 	 * F_DER = desired frequency (Hz)
 	 * 
 	 * timerTicks = [F_CPU / (scalar * F_DER)] - 1
+	 * F_DER = F_CPU / [scalar * (timerTicks + 1)]
 	 * 
 	 * @param id timer id to select
 	 * 
@@ -136,6 +137,29 @@
 	#define HARD_TIMER_LED_INDEX 1 // hardware timer index for status LEDs
 	#define HARD_TIMER_LED_SCALAR SCALAR_1024 // pre scalar for LED timer
 	#define HARD_TIMER_LED_TICK_MULTIPLIER (F_CPU / 1000000L) // multiplier for timer ticks
+
+	/****************************
+	 * Test Timer Config
+	****************************/
+
+	#ifdef __TEST_CASES__
+
+		// slow testing flags
+		#define HARD_TIMER_TEST_INDEX 1 // hardware timer index for testing
+		#define HARD_TIMER_TEST_SCALAR SCALAR_1024 // pre scalar for test
+		#define HARD_TIMER_TEST_MULTIPLIER (F_CPU / 1000000L) // multiplier for testing timer ticks
+		// override default since Uno timer equation isn't linear when multiplying tick values
+		#define HARD_TIMER_TEST_COUNT_BUFFER 1 // amount timer can be off of goal
+
+		// fast testing flags 125,000Hz
+		#define HARD_TIMER_FAST_TEST_INDEX 1 // hardware timer index for testing
+		#define HARD_TIMER_FAST_TEST_SCALAR SCALAR_8 // pre scalar for test
+		#define HARD_TIMER_FAST_TEST_MULTIPLIER 1 // multiplier for testing timer ticks
+		#define HARD_TIMER_FAST_TEST_COUNT_TARGET 125000 // target count for timer
+		#define HARD_TIMER_FAST_TEST_DELAY 15 // target timer ticks for data collected
+		#define HARD_TIMER_FAST_TEST_COUNT_BUFFER 1 // amount timer can be off of goal
+
+	#endif
 
 #endif
 #endif
