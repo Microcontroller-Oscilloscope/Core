@@ -22,7 +22,7 @@
 #include "../timer.h"
 
 // if status LEDs are enabled
-#define STATUS_LED_DEFINED() (defined(STATUS_LED_PIN) || defined(EXTERNAL_STATUS_LED_PIN)) && defined(HARD_TIMER_ID_LED)
+#define STATUS_LED_DEFINED() (defined(STATUS_LED_PIN) || defined(EXTERNAL_STATUS_LED_PIN)) && defined(HARD_TIMER_ID_LED) && !defined(__TEST_CASES__)
 
 #if STATUS_LED_DEFINED()
 
