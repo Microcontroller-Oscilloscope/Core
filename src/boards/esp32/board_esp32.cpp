@@ -25,6 +25,8 @@
 
 #define TIMER_COUNT_ZERO 0U // value for setting timer tick count to 0
 
+uint8_t timersStarted = 0U; // stores timer started state
+
 // hardware timer pointers
 hw_timer_t *timers[] = {
 	#if NUM_TIMERS >= 1
@@ -57,6 +59,23 @@ hw_timer_t** getTimer(hardware_timer_t timer) {
 }
 
 /**
+ * Sets timer started state
+ * 
+ * @param timer timer to set
+ * @param state whether or not timer is started
+ */
+void setTimerStarted(hardware_timer_t timer, bool state) {
+	if (timer >= 0 && timer < NUM_TIMERS) {
+		if (state) {
+			timersStarted |= (1 << timer);
+		}
+		else {
+			timersStarted &= (~(1 << timer));
+		}
+	}
+}
+
+/**
  * Gets if timer was initialized
  * 
  * @param timerPtr timer to test
@@ -80,28 +99,11 @@ bool timerInitialized(hardware_timer_t timer) {
 	return timerInitializedInternal(timerPtr);
 }
 
-/**
- * Gets if timer was started
- * 
- * @param timerPtr timer to test
- * 
- * @return if timer was started
- */
-bool timerStartedInternal(hw_timer_t** timerPtr) {
-	if (timerPtr == nullptr) {
-		return false;
-	}
-
-	if (timerAlarmEnabled(*timerPtr)) {
-		return true;
-	}
-
-	return false;
-}
-
 bool timerStarted(hardware_timer_t timer) {
-	hw_timer_t** timerPtr = getTimer(timer);
-	return timerStartedInternal(timerPtr);
+	if (timer >= 0 && timer < NUM_TIMERS) {
+		return !!((1 << timer) & timersStarted);
+	}
+	return false;
 }
 
 bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar) {
@@ -128,14 +130,11 @@ bool deconstructHardTimer(hardware_timer_t timer) {
 	}
 
 	if (timerInitializedInternal(timerPtr)) {
-
-		if (cancelHardTimer(timer)) {
-			timerDetachInterrupt(*timerPtr);
-			timerEnd(*timerPtr);
-			*timerPtr = NULL;
-			return true;
-		}
-
+		cancelHardTimer(timer);
+		timerDetachInterrupt(*timerPtr);
+		timerEnd(*timerPtr);
+		*timerPtr = NULL;
+		return true;
 	}
 	
 	return false;
@@ -148,10 +147,11 @@ bool cancelHardTimer(hardware_timer_t timer) {
 		return false;
 	}
 
-	if (timerStartedInternal(timerPtr)) {
+	if (timerStarted(timer)) {
 		timerAlarmDisable(*timerPtr);
 		timerStop(*timerPtr);
 		timerWrite(*timerPtr, TIMER_COUNT_ZERO);
+		setTimerStarted(timer, false);
 		return true;
 	}
 
@@ -165,10 +165,11 @@ bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
 		return false;
 	}
 
-	if (timerInitializedInternal(timerPtr) && !timerStartedInternal(timerPtr)) {
+	if (timerInitializedInternal(timerPtr) && !timerStarted(timer)) {
 		timerAlarmWrite(*timerPtr, timerTicks, true);
 		timerAlarmEnable(*timerPtr);
 		timerStart(*timerPtr);
+		setTimerStarted(timer, true);
 		return true;
 	}
 

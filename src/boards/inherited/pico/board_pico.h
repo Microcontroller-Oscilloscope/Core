@@ -184,7 +184,7 @@
 		#define HARD_TIMER_TEST_SCALAR SCALAR_MS // pre scalar for test
 		#define HARD_TIMER_TEST_MULTIPLIER HARD_TIMER_TICK_MULTIPLIER // multiplier for testing timer ticks
 
-		// fast testing flags
+		// fast testing flags 200,000Hz
 		#define HARD_TIMER_FAST_TEST_INDEX 0 // hardware timer index for testing
 		#define HARD_TIMER_FAST_TEST_SCALAR SCALAR_US // pre scalar for test
 		#define HARD_TIMER_FAST_TEST_MULTIPLIER HARD_TIMER_TICK_MULTIPLIER // multiplier for testing timer ticks

@@ -136,5 +136,26 @@
 	#define HARD_TIMER_LED_SCALAR 80 // pre scalar for LED timer
 	#define HARD_TIMER_LED_TICK_MULTIPLIER 1000 // multiplier for timer ticks
 
+	/****************************
+	 * Test Timer Config
+	****************************/
+
+	#ifdef __TEST_CASES__
+
+		// slow testing flags
+		#define HARD_TIMER_TEST_INDEX 0 // hardware timer index for testing
+		#define HARD_TIMER_TEST_SCALAR 80 // pre scalar for test
+		#define HARD_TIMER_TEST_MULTIPLIER 1000 // multiplier for testing timer ticks
+
+		// fast testing flags 200,000Hz
+		#define HARD_TIMER_FAST_TEST_INDEX 0 // hardware timer index for testing
+		#define HARD_TIMER_FAST_TEST_SCALAR 80 // pre scalar for test
+		#define HARD_TIMER_FAST_TEST_MULTIPLIER 1 // multiplier for testing timer ticks
+		#define HARD_TIMER_FAST_TEST_COUNT_TARGET 200000 // target count for timer
+		#define HARD_TIMER_FAST_TEST_DELAY 5 // target timer ticks for data collected
+		#define HARD_TIMER_FAST_TEST_COUNT_BUFFER 1 // amount timer can be off of goal
+
+	#endif
+
 #endif
 #endif
