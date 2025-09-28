@@ -108,6 +108,7 @@ bool timerStarted(hardware_timer_t timer) {
 bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar) {
 	if (!timerInitialized(timer)) {
 		setTimerInitialized(timer, true);
+		return true;
 	}
 	return false;
 }
@@ -123,6 +124,7 @@ bool deconstructHardTimer(hardware_timer_t timer) {
 		cancel_repeating_timer(timerPtr);
 		setTimerStarted(timer, false);
 		setTimerInitialized(timer, false);
+		return true;
 	}
 
 	return false;
