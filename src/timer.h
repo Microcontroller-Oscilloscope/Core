@@ -18,6 +18,14 @@
 
 #include "compile_flags/compile_flags.h"
 
+// available timers to use
+#if NUM_TIMERS > 0
+	#define HARD_TIMER_ID_OSC // oscilloscope data collection enable
+#endif
+#if NUM_TIMERS > 1
+	#define HARD_TIMER_ID_LED // status LED enable
+#endif
+
 /**
  * Initializes hardware timer
  * 
@@ -58,6 +66,24 @@ bool cancelHardTimer(hardware_timer_t timer);
  * @return if timer was successfully set
  */
 bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks);
+
+/**
+ * Gets if selected timer was initialized
+ * 
+ * @param timer timer to check
+ * 
+ * @return if timer was initialized
+ */
+bool timerInitialized(hardware_timer_t timer);
+
+/**
+ * Gets if selected timer was started
+ * 
+ * @param timer timer to check
+ * 
+ * @return if timer was started
+ */
+bool timerStarted(hardware_timer_t timer);
 
 static_assert(NUM_TIMERS <= NUM_TIMERS_AVAILABLE, "NUM_TIMERS too large");
 static_assert(NUM_TIMERS > 0, "NUM_TIMERS too small");

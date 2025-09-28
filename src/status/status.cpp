@@ -22,7 +22,7 @@
 #include "../timer.h"
 
 // if status LEDs are enabled
-#define STATUS_LED_DEFINED() defined(STATUS_LED_PIN) || defined(EXTERNAL_STATUS_LED_PIN)
+#define STATUS_LED_DEFINED() (defined(STATUS_LED_PIN) || defined(EXTERNAL_STATUS_LED_PIN)) && defined(HARD_TIMER_ID_LED)
 
 #if STATUS_LED_DEFINED()
 
@@ -49,26 +49,16 @@
 #endif
 
 void initStatus(void) {
+
 	#ifdef STATUS_LED_PIN
 		pinMode(STATUS_LED_PIN, OUTPUT);
 	#endif
 	#ifdef EXTERNAL_STATUS_LED_PIN
 		pinMode(EXTERNAL_STATUS_LED_PIN, OUTPUT);
 	#endif
+	
 	#if STATUS_LED_DEFINED()
-		bool result = false;
-		/*result = deconstructHardTimer(HARD_TIMER_LED);
-		Serial.print("Init Deconstruct: ");
-		Serial.println(result);
-		result = deconstructHardTimer(HARD_TIMER_LED);
-		Serial.print("Init Deconstruct: ");
-		Serial.println(result);
-		result = initHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR);
-		Serial.print("Init Construct: ");
-		Serial.println(result);*/
-		result = initHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR);
-		Serial.print("Init Construct: ");
-		Serial.println(result);
+		initHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR);
 	#endif
 }
 
@@ -76,11 +66,8 @@ void setStatus(STATUS_CODE status) {
 
 	#if STATUS_LED_DEFINED()
 
-		bool result = false;
-
 		// reset timers and LEDs
-		result = cancelHardTimer(HARD_TIMER_LED);
-		ledToggle = false;
+		cancelHardTimer(HARD_TIMER_LED);
 
 		#ifdef STATUS_LED_PIN
 			digitalWrite(STATUS_LED_PIN, LOW);
@@ -89,22 +76,7 @@ void setStatus(STATUS_CODE status) {
 			digitalWrite(EXTERNAL_STATUS_LED_PIN, LOW);
 		#endif
 
-		
-		//result = cancelHardTimer(HARD_TIMER_LED);
-		Serial.print("Cancel: ");
-		Serial.println(result);
-		/*result = deconstructHardTimer(HARD_TIMER_LED);
-		Serial.print("Deconstruct: ");
-		Serial.println(result);
-		result = deconstructHardTimer(HARD_TIMER_LED);
-		Serial.print("Deconstruct: ");
-		Serial.println(result);
-		result = initHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR);
-		Serial.print("Construct: ");
-		Serial.println(result);
-		result = initHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR);
-		Serial.print("Construct: ");
-		Serial.println(result);*/
+		ledToggle = false;
 
 		// sets LEDs
 		if (status == BOARD_OK) {
@@ -116,20 +88,21 @@ void setStatus(STATUS_CODE status) {
 			#endif
 		}
 		else if (status == BOARD_CONNECTING) {
-			result = setHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR, HARD_TIMER_LED_TICK_MULTIPLIER * CONNECTING_DELAY);
-			Serial.print("Set: ");
-			Serial.println(result);
-			/*result = setHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR, HARD_TIMER_LED_TICK_MULTIPLIER * CONNECTING_DELAY);
-			Serial.print("Set: ");
-			Serial.println(result);*/
+			setHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR, HARD_TIMER_LED_TICK_MULTIPLIER * CONNECTING_DELAY);
 		}
 		else if (status == BOARD_CRIT_ERROR) {
-			result = setHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR, HARD_TIMER_LED_TICK_MULTIPLIER * CRIT_ERROR_DELAY);
-			Serial.print("Set: ");
-			Serial.println(result);
-			/*result = setHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR, HARD_TIMER_LED_TICK_MULTIPLIER * CRIT_ERROR_DELAY);
-			Serial.print("Set: ");
-			Serial.println(result);*/
+			setHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR, HARD_TIMER_LED_TICK_MULTIPLIER * CRIT_ERROR_DELAY);
+		}
+
+	#else
+		
+		if (status == BOARD_OK) {
+			#ifdef STATUS_LED_PIN
+				digitalWrite(STATUS_LED_PIN, HIGH);
+			#endif
+			#ifdef EXTERNAL_STATUS_LED_PIN
+				digitalWrite(EXTERNAL_STATUS_LED_PIN, HIGH);
+			#endif
 		}
 
 	#endif
