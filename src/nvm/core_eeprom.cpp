@@ -22,7 +22,7 @@
 
 #include <EEPROM.h>
 
-bool started = false;
+bool nvmBegan = false;
 
 /**
  * Gets if nvm is started and debugs it
@@ -30,7 +30,7 @@ bool started = false;
  * @return if nvm is started
  */
 bool nvmStarted() {
-	if (!started) {
+	if (!nvmBegan) {
 		#ifdef __NVM_DEBUG__
 			printNVM();
 			Serial.println(F("EEPROM not started"));
@@ -41,7 +41,7 @@ bool nvmStarted() {
 }
 
 enum NVMStartCode nvmInit(uint16_t setNVMSize) {
-	if (started) {
+	if (nvmBegan) {
 		#ifdef __NVM_DEBUG__
 			printNVM();
 			Serial.println(F("EEPROM already started"));
@@ -60,24 +60,24 @@ enum NVMStartCode nvmInit(uint16_t setNVMSize) {
 	#ifdef __NVM_BEGIN__
 		#ifdef __NVM_BEGIN_SIZE__
 			#ifdef __NVM_BEGIN_RETURN__
-				started = EEPROM.begin(setNVMSize);
+				nvmBegan = EEPROM.begin(setNVMSize);
 			#else
 				EEPROM.begin(setNVMSize);
-				started = true;
+				nvmBegan = true;
 			#endif
 		#else
 			#ifdef __NVM_BEGIN_RETURN__
-				started = EEPROM.begin();
+				nvmBegan = EEPROM.begin();
 			#else
 				EEPROM.begin();
-				started = true;
+				nvmBegan = true;
 			#endif
 		#endif
 	#else
-		started = true;
+		nvmBegan = true;
 	#endif
 
-	if (!started) {
+	if (!nvmBegan) {
 		#ifdef __ERROR_DEBUG__
 			printError();
 			Serial.println(F("'EEPROM' library failed to start"));
@@ -95,7 +95,7 @@ enum NVMStartCode nvmInit(uint16_t setNVMSize) {
 
 bool nvmMaxSize(nvm_size_t *size) {
 	
-	if (started) {
+	if (nvmBegan) {
 		*size = (nvm_size_t)EEPROM.length();
 		if (*size == 0) {
 			*size = NVM_MAX_SIZE;

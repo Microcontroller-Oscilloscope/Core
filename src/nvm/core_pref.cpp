@@ -25,7 +25,7 @@
 
 #define CHAR_KEY_SIZE NVM_MAX_SIZE_BYTES + 1U
 
-bool started = false;
+bool nvmBegan = false;
 Preferences preferences;
 
 #ifdef __NVM_DEBUG__
@@ -74,7 +74,7 @@ void nvmWriteFailed(enum VarType varType) {
 #endif
 
 enum NVMStartCode nvmInit(nvm_size_t setNVMSize) {
-	if (started) {
+	if (nvmBegan) {
 		#ifdef __NVM_DEBUG__
 			printNVM();
 			Serial.println(F("Pref already started"));
@@ -92,16 +92,16 @@ enum NVMStartCode nvmInit(nvm_size_t setNVMSize) {
 
 	#ifdef __NVM_BEGIN__
 		#ifdef __NVM_BEGIN_RETURN__
-			started = preferences.begin("Osc", false);
+			nvmBegan = preferences.begin("Osc", false);
 		#else
 			preferences.begin("Osc", false);
-			started = true;
+			nvmBegan = true;
 		#endif
 	#else
-		started = true;
+		nvmBegan = true;
 	#endif
 
-	if (!started) {
+	if (!nvmBegan) {
 		#ifdef __ERROR_DEBUG__
 			printError();
 			Serial.println(F("Preferences lib failed to start"));
@@ -128,19 +128,19 @@ enum NVMStartCode nvmInit(nvm_size_t setNVMSize) {
  * @return if stop was successful
  */
 bool nvmStop(void) {
-	if (!started) {
+	if (!nvmBegan) {
 		return false;
 	}
 
 	preferences.end();
-	started = false;
+	nvmBegan = false;
 
 	return true;
 }
 
 bool nvmMaxSize(nvm_size_t *size) {
 
-	if (started) {
+	if (nvmBegan) {
 		*size = NVM_MAX_SIZE;
 		return true;
 	}
@@ -242,7 +242,7 @@ NVMDefaultCode nvmSetDefaults(void) {
  * @return if Pref was started
  */
 bool nvmStarted(void) {
-	if (!started) {
+	if (!nvmBegan) {
 		#ifdef __ERROR_DEBUG__
 			printError();
 			Serial.println(F("Pref not started"));

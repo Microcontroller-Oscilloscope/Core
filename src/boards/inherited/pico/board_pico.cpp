@@ -40,8 +40,8 @@ struct repeating_timer timers[NUM_TIMERS];
 	#error TOO MANY TIMERS! Reduce NUM_TIMERS to 64 or less
 #endif
 
-storage_t initialized = 0U; // stores timer initialization state
-storage_t started = 0U; // stores timer started state
+storage_t timersInitialized = 0U; // stores timer initialization state
+storage_t timersStarted = 0U; // stores timer started state
 
 /**
  * Gets timer based on desired timer
@@ -66,10 +66,10 @@ struct repeating_timer* getTimer(hardware_timer_t timer) {
 void setTimerInitialized(hardware_timer_t timer, bool state) {
 	if (timer >= 0 && timer < NUM_TIMERS) {
 		if (state) {
-			initialized |= (1 << timer);
+			timersInitialized |= (1 << timer);
 		}
 		else {
-			initialized &= (~(1 << timer));
+			timersInitialized &= (~(1 << timer));
 		}
 	}
 }
@@ -83,24 +83,24 @@ void setTimerInitialized(hardware_timer_t timer, bool state) {
 void setTimerStarted(hardware_timer_t timer, bool state) {
 	if (timer >= 0 && timer < NUM_TIMERS) {
 		if (state) {
-			started |= (1 << timer);
+			timersStarted |= (1 << timer);
 		}
 		else {
-			started &= (~(1 << timer));
+			timersStarted &= (~(1 << timer));
 		}
 	}
 }
 
 bool timerInitialized(hardware_timer_t timer) {
 	if (timer >= 0 && timer < NUM_TIMERS) {
-		return !!((1 << timer) & initialized);
+		return !!((1 << timer) & timersInitialized);
 	}
 	return false;
 }
 
 bool timerStarted(hardware_timer_t timer) {
 	if (timer >= 0 && timer < NUM_TIMERS) {
-		return !!((1 << timer) & started);
+		return !!((1 << timer) & timersStarted);
 	}
 	return false;
 }
