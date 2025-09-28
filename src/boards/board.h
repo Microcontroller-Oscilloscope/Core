@@ -62,12 +62,6 @@
  * Changes Flags When Testing
 ****************************/
 
-#ifndef __TEST_CASES__
-	#if defined(PIO_UNIT_TESTING) || defined(UNIT_TEST)
-		#define __TEST_CASES__ // indicator if compiling for testing
-	#endif
-#endif
-
 // removes debug flags that print to console
 #ifdef __TEST_CASES__
 	#undef __ERROR_DEBUG__

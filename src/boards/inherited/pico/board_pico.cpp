@@ -153,7 +153,7 @@ bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
 		return false;
 	}
 
-	if (!timerStarted(timer)) {
+	if (!timerStarted(timer) && timerInitialized(timer)) {
 		if (scalar == SCALAR_MS) {
 			if (add_repeating_timer_ms(-timerTicks, function, NULL, timerPtr)) {
 				setTimerStarted(timer, true);
