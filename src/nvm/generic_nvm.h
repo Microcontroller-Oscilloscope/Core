@@ -19,11 +19,8 @@
 #ifndef GENERIC_NVM_H
 #define GENERIC_NVM_H
 
-#include <Arduino.h>
-#include "../status/debug.h"
-#include "eeprom_addresses.h"
 #include "../compile_flags/compile_flags.h"
-#include "../osc_err/osc_err.h"
+#include <WString.h>
 
 // defualt size for nvm storage
 #define DEFAULT_NVM_SIZE 0U

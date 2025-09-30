@@ -21,11 +21,6 @@
 #ifndef COREPREF_H
 #define COREPREF_H
 
-#ifdef NVM_PREF
-
-#include <Arduino.h>
-#include <Preferences.h>
 #include "generic_nvm.h"
 
-#endif
 #endif

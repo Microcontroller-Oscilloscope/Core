@@ -28,6 +28,8 @@
 
 #ifdef UNOR3
 
+	#include <Arduino.h>
+
 	/****************************
 	 * Board Overrides
 	****************************/

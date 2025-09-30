@@ -28,6 +28,9 @@
 
 #ifdef ESP32DEVC
 
+	#include <esp_attr.h>
+	#include <esp32-hal-gpio.h>
+
 	/****************************
 	 * Board Overrides
 	****************************/

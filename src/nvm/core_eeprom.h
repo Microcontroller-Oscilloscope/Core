@@ -18,13 +18,9 @@
 
 #include "../compile_flags/compile_flags.h"
 
-#ifndef COREEEPROM_H
-#define COREEEPROM_H
+#ifndef CORE_EEPROM_H
+#define CORE_EEPROM_H
 
-#ifdef NVM_EEPROM
-
-#include <Arduino.h>
 #include "generic_nvm.h"
 
-#endif
 #endif

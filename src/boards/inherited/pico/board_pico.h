@@ -23,6 +23,8 @@
 
 #ifdef PICO
 
+	#include <api/Common.h>
+
 	/****************************
 	 * Board Overrides
 	****************************/

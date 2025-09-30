@@ -19,9 +19,7 @@
 #ifndef RUNNER_H
 #define RUNNER_H
 
-#include <Arduino.h>
 #include "compile_flags/compile_flags.h"
-#include "status/status.h"
 
 /**
  * Runs Program

@@ -18,6 +18,12 @@
 
 #include "entry.h"
 
+#include <Arduino.h>
+#include "compile_flags/compile_flags.h"
+#include "nvm/nvm.h"
+#include "osc_err/osc_err.h"
+#include "status/status.h"
+
 void startProgram(void) {
 
 	// starts serial monitor

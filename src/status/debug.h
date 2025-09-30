@@ -19,8 +19,8 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-#include <Arduino.h>
 #include "compile_flags/compile_flags.h"
+#include <WString.h>
 
 /**
  * Prints formatted tag to serial monitor '[tag]:'
@@ -54,6 +54,8 @@ void printNVM(void);
 void printCritError(void);
 
 #ifndef INT64_SUPPORT
+
+#include <Arduino.h>
 
 /**
  * Converts to n power of input datatypes

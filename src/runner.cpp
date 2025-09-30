@@ -18,6 +18,9 @@
 
 #include "runner.h"
 
+#include <Arduino.h>
+#include "compile_flags/compile_flags.h"
+#include "status/status.h"
 #include "compile_flags/compile_warnings.h"
 
 void runProgram(void) {

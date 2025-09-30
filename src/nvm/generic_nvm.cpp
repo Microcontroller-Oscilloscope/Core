@@ -18,6 +18,10 @@
 
 #include "generic_nvm.h"
 
+#include "eeprom_addresses.h"
+#include "../osc_err/osc_err.h"
+#include "../status/debug.h"
+
 #ifndef NO_CHAR_ARRAY_SUPPORT
 
 bool sameString(char* first, char* second) {

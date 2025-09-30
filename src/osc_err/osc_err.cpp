@@ -18,6 +18,9 @@
 
 #include "osc_err.h"
 
+#include <Arduino.h>
+#include "../status/debug.h"
+
 void errorLoop(OSC_ERR err) {
 	#ifndef __TEST_CASES__
 		while(true) {

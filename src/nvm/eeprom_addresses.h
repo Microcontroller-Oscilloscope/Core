@@ -19,8 +19,6 @@
 #ifndef EEPROM_ADDRESSES_H
 #define EEPROM_ADDRESSES_H
 
-#include <Arduino.h>
-
 #define BYTE1_SIZE 1
 #define BYTE2_SIZE 2
 #define BYTE4_SIZE 4

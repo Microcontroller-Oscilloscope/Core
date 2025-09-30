@@ -19,11 +19,7 @@
 #ifndef ENTRY_H
 #define ENTRY_H
 
-#include <Arduino.h>
 #include "compile_flags/compile_flags.h"
-#include "nvm/nvm.h"
-#include "osc_err/osc_err.h"
-#include "status/status.h"
 
 /**
  * Sets up and starts program

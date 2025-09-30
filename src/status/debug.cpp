@@ -17,6 +17,7 @@
 */
 
 #include "debug.h"
+#include <Arduino.h>
 
 void printTag(const __FlashStringHelper * tag) {
 	Serial.print(F("["));

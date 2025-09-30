@@ -19,9 +19,7 @@
 #ifndef OSC_ERR_H
 #define OSC_ERR_H
 
-#include <Arduino.h>
 #include "osc_err_list.h"
-#include "../status/debug.h"
 
 #define OSC_ERR_DELAY 1000
 
