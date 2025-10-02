@@ -28,8 +28,6 @@
 
 #ifdef UNOR3
 
-	#include <Arduino.h>
-
 	/****************************
 	 * Board Overrides
 	****************************/
@@ -67,7 +65,7 @@
 	// available hardware timers
 	#define HARD_TIMER(id) CONCATENATE(HARD_TIMER, id) // timer #id
 
-	enum HARDWARE_TIMER_T {
+	typedef enum {
 
 		#if NUM_TIMERS >= 1
 			HARD_TIMER(0), // 8 bit counter
@@ -78,11 +76,10 @@
 		#if NUM_TIMERS >= 3
 			HARD_TIMER(2), // 8 bit counter
 		#endif
-	};
-	typedef HARDWARE_TIMER_T hardware_timer_t; // hardware timer type
+	} hardware_timer_t; // hardware timer type
 
 	// available pre scalars
-	enum PRE_SCALAR_T {
+	typedef enum {
 		SCALAR_1, // timer prescalar of 1, timers 0-2
 		SCALAR_8, // timer prescalar of 8, timers 0-2
 		SCALAR_32, // timer prescalar of 32, timer 2
@@ -90,8 +87,7 @@
 		SCALAR_128, // timer prescalar of 128, timer 2
 		SCALAR_256, // timer prescalar of 256, timers 0-2
 		SCALAR_1024, // timer prescalar of 1024, timers 0-2
-	};
-	typedef PRE_SCALAR_T prescalar_t; // pre scalar type
+	} prescalar_t; // pre scalar type
 
 	// other timer definitions
 	typedef uint16_t timertick_t; // timer tick type

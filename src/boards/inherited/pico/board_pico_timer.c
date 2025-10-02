@@ -1,5 +1,5 @@
 /*
-	board_pico.cpp - configuration for all Raspberry Pi Picos
+	board_pico_timer.c - timer configuration for all Raspberry Pi Picos
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify

@@ -1,5 +1,5 @@
 /*
-	board_esp32.cpp - configuration for Espressif ESP32
+	board_esp32_timer.c - timer configuration for Espressif ESP32
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify

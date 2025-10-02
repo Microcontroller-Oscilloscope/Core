@@ -1,5 +1,5 @@
 /*
-	board_uno.cpp - configuration for Arduino Uno
+	board_uno_timer.c - timer configuration for Arduino Uno
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include "../../timer.h"
+#include "../../hardTimer.h"
 
 uint8_t timerStates = 0U;
 #define START_OFFSET 4 // offset from init to start flags
@@ -186,7 +186,7 @@ void setTimerStarted(hardware_timer_t timer, bool state) {
  */
 #define TICKS_OUT_OF_BOUNDS(timer, timerTicks) ((timer == HARD_TIMER0 || timer == HARD_TIMER2) && timerTicks >= UINT8_MAX)
 
-bool timerInitialized(hardware_timer_t timer) {
+bool hardTimerInitialized(hardware_timer_t timer) {
 
 	if (timer >= 0 && timer < NUM_TIMERS) {
 		return !!((1 << timer) & timerStates);
@@ -195,7 +195,7 @@ bool timerInitialized(hardware_timer_t timer) {
 	return false;
 }
 
-bool timerStarted(hardware_timer_t timer) {
+bool hardTimerStarted(hardware_timer_t timer) {
 
 	if (timer >= 0 && timer < NUM_TIMERS) {
 		return !!((1 << (timer + START_OFFSET)) & timerStates);
@@ -206,7 +206,7 @@ bool timerStarted(hardware_timer_t timer) {
 
 bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar) {
 
-	if (!timerInitialized(timer)) {
+	if (!hardTimerInitialized(timer)) {
 		setTimerInitialized(timer, true);
 		return true;
 	}

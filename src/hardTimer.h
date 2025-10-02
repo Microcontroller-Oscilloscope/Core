@@ -1,5 +1,5 @@
 /*
-	timer.h - timer definitions for each board
+	hardTimer.h - timer definitions for each board
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -84,6 +84,7 @@ extern "C" {
 #define HARD_TIMER_H
 
 #include "compile_flags/compile_flags.h"
+#include <stdbool.h>
 
 // available timers to use
 #if NUM_TIMERS > 0
