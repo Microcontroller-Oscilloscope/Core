@@ -21,7 +21,7 @@
 #ifdef PICO
 
 #include <pico/time.h>
-#include "../../../timer.h"
+#include "../../../hardTimer.h"
 
 #define NULL_REPEATING_TIMER 0
 
@@ -92,14 +92,14 @@ void setTimerStarted(hardware_timer_t timer, bool state) {
 	}
 }
 
-bool timerInitialized(hardware_timer_t timer) {
+bool hardTimerInitialized(hardware_timer_t timer) {
 	if (timer >= 0 && timer < NUM_TIMERS) {
 		return !!((1 << timer) & timersInitialized);
 	}
 	return false;
 }
 
-bool timerStarted(hardware_timer_t timer) {
+bool hardTimerStarted(hardware_timer_t timer) {
 	if (timer >= 0 && timer < NUM_TIMERS) {
 		return !!((1 << timer) & timersStarted);
 	}
@@ -107,7 +107,7 @@ bool timerStarted(hardware_timer_t timer) {
 }
 
 bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar) {
-	if (!timerInitialized(timer)) {
+	if (!hardTimerInitialized(timer)) {
 		setTimerInitialized(timer, true);
 		return true;
 	}
@@ -121,7 +121,7 @@ bool deconstructHardTimer(hardware_timer_t timer) {
 		return false;
 	}
 
-	if (timerInitialized(timer)) {
+	if (hardTimerInitialized(timer)) {
 		cancel_repeating_timer(timerPtr);
 		setTimerStarted(timer, false);
 		setTimerInitialized(timer, false);
@@ -138,7 +138,7 @@ bool cancelHardTimer(hardware_timer_t timer) {
 		return false;
 	}
 
-	if (timerStarted(timer)) {
+	if (hardTimerStarted(timer)) {
 		cancel_repeating_timer(timerPtr);
 		setTimerStarted(timer, false);
 		return true;
@@ -154,7 +154,7 @@ bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
 		return false;
 	}
 
-	if (!timerStarted(timer) && timerInitialized(timer)) {
+	if (!hardTimerStarted(timer) && hardTimerInitialized(timer)) {
 		if (scalar == SCALAR_MS) {
 			if (add_repeating_timer_ms(-timerTicks, function, NULL, timerPtr)) {
 				setTimerStarted(timer, true);

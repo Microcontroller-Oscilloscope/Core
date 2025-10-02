@@ -21,7 +21,7 @@
 #ifdef ESP32DEVC
 
 #include <esp32-hal-timer.h>
-#include "../../timer.h"
+#include "../../hardTimer.h"
 
 #define TIMER_COUNT_ZERO 0U // value for setting timer tick count to 0
 
@@ -43,6 +43,8 @@ hw_timer_t *timers[] = {
 	#endif
 };
 
+hw_timer_t *nullTimer;
+
 /**
  * Gets timer based on desired timer
  * 
@@ -55,7 +57,7 @@ hw_timer_t** getTimer(hardware_timer_t timer) {
 	if (timer >= 0 && timer < NUM_TIMERS) {
 		return &timers[timer];
 	}
-	return nullptr;
+	return &nullTimer;
 }
 
 /**
@@ -83,7 +85,7 @@ void setTimerStarted(hardware_timer_t timer, bool state) {
  * @return if timer was initialized
  */
 bool timerInitializedInternal(hw_timer_t** timerPtr) {
-	if (timerPtr == nullptr) {
+	if (timerPtr == &nullTimer) {
 		return false;
 	}
 
@@ -94,12 +96,12 @@ bool timerInitializedInternal(hw_timer_t** timerPtr) {
 	return false;
 }
 
-bool timerInitialized(hardware_timer_t timer) {
+bool hardTimerInitialized(hardware_timer_t timer) {
 	hw_timer_t** timerPtr = getTimer(timer);
 	return timerInitializedInternal(timerPtr);
 }
 
-bool timerStarted(hardware_timer_t timer) {
+bool hardTimerStarted(hardware_timer_t timer) {
 	if (timer >= 0 && timer < NUM_TIMERS) {
 		return !!((1 << timer) & timersStarted);
 	}
@@ -109,7 +111,7 @@ bool timerStarted(hardware_timer_t timer) {
 bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar) {
 
 	hw_timer_t** timerPtr = getTimer(timer);
-	if (timerPtr == nullptr) {
+	if (timerPtr == &nullTimer) {
 		return false;
 	}
 
@@ -125,7 +127,7 @@ bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, p
 bool deconstructHardTimer(hardware_timer_t timer) {
 
 	hw_timer_t** timerPtr = getTimer(timer);
-	if (timerPtr == nullptr) {
+	if (timerPtr == &nullTimer) {
 		return false;
 	}
 
@@ -143,11 +145,11 @@ bool deconstructHardTimer(hardware_timer_t timer) {
 bool cancelHardTimer(hardware_timer_t timer) {
 	
 	hw_timer_t** timerPtr = getTimer(timer);
-	if (timerPtr == nullptr) {
+	if (timerPtr == &nullTimer) {
 		return false;
 	}
 
-	if (timerStarted(timer)) {
+	if (hardTimerStarted(timer)) {
 		timerAlarmDisable(*timerPtr);
 		timerStop(*timerPtr);
 		timerWrite(*timerPtr, TIMER_COUNT_ZERO);
@@ -161,11 +163,11 @@ bool cancelHardTimer(hardware_timer_t timer) {
 bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks) {
 	
 	hw_timer_t** timerPtr = getTimer(timer);
-	if (timerPtr == nullptr) {
+	if (timerPtr == &nullTimer) {
 		return false;
 	}
 
-	if (timerInitializedInternal(timerPtr) && !timerStarted(timer)) {
+	if (timerInitializedInternal(timerPtr) && !hardTimerStarted(timer)) {
 		timerAlarmWrite(*timerPtr, timerTicks, true);
 		timerAlarmEnable(*timerPtr);
 		timerStart(*timerPtr);

@@ -76,6 +76,13 @@
  * (1,1) -> (1,1)
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifndef HARD_TIMER_H
+#define HARD_TIMER_H
+
 #include "compile_flags/compile_flags.h"
 
 // available timers to use
@@ -84,10 +91,6 @@
 #endif
 #if NUM_TIMERS > 1
 	#define HARD_TIMER_ID_LED // status LED enable
-#endif
-
-#ifdef __cplusplus
-extern "C" {
 #endif
 
 /**
@@ -138,7 +141,7 @@ bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
  * 
  * @return if timer was initialized
  */
-bool timerInitialized(hardware_timer_t timer);
+bool hardTimerInitialized(hardware_timer_t timer);
 
 /**
  * Gets if selected timer was started
@@ -147,11 +150,18 @@ bool timerInitialized(hardware_timer_t timer);
  * 
  * @return if timer was started
  */
-bool timerStarted(hardware_timer_t timer);
+bool hardTimerStarted(hardware_timer_t timer);
+
+#if NUM_TIMERS > NUM_TIMERS_AVAILABLE
+	#error NUM_TIMERS too large
+#endif
+
+#if NUM_TIMERS_AVAILABLE > 0 && NUM_TIMERS <= 0
+	#error NUM_TIMERS too small
+#endif
 
 #ifdef __cplusplus
 }
 #endif
 
-static_assert(NUM_TIMERS <= NUM_TIMERS_AVAILABLE, "NUM_TIMERS too large");
-static_assert(!(NUM_TIMERS == 0 && NUM_TIMERS_AVAILABLE > 0), "NUM_TIMERS too small");
+#endif
