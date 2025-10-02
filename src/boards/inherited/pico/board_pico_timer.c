@@ -27,6 +27,7 @@
 
 // hardware timers
 struct repeating_timer timers[NUM_TIMERS];
+struct repeating_timer nullTimer;
 
 #if NUM_TIMERS <= 8
 	typedef uint8_t storage_t; // storage type for timer states
@@ -54,7 +55,7 @@ struct repeating_timer* getTimer(hardware_timer_t timer) {
 	if (timer >= 0 && timer < NUM_TIMERS) {
 		return &timers[timer];
 	}
-	return nullptr;
+	return &nullTimer;
 }
 
 /**
@@ -116,7 +117,7 @@ bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, p
 bool deconstructHardTimer(hardware_timer_t timer) {
 
 	struct repeating_timer* timerPtr = getTimer(timer);
-	if (timerPtr == nullptr) {
+	if (timerPtr == &nullTimer) {
 		return false;
 	}
 
@@ -133,7 +134,7 @@ bool deconstructHardTimer(hardware_timer_t timer) {
 bool cancelHardTimer(hardware_timer_t timer) {
 
 	struct repeating_timer* timerPtr = getTimer(timer);
-	if (timerPtr == nullptr) {
+	if (timerPtr == &nullTimer) {
 		return false;
 	}
 
@@ -149,7 +150,7 @@ bool cancelHardTimer(hardware_timer_t timer) {
 bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks) {
 	
 	struct repeating_timer* timerPtr = getTimer(timer);
-	if (timerPtr == nullptr) {
+	if (timerPtr == &nullTimer) {
 		return false;
 	}
 

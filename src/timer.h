@@ -86,6 +86,10 @@
 	#define HARD_TIMER_ID_LED // status LED enable
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Initializes hardware timer
  * 
@@ -144,6 +148,10 @@ bool timerInitialized(hardware_timer_t timer);
  * @return if timer was started
  */
 bool timerStarted(hardware_timer_t timer);
+
+#ifdef __cplusplus
+}
+#endif
 
 static_assert(NUM_TIMERS <= NUM_TIMERS_AVAILABLE, "NUM_TIMERS too large");
 static_assert(!(NUM_TIMERS == 0 && NUM_TIMERS_AVAILABLE > 0), "NUM_TIMERS too small");

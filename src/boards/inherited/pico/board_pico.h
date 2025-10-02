@@ -74,7 +74,7 @@
 	// available hardware timers
 	#define HARD_TIMER(id) CONCATENATE(HARD_TIMER, id) // timer #id
 
-	enum HARDWARE_TIMER_T { // hardware timer type
+	typedef enum { // hardware timer type
 		#if NUM_TIMERS >= 1
 			HARD_TIMER(0), // 64 bit counter
 		#endif
@@ -123,15 +123,13 @@
 		#if NUM_TIMERS >= 16
 			HARD_TIMER(15), // 64 bit counter
 		#endif
-	};
-	typedef HARDWARE_TIMER_T hardware_timer_t; // hardware timer type
+	} hardware_timer_t; // hardware timer type
 
 	// available pre scalars
-	enum PRE_SCALAR_T {
+	typedef enum {
 		SCALAR_MS, // timer prescalar for milli seconds
 		SCALAR_US, // timer prescalar micro seconds
-	};
-	typedef PRE_SCALAR_T prescalar_t; // pre scalar type
+	} prescalar_t; // pre scalar type
 
 	// other timer definitions
 	typedef int64_t timertick_t; // timer tick type
