@@ -1,5 +1,5 @@
 /*
-	board_generic.cpp - configuration for generic board
+	board_generic.c - configuration for generic board
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify

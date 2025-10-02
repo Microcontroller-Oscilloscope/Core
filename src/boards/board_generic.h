@@ -60,10 +60,18 @@
 		|| defined(__NVM_BEGIN_RETURN__) || defined(__NVM_COMMIT__)) \
 		|| !defined(__ENABLED_DEV_RELEASE__) || !defined(__ENABLED_DEV_TEST__)
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Void function for void parameters
  */
 void nothing();
+
+#ifdef __cplusplus
+}
+#endif
 
 #define VOID_FUNCTION_NAME nothing // name of empty void function
 
