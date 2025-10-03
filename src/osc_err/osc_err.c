@@ -1,5 +1,5 @@
 /*
-	osc_err.cpp - handles critical errors
+	osc_err.c - handles critical errors
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -20,12 +20,13 @@
 
 #include <Arduino.h>
 #include "../status/debug.h"
+#include "../comm/hard_serial/hard_serial.h"
 
-void errorLoop(OSC_ERR err) {
+void errorLoop(enum OSC_ERR err) {
 	#ifndef __TEST_CASES__
 		while(true) {
 			printCritError();
-			Serial.println(err);
+			hardPrintUInt16ln(err);
 			delay(OSC_ERR_DELAY);
 		}
 	#endif

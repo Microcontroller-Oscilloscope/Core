@@ -19,6 +19,10 @@
 #ifndef OSC_ERR_H
 #define OSC_ERR_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "osc_err_list.h"
 
 #define OSC_ERR_DELAY 1000
@@ -29,5 +33,9 @@
  * @param err error code to display
  */
 void errorLoop(enum OSC_ERR err);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

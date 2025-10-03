@@ -19,6 +19,10 @@
 #ifndef OSC_ERR_LIST_H
 #define OSC_ERR_LIST_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * List of errors that hang microcontroller
  */
@@ -32,5 +36,9 @@ enum OSC_ERR {
 	NVM_SIZE_TOO_BIG_FAIL, // NVM_SIZE in board consts is over max
 	NVM_SIZE_TOO_SMALL_FAIL, // NVM_SIZE in board consts is too small for data
 };
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
