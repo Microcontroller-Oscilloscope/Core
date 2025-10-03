@@ -236,7 +236,7 @@ bool nvmWrite64(uint16_t key, T value) {
 
 #ifndef NO_CHAR_ARRAY_SUPPORT
 
-bool nvmWriteValue(uint16_t key, char* value, uint8_t maxLength) {
+bool nvmWriteCharArray(uint16_t key, char* value, uint8_t maxLength) {
 
 	if (!nvmStarted()) {
 		return false;
@@ -403,7 +403,7 @@ bool nvmGet64(uint16_t key, T *value, T defaultValue, bool canDefault) {
 
 #ifndef NO_CHAR_ARRAY_SUPPORT
 
-bool nvmGetValue(uint16_t key, char* value, uint8_t maxLength) {
+bool nvmGetCharArray(uint16_t key, char* value, uint8_t maxLength) {
 
 	if (!nvmStarted()) {
 		return false;
@@ -464,35 +464,35 @@ bool nvmGetValue(uint16_t key, char* value, uint8_t maxLength) {
 
 #endif
 
-bool nvmWriteValue(uint16_t key, bool value) {
+bool nvmWriteBool(uint16_t key, bool value) {
 	return nvmWrite(key, value);
 }
 
-bool nvmWriteValue(uint16_t key, int8_t value) {
+bool nvmWriteI8(uint16_t key, int8_t value) {
 	return nvmWrite(key, value);
 }
 
-bool nvmWriteValue(uint16_t key, uint8_t value) {
+bool nvmWriteUI8(uint16_t key, uint8_t value) {
 	return nvmWrite(key, value);
 }
 
-bool nvmWriteValue(uint16_t key, int16_t value) {
+bool nvmWriteI16(uint16_t key, int16_t value) {
 	return nvmWrite(key, value);
 }
 
-bool nvmWriteValue(uint16_t key, uint16_t value) {
+bool nvmWriteUI16(uint16_t key, uint16_t value) {
 	return nvmWrite(key, value);
 }
 
-bool nvmWriteValue(uint16_t key, int32_t value) {
+bool nvmWriteI32(uint16_t key, int32_t value) {
 	return nvmWrite(key, value);
 }
 
-bool nvmWriteValue(uint16_t key, uint32_t value) {
+bool nvmWriteUI32(uint16_t key, uint32_t value) {
 	return nvmWrite(key, value);
 }
 
-bool nvmWriteValue(uint16_t key, int64_t value) {
+bool nvmWriteI64(uint16_t key, int64_t value) {
 	#ifdef INT64_SUPPORT
 	return nvmWrite(key, value);
 	#else
@@ -500,7 +500,7 @@ bool nvmWriteValue(uint16_t key, int64_t value) {
 	#endif
 }
 
-bool nvmWriteValue(uint16_t key, uint64_t value) {
+bool nvmWriteUI64(uint16_t key, uint64_t value) {
 	#ifdef INT64_SUPPORT
 	return nvmWrite(key, value);
 	#else
@@ -508,43 +508,43 @@ bool nvmWriteValue(uint16_t key, uint64_t value) {
 	#endif
 }
 
-bool nvmWriteValue(uint16_t key, float value) {
+bool nvmWriteFloat(uint16_t key, float value) {
 	return nvmWrite(key, value);
 }
 
-bool nvmWriteValue(uint16_t key, double value) {
+bool nvmWriteDouble(uint16_t key, double value) {
 	return nvmWrite(key, value);
 }
 
-bool nvmGetValue(uint16_t key, bool *value, bool canDefault) {
+bool nvmGetBool(uint16_t key, bool *value, bool canDefault) {
 	return nvmGet(key, value, (bool)DEFAULT_BOOL, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, int8_t *value, bool canDefault) {
+bool nvmGetI8(uint16_t key, int8_t *value, bool canDefault) {
 	return nvmGet(key, value, (int8_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, uint8_t *value, bool canDefault) {
+bool nvmGetUI8(uint16_t key, uint8_t *value, bool canDefault) {
 	return nvmGet(key, value, (uint8_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, int16_t *value, bool canDefault) {
+bool nvmGetI16(uint16_t key, int16_t *value, bool canDefault) {
 	return nvmGet(key, value, (int16_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, uint16_t *value, bool canDefault) {
+bool nvmGetUI16(uint16_t key, uint16_t *value, bool canDefault) {
 	return nvmGet(key, value, (uint16_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, int32_t *value, bool canDefault) {
+bool nvmGetI32(uint16_t key, int32_t *value, bool canDefault) {
 	return nvmGet(key, value, (int32_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, uint32_t *value, bool canDefault) {
+bool nvmGetUI32(uint16_t key, uint32_t *value, bool canDefault) {
 	return nvmGet(key, value, (uint32_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, int64_t *value, bool canDefault) {
+bool nvmGetI64(uint16_t key, int64_t *value, bool canDefault) {
 	#ifdef INT64_SUPPORT
 	return nvmGet(key, value, (int64_t)DEFAULT_INT, canDefault);
 	#else
@@ -552,7 +552,7 @@ bool nvmGetValue(uint16_t key, int64_t *value, bool canDefault) {
 	#endif
 }
 
-bool nvmGetValue(uint16_t key, uint64_t *value, bool canDefault) {
+bool nvmGetUI64(uint16_t key, uint64_t *value, bool canDefault) {
 	#ifdef INT64_SUPPORT
 	return nvmGet(key, value, (uint64_t)DEFAULT_INT, canDefault);
 	#else
@@ -560,11 +560,11 @@ bool nvmGetValue(uint16_t key, uint64_t *value, bool canDefault) {
 	#endif
 }
 
-bool nvmGetValue(uint16_t key, float *value, bool canDefault) {
+bool nvmGetFloat(uint16_t key, float *value, bool canDefault) {
 	return nvmGet(key, value, (float)DEFAULT_FLOAT, canDefault);
 }
 
-bool nvmGetValue(uint16_t key, double *value, bool canDefault) {
+bool nvmGetDouble(uint16_t key, double *value, bool canDefault) {
 	return nvmGet(key, value, (double)DEFAULT_FLOAT, canDefault);
 }
 
