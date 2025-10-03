@@ -17,26 +17,33 @@
 */
 
 #include "debug.h"
-#include <Arduino.h>
+#include "../comm/hardSerial/hard_serial.h"
 
-void printTag(const __FlashStringHelper * tag) {
-	Serial.print(F("["));
-	Serial.print(tag);
-	Serial.print(F("]:"));
+memCharString leftBracket[] = {"["};
+memCharString rightBracket[] = {"]:"};
+
+memCharString errorTag[] = {"Err"};
+memCharString nvmTag[] = {"NVM"};
+memCharString critErrorTag[] = {"!!!"};
+
+void printTag(memCharString* tag) {
+	hardPrintMemCharArray(leftBracket);
+	hardPrintMemCharArray(tag);
+	hardPrintMemCharArray(rightBracket);
 }
 
 #ifdef __ERROR_DEBUG__
 void printError(void) {
-	printTag(F("Err"));
+	printTag(errorTag);
 }
 #endif
 
 #ifdef __NVM_DEBUG__
 void printNVM(void) {
-	printTag(F("NVM"));
+	printTag(nvmTag);
 }
 #endif
 
 void printCritError(void) {
-	printTag(F("!!!"));
+	printTag(critErrorTag);
 }

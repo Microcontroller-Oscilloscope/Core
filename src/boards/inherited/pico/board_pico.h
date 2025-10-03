@@ -23,7 +23,13 @@
 
 #ifdef PICO
 
-	#include <api/Common.h>
+	/****************************
+	 * Type Defines
+	****************************/
+
+	#include <avr/pgmspace.h>
+
+	typedef const PROGMEM char memCharString;
 
 	/****************************
 	 * Board Overrides

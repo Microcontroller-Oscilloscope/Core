@@ -32,6 +32,14 @@
 	#include <esp32-hal-gpio.h>
 
 	/****************************
+	 * Type Defines
+	****************************/
+
+	#include <pgmspace.h>
+
+	typedef const PROGMEM char memCharString;
+
+	/****************************
 	 * Board Overrides
 	****************************/
 

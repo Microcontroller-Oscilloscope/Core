@@ -23,6 +23,7 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 #include "../osc_err/osc_err.h"
+#include "../status/debug.h"
 
 bool nvmBegan = false;
 

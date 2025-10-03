@@ -25,10 +25,10 @@
 /**
  * Prints formatted tag to serial monitor '[tag]:'
  * 
- * @param tag tag formatted with F({String})
+ * @param tag tag to print
  * @return void
  */
-void printTag(const __FlashStringHelper * tag);
+void printTag(memCharString* tag);
 
 #ifdef __ERROR_DEBUG__
 /**
@@ -53,69 +53,4 @@ void printNVM(void);
  */
 void printCritError(void);
 
-#ifndef INT64_SUPPORT
-
-#include <Arduino.h>
-
-/**
- * Converts to n power of input datatypes
- * 
- * @param base base of exponent
- * @param power power of exponent
- * 
- * @return final value
- */
-template <typename T>
-uint64_t toNPower(T base, T power) {
-	uint64_t value = 1;
-	for (T i = 0; i < power; i++) {
-		value *= base;
-	}
-	return value;
-}
-
-/**
- * Prints a 64 bit integer to the serial monitor
- * 
- * @param value integer to print
- */
-template <typename T>
-void printInt64(T value) {
-
-	// prints 0
-	if (value == 0) {
-		Serial.print("0");
-		return;
-	}
-
-	if (value < 0) {
-		Serial.print(F("-"));
-		value *= -1;
-
-		// prints I64 min
-		if (value < 0) {
-			Serial.print(F("-9223372036854775808"));
-			return;
-		}
-	}
-
-	int8_t digits = 0;
-	uint64_t temp = (uint64_t)value;
-
-	// gets count of digits
-	while (temp > 0) {
-		digits++;
-		temp = temp/10U;
-	}
-
-	// prints digits
-	for (int8_t i = digits - 1; i >= 0; i--) {
-		uint64_t power = toNPower((uint8_t)10, (uint8_t)i);
-		uint64_t leftover = value % power;
-		Serial.print((uint8_t)((value - leftover) / power));
-		value -= value - leftover;
-	}
-}
-
-#endif
 #endif

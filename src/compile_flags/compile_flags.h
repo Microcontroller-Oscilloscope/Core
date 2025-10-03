@@ -82,6 +82,13 @@
 	#define NO_CHAR_ARRAY_SUPPORT
 #endif
 
+/**
+ * Supports PROGMEM as pointers
+ */
+#if defined(UNOR3)
+	#define NO_PROGMEM_COPY_SUPPORT
+#endif
+
 /****************************
  * Debug Toggles
 ****************************/

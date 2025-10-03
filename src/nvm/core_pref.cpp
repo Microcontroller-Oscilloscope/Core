@@ -23,6 +23,7 @@
 #include <Arduino.h>
 #include <Preferences.h>
 #include "../osc_err/osc_err.h"
+#include "../status/debug.h"
 
 #define GOT_VALUE true
 #define WROTE_VALUE false

@@ -76,6 +76,7 @@ void nothing();
 #define VOID_FUNCTION_NAME nothing // name of empty void function
 
 #include <stdint.h>
+#include <stdbool.h>
 
 /****************************
  * Changes Flags When Testing

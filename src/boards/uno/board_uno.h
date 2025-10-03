@@ -29,6 +29,14 @@
 #ifdef UNOR3
 
 	/****************************
+	 * Type Defines
+	****************************/
+
+	#include <avr/pgmspace.h>
+
+	typedef const PROGMEM char memCharString;
+
+	/****************************
 	 * Board Overrides
 	****************************/
 
