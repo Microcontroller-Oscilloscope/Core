@@ -19,8 +19,11 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "compile_flags/compile_flags.h"
-#include <WString.h>
 
 /**
  * Prints formatted tag to serial monitor '[tag]:'
@@ -52,5 +55,9 @@ void printNVM(void);
  * Prints critical error tag '[!!!]:'
  */
 void printCritError(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

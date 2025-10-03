@@ -1,5 +1,5 @@
 /*
-	debug.h - debug statement formatter
+	debug.c - debug statement formatter
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify

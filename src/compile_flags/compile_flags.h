@@ -1,5 +1,5 @@
 /*
-	core_pref.h - methods for Preferences usage
+	compile_flags.h - compilation flags for oscilloscope use
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify

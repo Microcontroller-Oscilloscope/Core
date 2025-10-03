@@ -18,108 +18,214 @@
 
 #include "hard_serial.h"
 
-#if defined(NO_PROGMEM_COPY_SUPPORT) || !defined(INT64_SUPPORT)
+#ifdef PLATFORMIO
+#include <Arduino.h>
+#endif
 
-	#ifdef PLATFORMIO
-	#include <Arduino.h>
-	#endif
+extern "C" void hardPrintBegin(uint32_t baud) {
+	Serial.begin(baud);
+}
 
-	#ifdef __cplusplus
-	extern "C" {
-	#endif
+extern "C" void hardPrintCharArray(const char* value) {
+	Serial.print(value);
+}
 
-	#ifdef NO_PROGMEM_COPY_SUPPORT
+extern "C" void hardPrintInt8(int8_t value) {
+	Serial.print(value);
+}
 
-	/**
-	 * Copies flash message to serial
-	 * 
-	 * @param message flash message to print
-	 * @param messageSize size of message to print
-	 */
-	extern "C" void copyMessage(memCharString *message, uint8_t messageSize) {
-		for (uint8_t i = 0; i < messageSize; i++) {
-			Serial.print((char)pgm_read_byte_near(message + i));
-		}
+extern "C" void hardPrintUInt8(uint8_t value) {
+	Serial.print(value);
+}
+
+extern "C" void hardPrintInt16(int16_t value) {
+	Serial.print(value);
+}
+
+extern "C" void hardPrintUInt16(uint16_t value) {
+	Serial.print(value);
+}
+
+extern "C" void hardPrintInt32(int32_t value) {
+	Serial.print(value);
+}
+
+extern "C" void hardPrintUInt32(uint32_t value) {
+	Serial.print(value);
+}
+
+extern "C" void hardPrintFloat(float value, uint8_t places) {
+	Serial.print(value, places);
+}
+
+extern "C" void hardPrintDouble(double value, uint8_t places) {
+	Serial.print(value, places);
+}
+
+extern "C" void hardPrintCharArrayln(const char* value) {
+	Serial.println(value);
+}
+
+extern "C" void hardPrintInt8ln(int8_t value) {
+	Serial.println(value);
+}
+
+extern "C" void hardPrintUInt8ln(uint8_t value) {
+	Serial.println(value);
+}
+
+extern "C" void hardPrintInt16ln(int16_t value) {
+	Serial.println(value);
+}
+
+extern "C" void hardPrintUInt16ln(uint16_t value) {
+	Serial.println(value);
+}
+
+extern "C" void hardPrintInt32ln(int32_t value) {
+	Serial.println(value);
+}
+
+extern "C" void hardPrintUInt32ln(uint32_t value) {
+	Serial.println(value);
+}
+
+extern "C" void hardPrintFloatln(float value, uint8_t places) {
+	Serial.println(value, places);
+}
+
+extern "C" void hardPrintDoubleln(double value, uint8_t places) {
+	Serial.println(value, places);
+}
+
+extern "C" void hardPrintln(void) {
+	Serial.println();
+}
+
+#ifndef NO_PROGMEM_COPY_SUPPORT
+
+extern "C" void hardPrintMemCharArray(memCharString* value) {
+	Serial.print(value);
+}
+
+extern "C" void hardPrintMemCharArrayln(memCharString* value) {
+	Serial.println(value);
+}
+
+#else
+
+/**
+ * Copies flash message to serial
+ * 
+ * @param message flash message to print
+ * @param messageSize size of message to print
+ */
+extern "C" void copyMessage(memCharString *message, uint8_t messageSize) {
+	for (uint8_t i = 0; i < messageSize; i++) {
+		Serial.print((char)pgm_read_byte_near(message + i));
+	}
+}
+
+extern "C" void hardPrintMemCharArray(memCharString* value) {
+	copyMessage(value, strlen_P(value));
+}
+
+extern "C" void hardPrintMemCharArrayln(memCharString* value) {
+	copyMessage(value, strlen_P(value));
+	Serial.println();
+}
+
+#endif
+
+#ifndef INT64_SUPPORT
+
+/**
+ * Converts to n power of input datatypes
+ * 
+ * @param base base of exponent
+ * @param power power of exponent
+ * 
+ * @return final value
+ */
+extern "C" uint64_t toNPower(uint8_t base, uint8_t power) {
+	uint64_t value = 1;
+	for (uint8_t i = 0; i < power; i++) {
+		value *= base;
+	}
+	return value;
+}
+
+extern "C" void hardPrintInt64(int64_t value) {
+
+	if (value == 0) {
+		Serial.print("0");
+		return;
 	}
 
-	extern "C" void hardPrintMemCharArray(memCharString* value) {
-		copyMessage(value, strlen_P(value));
+	Serial.print(F("-"));
+	value *= -1;
+
+	// prints I64 min
+	if (value < 0) {
+		Serial.print(F("-9223372036854775808"));
+		return;
 	}
 
-	extern "C" void hardPrintMemCharArrayln(memCharString* value) {
-		copyMessage(value, strlen_P(value));
-		Serial.println();
+	hardPrintUInt64(value);
+}
+
+extern "C" void hardPrintUInt64(uint64_t value) {
+
+	// prints 0
+	if (value == 0) {
+		Serial.print("0");
+		return;
 	}
 
-	#endif
+	int8_t digits = 0;
+	uint64_t temp = value;
 
-	#ifndef INT64_SUPPORT
-
-	/**
-	 * Converts to n power of input datatypes
-	 * 
-	 * @param base base of exponent
-	 * @param power power of exponent
-	 * 
-	 * @return final value
-	 */
-	extern "C" uint64_t toNPower(uint8_t base, uint8_t power) {
-		uint64_t value = 1;
-		for (uint8_t i = 0; i < power; i++) {
-			value *= base;
-		}
-		return value;
+	// gets count of digits
+	while (temp > 0) {
+		digits++;
+		temp = temp/10U;
 	}
 
-	extern "C" void hardPrintInt64(int64_t value) {
-
-		if (value == 0) {
-			Serial.print("0");
-			return;
-		}
-
-		Serial.print(F("-"));
-		value *= -1;
-
-		// prints I64 min
-		if (value < 0) {
-			Serial.print(F("-9223372036854775808"));
-			return;
-		}
-
-		hardPrintUInt64(value);
+	// prints digits
+	for (int8_t i = digits - 1; i >= 0; i--) {
+		uint64_t power = toNPower((uint8_t)10, (uint8_t)i);
+		uint64_t leftover = value % power;
+		Serial.print((uint8_t)((value - leftover) / power));
+		value -= value - leftover;
 	}
+}
 
-	extern "C" void hardPrintUInt64(uint64_t value) {
+extern "C" void hardPrintInt64ln(int64_t value) {
+	hardPrintInt64(value);
+	Serial.println();
+}
 
-		// prints 0
-		if (value == 0) {
-			Serial.print("0");
-			return;
-		}
+extern "C" void hardPrintUInt64ln(uint64_t value) {
+	hardPrintUInt64(value);
+	Serial.println();
+}
 
-		int8_t digits = 0;
-		uint64_t temp = value;
+#else
 
-		// gets count of digits
-		while (temp > 0) {
-			digits++;
-			temp = temp/10U;
-		}
+extern "C" void hardPrintInt64(int64_t value) {
+	Serial.print(value);
+}
 
-		// prints digits
-		for (int8_t i = digits - 1; i >= 0; i--) {
-			uint64_t power = toNPower((uint8_t)10, (uint8_t)i);
-			uint64_t leftover = value % power;
-			Serial.print((uint8_t)((value - leftover) / power));
-			value -= value - leftover;
-		}
-	}
+extern "C" void hardPrintUInt64(uint64_t value) {
+	Serial.print(value);
+}
 
-	#endif
+extern "C" void hardPrintInt64ln(int64_t value) {
+	Serial.println(value);
+}
 
-	#ifdef __cplusplus
-	}
-	#endif
+extern "C" void hardPrintUInt64ln(uint64_t value) {
+	Serial.println(value);
+}
 
 #endif

@@ -101,14 +101,14 @@ void hardPrintUInt64(uint64_t value);
  * @param value value to print
  * @param places amount of decimal places to show
  */
-void hardPrintFloat(float value, uint8_t places = DEFAULT_FLOAT_PLACES);
+void hardPrintFloat(float value, uint8_t places);
 /**
  * Prints double to Serial
  * 
  * @param value value to print
  * @param places amount of decimal places to show
  */
-void hardPrintDouble(double value, uint8_t places = DEFAULT_DOUBLE_PLACES);
+void hardPrintDouble(double value, uint8_t places);
 
 /**
  * Prints memory char array to Serial with termination
@@ -176,14 +176,14 @@ void hardPrintUInt64ln(uint64_t value);
  * @param value value to print
  * @param places amount of decimal places to show
  */
-void hardPrintFloatln(float value, uint8_t places = DEFAULT_FLOAT_PLACES);
+void hardPrintFloatln(float value, uint8_t places);
 /**
  * Prints double to Serial with termination
  * 
  * @param value value to print
  * @param places amount of decimal places to show
  */
-void hardPrintDoubleln(double value, uint8_t places = DEFAULT_DOUBLE_PLACES);
+void hardPrintDoubleln(double value, uint8_t places);
 /**
  * Prints termination to Serial
  * 
@@ -193,10 +193,6 @@ void hardPrintln(void);
 
 #ifdef __cplusplus
 }
-#endif
-
-#ifdef PLATFORMIO
-#include "hard_serial_def.h"
 #endif
 
 #endif

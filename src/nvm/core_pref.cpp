@@ -1,5 +1,5 @@
 /*
-	core_pref.h - methods for Preferences usage
+	core_pref.cpp - methods for Preferences usage
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -214,20 +214,20 @@ NVMDefaultCode nvmSetDefaults(void) {
 
 	// ensures clear works
 	if (!nvmClear()) {
-		printDefaultDebug(F("nvm default failed clear"));
+		//printDefaultDebug(F("nvm default failed clear"));
 		return NVM_DEFAULT_FAIL_CLEAR;
 	}
 
 	// stops nvm
 	if (!nvmStop()) {
-		printDefaultDebug(F("nvm default failed stop"));
+		//printDefaultDebug(F("nvm default failed stop"));
 		return NVM_DEFAULT_FAIL_STOP;
 	}
 
 	// restarts nvm for operations
 	NVMStartCode startCode = nvmInit(NVM_SIZE);
 	if (startCode != NVM_OK) {
-		printDefaultDebug(F("nvm default failed init"));
+		//printDefaultDebug(F("nvm default failed init"));
 		return NVM_DEFAULT_FAIL_INIT;
 	}
 

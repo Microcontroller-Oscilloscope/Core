@@ -28,6 +28,6 @@
  * 
  * @param err error code to display
  */
-void errorLoop(OSC_ERR err);
+void errorLoop(enum OSC_ERR err);
 
 #endif
