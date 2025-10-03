@@ -22,7 +22,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include "../../hardTimer.h"
+#include "../../hard_timer.h"
 
 uint8_t timerStates = 0U;
 #define START_OFFSET 4 // offset from init to start flags

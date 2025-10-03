@@ -21,7 +21,7 @@
 #ifdef PICO
 
 #include <pico/time.h>
-#include "../../../hardTimer.h"
+#include "../../../hard_timer.h"
 
 #define NULL_REPEATING_TIMER 0
 

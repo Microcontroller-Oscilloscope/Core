@@ -17,7 +17,7 @@
 */
 
 #include "debug.h"
-#include "../comm/hardSerial/hard_serial.h"
+#include "../comm/hard_serial/hard_serial.h"
 
 memCharString leftBracket[] = {"["};
 memCharString rightBracket[] = {"]:"};

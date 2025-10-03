@@ -21,7 +21,7 @@
 #include "eeprom_addresses.h"
 #include "../osc_err/osc_err.h"
 #include "../status/debug.h"
-#include "../comm/hardSerial/hard_serial.h"
+#include "../comm/hard_serial/hard_serial.h"
 
 #ifndef NO_CHAR_ARRAY_SUPPORT
 

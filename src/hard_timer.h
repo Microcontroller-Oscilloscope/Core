@@ -1,5 +1,5 @@
 /*
-	hardTimer.h - timer definitions for each board
+	hard_timer.h - timer definitions for each board
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify

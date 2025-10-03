@@ -19,7 +19,7 @@
 #include "status.h"
 #include <Arduino.h>
 #include "../compile_flags/compile_flags.h"
-#include "../hardTimer.h"
+#include "../hard_timer.h"
 
 // if status LEDs are enabled
 #define STATUS_LED_DEFINED() (defined(STATUS_LED_PIN) || defined(EXTERNAL_STATUS_LED_PIN)) && defined(HARD_TIMER_ID_LED) && !defined(__TEST_CASES__)
