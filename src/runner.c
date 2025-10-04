@@ -1,5 +1,5 @@
 /*
-	runner.cpp - execution point for code
+	runner.c - execution point for code
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -18,11 +18,11 @@
 
 #include "runner.h"
 
-#include <Arduino.h>
 #include "compile_flags/compile_flags.h"
 #include "status/status.h"
 #include "compile_flags/compile_warnings.h"
+#include "board_common.h"
 
 void runProgram(void) {
-	delay(1000);
+	hardDelayMS(1000);
 }

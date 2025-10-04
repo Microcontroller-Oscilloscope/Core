@@ -21,9 +21,17 @@
 
 #include "compile_flags/compile_flags.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Runs Program
  */
 void runProgram(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

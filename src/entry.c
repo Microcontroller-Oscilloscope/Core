@@ -1,5 +1,5 @@
 /*
-	entry.cpp - entry point for code
+	entry.c - entry point for code
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -18,18 +18,19 @@
 
 #include "entry.h"
 
-#include <Arduino.h>
 #include "compile_flags/compile_flags.h"
 #include "nvm/nvm.h"
 #include "osc_err/osc_err.h"
 #include "status/status.h"
+#include "board_common.h"
+#include "comm/hard_serial/hard_serial.h"
 
 void startProgram(void) {
 
 	// starts serial monitor
-	Serial.begin(BAUD_RATE);
+	hardPrintBegin(BAUD_RATE);
 
-	delay(WAIT_RUN);
+	hardDelayMS(WAIT_RUN);
 
 	/*if (nvmInit(NVM_SIZE) != NVM_OK) {
 		errorLoop(NVM_INIT_FAIL);
