@@ -106,18 +106,16 @@ Preferences preferences;
 
 enum NVMStartCode nvmInit(nvm_size_t setNVMSize) {
 	if (nvmBegan) {
-		#ifdef __NVM_DEBUG__
-			printNVM();
+		PRINT_NVM_DEBUG (
 			hardPrintMemCharArrayln(nvmStartedStr);
-		#endif
+		)
 		return NVM_STARTED;
 	}
 
 	if (setNVMSize == (nvm_size_t)DEFAULT_NVM_SIZE) {
-		#ifdef __NVM_DEBUG__
-			printNVM();
+		PRINT_NVM_DEBUG (
 			hardPrintMemCharArrayln(nvmBadSizeStr);
-		#endif
+		)
 		return NVM_INVALID_SIZE;
 	}
 
@@ -133,17 +131,15 @@ enum NVMStartCode nvmInit(nvm_size_t setNVMSize) {
 	#endif
 
 	if (!nvmBegan) {
-		#ifdef __ERROR_DEBUG__
-			printError();
+		PRINT_ERROR_DEBUG (
 			hardPrintMemCharArrayln(nvmFailStartStr);
-		#endif
+		)
 		return NVM_FAILED;
 	}
 
-	#ifdef __NVM_DEBUG__
-		printNVM();
+	PRINT_NVM_DEBUG (
 		hardPrintMemCharArrayln(nvmStartStr);
-	#endif
+	)
 
 	return NVM_OK;
 }
@@ -198,27 +194,24 @@ bool nvmClear(void) {
 	#ifdef ESP32DEVC
 		esp_err_t result = nvs_flash_erase();
 		if (result) {
-			#ifdef __NVM_DEBUG__
-				printNVM();
+			PRINT_NVM_DEBUG (
 				hardPrintMemCharArrayln(nvmEreaseFailStr);
-			#endif
+			)
 			return false;
 		}
 
 		result = nvs_flash_init();
 		if (result) {
-			#ifdef __NVM_DEBUG__
-				printNVM();
+			PRINT_NVM_DEBUG (
 				hardPrintMemCharArrayln(nvmInitFailStr);
-			#endif
+			)
 			return false;
 		}
 		return true;
 	#else
-		#ifdef __ERROR_DEBUG__
-			printError();
+		PRINT_ERROR_DEBUG (
 			hardPrintMemCharArrayln(nvmNoClearMethodStr);
-		#endif
+		)
 		return false;
 	#endif
 }
@@ -271,10 +264,9 @@ enum NVMDefaultCode nvmSetDefaults(void) {
  */
 bool nvmStarted(void) {
 	if (!nvmBegan) {
-		#ifdef __ERROR_DEBUG__
-			printError();
+		PRINT_ERROR_DEBUG (
 			hardPrintMemCharArray(nvmNotStartedStr);
-		#endif
+		)
 		return false;
 	}
 	return true;
@@ -338,24 +330,21 @@ bool nvmWriteCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 	uint8_t valueLen = charArraySize(value);
 
 	if (valueLen == 0) {
-		#ifdef __NVM_DEBUG__
-			printNVM();
+		PRINT_NVM_DEBUG (
 			hardPrintMemCharArrayln(nullPointerStr);
-		#endif
+		)
 		return false;
 	}
 	else if (valueLen > maxLength) {
-		#ifdef __NVM_DEBUG__
-			printNVM();
+		PRINT_NVM_DEBUG (
 			hardPrintMemCharArrayln(maxLengthTooShortStr);
-		#endif
+		)
 		return false;
 	}
 	else if (valueLen == CHAR_LEN_ERROR) {
-		#ifdef __NVM_DEBUG__
-			printNVM();
+		PRINT_NVM_DEBUG (
 			hardPrintMemCharArrayln(invalidInputStr);
-		#endif
+		)
 		return false;
 	}
 
@@ -402,10 +391,9 @@ bool nvmGet(PRINTPTR printPtr, PTR prefptr, const nvm_size_t key, VAL *value, VA
 	*value = (preferences.*prefptr)(keyStr, defValue);
 
 	if (!canDefault && *value == defValue) {
-		#ifdef __NVM_DEBUG__
-			printNVM();
+		PRINT_NVM_DEBUG (
 			hardPrintMemCharArrayln(noDefaultStr);
-		#endif
+		)
 		return false;
 	}
 
@@ -427,10 +415,9 @@ bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 	}
 
 	if (maxLength == 0U) {
-		#ifdef __NVM_DEBUG__
-			printNVM();
+		PRINT_NVM_DEBUG (
 			hardPrintMemCharArrayln(maxLength0Str);
-		#endif
+		)
 		return false;
 	}
 
@@ -441,10 +428,9 @@ bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 	uint8_t valueLen = charArraySize(value);
 
 	if (valueLen != charSize) {
-		#ifdef __NVM_DEBUG__
-			printNVM();
+		PRINT_NVM_DEBUG (
 			hardPrintMemCharArrayln(errorGetValueStr);
-		#endif
+		)
 		return false;
 	}
 
