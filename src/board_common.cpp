@@ -1,5 +1,5 @@
 /*
-	osc_err.h - handles critical errors
+	board_common.cpp - common functions for microcontrollers
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,26 +16,22 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef OSC_ERR_H
-#define OSC_ERR_H
+#include "board_common.h"
 
-#include "osc_err_list.h"
+#include <Arduino.h>
 
-#define OSC_ERR_DELAY 1000
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * Keeps program in an error loop to alert user
- * 
- * @param err error code to display
- */
-void errorLoop(enum OSC_ERR err);
-
-#ifdef __cplusplus
+extern "C" void hardDelayMS(uint32_t delayAmount) {
+	delay(delayAmount);
 }
-#endif
 
-#endif
+extern "C" void hardDelayUS(uint32_t delayAmount) {
+	delayMicroseconds(delayAmount);
+}
+
+extern "C" void hardPinMode(uint8_t pin, PinMode mode) {
+	pinMode(pin, mode);
+}
+
+extern "C" void hardDigitalWrite(uint8_t pin, uint8_t value) {
+	digitalWrite(pin, value);
+}

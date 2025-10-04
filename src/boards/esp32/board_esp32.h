@@ -51,6 +51,8 @@
 		#define CORE_COUNT 2 // amount of CPU cores available to board
 	#endif
 
+	typedef uint8_t PinMode;
+
 	#ifndef EXTERNAL_LED_PIN
 		#define EXTERNAL_STATUS_LED_PIN 23 // pin for external status LED
 	#endif

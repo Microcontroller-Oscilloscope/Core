@@ -48,6 +48,18 @@
 		#define CORE_COUNT 1 // amount of CPU cores available to board
 	#endif
 
+	typedef uint8_t PinMode;
+
+	#ifndef INPUT
+		#define INPUT 0x0
+	#endif
+	#ifndef OUTPUT
+		#define OUTPUT 0x1
+	#endif
+	#ifndef INPUT_PULLUP
+		#define INPUT_PULLUP 0x2
+	#endif
+
 	#ifndef STATUS_LED_PIN
 		#define STATUS_LED_PIN 13 // pin for status LED
 	#endif
@@ -111,6 +123,8 @@
 	#define HARD_TIMER_REFERENCE(id) VOID_FUNCTION_NAME
 
 	// timer functions
+
+	#include <avr/interrupt.h>
 
 	/**
 	 * Selects timer function from given id

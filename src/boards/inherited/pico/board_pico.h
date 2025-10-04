@@ -43,6 +43,8 @@
 		#define CORE_COUNT 2 // amount of CPU cores available to board
 	#endif
 
+	#include <pins_arduino.h>
+
 	#ifndef STATUS_LED_PIN
 		#define STATUS_LED_PIN LED_BUILTIN // pin for status LED
 	#endif
@@ -201,5 +203,4 @@
 	#endif
 
 #endif
-
 #endif

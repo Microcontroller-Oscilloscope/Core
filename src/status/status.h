@@ -31,6 +31,10 @@ enum STATUS_CODE {
 #define CONNECTING_DELAY 1000 // LED blink delay for connecting in ms
 #define CRIT_ERROR_DELAY 100 // LED blink delay for critical errors in ms
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Initializes status pin configuration
  */
@@ -41,6 +45,10 @@ void initStatus(void);
  * 
  * @param status status code to show
  */
-void setStatus(STATUS_CODE status);
+void setStatus(enum STATUS_CODE status);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

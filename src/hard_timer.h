@@ -76,10 +76,6 @@
  * (1,1) -> (1,1)
  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifndef HARD_TIMER_H
 #define HARD_TIMER_H
 
@@ -91,6 +87,10 @@ extern "C" {
 #endif
 #if NUM_TIMERS > 1
 	#define HARD_TIMER_ID_LED // status LED enable
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /**
@@ -152,16 +152,16 @@ bool hardTimerInitialized(hardware_timer_t timer);
  */
 bool hardTimerStarted(hardware_timer_t timer);
 
+#ifdef __cplusplus
+}
+#endif
+
 #if NUM_TIMERS > NUM_TIMERS_AVAILABLE
 	#error NUM_TIMERS too large
 #endif
 
 #if NUM_TIMERS_AVAILABLE > 0 && NUM_TIMERS <= 0
 	#error NUM_TIMERS too small
-#endif
-
-#ifdef __cplusplus
-}
 #endif
 
 #endif

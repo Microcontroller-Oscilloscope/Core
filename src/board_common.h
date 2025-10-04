@@ -1,5 +1,5 @@
 /*
-	debug.h - debug statement formatter
+	board_common.h - common functions for microcontrollers
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,45 +16,50 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef DEBUG_H
-#define DEBUG_H
+#ifndef OSC_COMMON_H
+#define OSC_COMMON_H
 
 #include "compile_flags/compile_flags.h"
+
+// states for digital writes
+enum DIGITAL_STATE {
+	DIGITAL_LOW,
+	DIGITAL_HIGH
+};
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * Prints formatted tag to serial monitor '[tag]:'
+ * Delays microcontroller for milliseconds
  * 
- * @param tag tag to print
- * @return void
+ * @param delayAmount amount to delay
  */
-void printTag(memCharString* tag);
-
-#ifdef __ERROR_DEBUG__
-/**
- * Prints error tag '[Err]:'
- * 
- * @return void
- */
-void printError(void);
-#endif
-
-#ifdef __NVM_DEBUG__
-/**
- * Prints nvm tag '[NVM]:'
- * 
- * @return void
- */
-void printNVM(void);
-#endif
+void hardDelayMS(uint32_t delayAmount);
 
 /**
- * Prints critical error tag '[!!!]:'
+ * Delays microcontroller for microseconds
+ * 
+ * @param delayAmount amount to delay
  */
-void printCritError(void);
+void hardDelayUS(uint32_t delayAmount);
+
+/**
+ * Sets pin mode for board
+ * 
+ * @param pin pin to configure
+ * @param mode mode to operate in
+ */
+void hardPinMode(uint8_t pin, PinMode mode);
+
+/**
+ * Sets digital pin state
+ * 
+ * @param pin pin to set
+ * @param value value to set
+ */
+void hardDigitalWrite(uint8_t pin, uint8_t value);
 
 #ifdef __cplusplus
 }

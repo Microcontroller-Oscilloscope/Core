@@ -19,14 +19,14 @@
 #ifndef HARD_SERIAL_H
 #define HARD_SERIAL_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define DEFAULT_FLOAT_PLACES 2
 #define DEFAULT_DOUBLE_PLACES 4
 
 #include "../../compile_flags/compile_flags.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Sets up Serial communication

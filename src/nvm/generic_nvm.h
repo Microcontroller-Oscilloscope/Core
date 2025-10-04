@@ -19,10 +19,6 @@
 #ifndef GENERIC_NVM_H
 #define GENERIC_NVM_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "../compile_flags/compile_flags.h"
 
 // defualt size for nvm storage
@@ -68,46 +64,50 @@ typedef uint16_t nvm_size_t;
 #define NVM_OVER_SIZE (~((nvm_size_t)0U))
 #define NVM_MAX_SIZE NVM_OVER_SIZE ^ (nvm_size_t)(1U)
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef NO_CHAR_ARRAY_SUPPORT
 
-/**
- * Tests if two char arrays are the same value
- * 
- * @param first first char array to test
- * @param second second char array to test
- * 
- * @return if they are the same
- */
-bool sameString(char* first, char* second);
+	/**
+	 * Tests if two char arrays are the same value
+	 * 
+	 * @param first first char array to test
+	 * @param second second char array to test
+	 * 
+	 * @return if they are the same
+	 */
+	bool sameString(char* first, char* second);
 
-/**
- * Tests if char array is a null pointer
- * 
- * @param value array to test
- * 
- * @return if array isn't null
- */
-bool validCharPointer(char* value);
+	/**
+	 * Tests if char array is a null pointer
+	 * 
+	 * @param value array to test
+	 * 
+	 * @return if array isn't null
+	 */
+	bool validCharPointer(char* value);
 
-/**
- * Gets the size of a char array within 254 including '\0'
- * 
- * @param value array to test
- * 
- * @return size of array or error
- */
-uint8_t charArraySize(char* value);
+	/**
+	 * Gets the size of a char array within 254 including '\0'
+	 * 
+	 * @param value array to test
+	 * 
+	 * @return size of array or error
+	 */
+	uint8_t charArraySize(char* value);
 
 #endif
 
 #ifdef __NVM_DEBUG__
 
-/**
- * Prints the variable type inputted to console
- * 
- * @param varType type of variable
- */
-void printVarType(enum VarType varType);
+	/**
+	 * Prints the variable type inputted to console
+	 * 
+	 * @param varType type of variable
+	 */
+	void printVarType(enum VarType varType);
 
 #endif
 
@@ -285,16 +285,16 @@ bool nvmWriteDouble(nvm_size_t key, double value);
 
 #ifndef NO_CHAR_ARRAY_SUPPORT
 
-/**
- * Writes char array to nvm
- * 
- * @param key key of nvm address
- * @param value value to write to nvm
- * @param maxLength maximum length of string to write
- * 
- * @return if write was valid
- */
-bool nvmWriteCharArray(nvm_size_t key, char* value, uint8_t maxLength);
+	/**
+	 * Writes char array to nvm
+	 * 
+	 * @param key key of nvm address
+	 * @param value value to write to nvm
+	 * @param maxLength maximum length of string to write
+	 * 
+	 * @return if write was valid
+	 */
+	bool nvmWriteCharArray(nvm_size_t key, char* value, uint8_t maxLength);
 
 #endif
 
@@ -425,21 +425,21 @@ bool nvmGetDouble(nvm_size_t key, double *value, bool canDefault);
 
 #ifndef NO_CHAR_ARRAY_SUPPORT
 
-/**
- * Gets char array from nvm
- * 
- * @param key key of nvm address
- * @param value value to write to nvm
- * @param maxLength maximum length of string to get
- * 
- * @return if write was valid
- */
-bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength);
-
-#endif
+	/**
+	 * Gets char array from nvm
+	 * 
+	 * @param key key of nvm address
+	 * @param value value to write to nvm
+	 * @param maxLength maximum length of string to get
+	 * 
+	 * @return if write was valid
+	 */
+	bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength);
 
 #endif
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
