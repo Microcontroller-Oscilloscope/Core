@@ -368,33 +368,13 @@ bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 		return false;
 	}
 
-	char result[maxLength];
-	bool ended = false;
-
 	for (uint8_t i = 0U; i < maxLength; i++) {
 		char letter;
-		bool valid = nvmGet(&hardPrintChar, key+i, &letter, (char)DEFAULT_INT, CAN_DEFAULT);
-		if (!valid) {
+		if (!nvmGet(&hardPrintChar, key+i, &letter, (char)DEFAULT_INT, CAN_DEFAULT)) {
 			return false;
 		}
-		result[i] = letter;
+		value[i] = letter;
 		if (letter == END_OF_CHAR) {
-			i = maxLength;
-			ended = true;
-		}
-	}
-
-	if (!ended) {
-		#ifdef __ERROR_DEBUG__
-			printNVM();
-			hardPrintMemCharArrayln(strTooLongStr);
-		#endif
-		return false;
-	}
-
-	for (uint8_t i = 0U; i < maxLength; i++) {
-		value[i] = result[i];
-		if (result[i] == END_OF_CHAR) {
 			#ifdef __NVM_DEBUG__
 				printNVM();
 				hardPrintMemCharArray(gotStr);
@@ -407,6 +387,10 @@ bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 		}
 	}
 
+	#ifdef __ERROR_DEBUG__
+		printError();
+		hardPrintMemCharArrayln(strTooLongStr);
+	#endif
 	return false;
 }
 
