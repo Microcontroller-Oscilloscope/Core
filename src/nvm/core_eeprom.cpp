@@ -70,7 +70,7 @@ bool nvmStarted() {
 	return true;
 }
 
-enum NVMStartCode nvmInit(nvm_size_t setNVMSize) {
+extern "C" enum NVMStartCode nvmInit(nvm_size_t setNVMSize) {
 	if (nvmBegan) {
 		PRINT_NVM_DEBUG (
 			hardPrintMemCharArrayln(alreadyStartedStr);
@@ -119,7 +119,7 @@ enum NVMStartCode nvmInit(nvm_size_t setNVMSize) {
 	return NVM_OK;
 }
 
-bool nvmMaxSize(nvm_size_t *size) {
+extern "C" bool nvmMaxSize(nvm_size_t *size) {
 	
 	if (nvmBegan) {
 		*size = (nvm_size_t)EEPROM.length();
@@ -133,7 +133,7 @@ bool nvmMaxSize(nvm_size_t *size) {
 	return false;
 }
 
-enum NVMDefaultCode nvmSetDefaults(void) {
+extern "C" enum NVMDefaultCode nvmSetDefaults(void) {
 	// ensures NVM_SIZE isn't too big for microcontroller
 	nvm_size_t nvmMaxValue;
 	if (nvmMaxSize(&nvmMaxValue)) {
@@ -238,7 +238,7 @@ bool nvmWrite(nvm_size_t key, T value) {
 
 #ifndef NO_CHAR_ARRAY_SUPPORT
 
-bool nvmWriteCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
+extern "C" bool nvmWriteCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 
 	if (!nvmStarted()) {
 		return false;
@@ -380,7 +380,7 @@ bool nvmGet(nvm_size_t key, T *value, T defaultValue, bool canDefault) {
 
 #ifndef NO_CHAR_ARRAY_SUPPORT
 
-bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
+extern "C" bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 
 	if (!nvmStarted()) {
 		return false;
@@ -427,7 +427,7 @@ bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 
 #endif
 
-bool nvmWriteBool(nvm_size_t key, bool value) {
+extern "C" bool nvmWriteBool(nvm_size_t key, bool value) {
 	return nvmWrite(
 		#if NVM_DEBUG
 			&hardPrintBool, 
@@ -435,7 +435,7 @@ bool nvmWriteBool(nvm_size_t key, bool value) {
 	key, value);
 }
 
-bool nvmWriteI8(nvm_size_t key, int8_t value) {
+extern "C" bool nvmWriteI8(nvm_size_t key, int8_t value) {
 	return nvmWrite(
 		#if NVM_DEBUG
 			&hardPrintInt8, 
@@ -443,7 +443,7 @@ bool nvmWriteI8(nvm_size_t key, int8_t value) {
 	key, value);
 }
 
-bool nvmWriteUI8(nvm_size_t key, uint8_t value) {
+extern "C" bool nvmWriteUI8(nvm_size_t key, uint8_t value) {
 	return nvmWrite(
 		#if NVM_DEBUG
 			&hardPrintUInt8, 
@@ -451,7 +451,7 @@ bool nvmWriteUI8(nvm_size_t key, uint8_t value) {
 	key, value);
 }
 
-bool nvmWriteI16(nvm_size_t key, int16_t value) {
+extern "C" bool nvmWriteI16(nvm_size_t key, int16_t value) {
 	return nvmWrite(
 		#if NVM_DEBUG
 			&hardPrintInt16, 
@@ -459,7 +459,7 @@ bool nvmWriteI16(nvm_size_t key, int16_t value) {
 	key, value);
 }
 
-bool nvmWriteUI16(nvm_size_t key, uint16_t value) {
+extern "C" bool nvmWriteUI16(nvm_size_t key, uint16_t value) {
 	return nvmWrite(
 		#if NVM_DEBUG
 			&hardPrintUInt16, 
@@ -467,7 +467,7 @@ bool nvmWriteUI16(nvm_size_t key, uint16_t value) {
 	key, value);
 }
 
-bool nvmWriteI32(nvm_size_t key, int32_t value) {
+extern "C" bool nvmWriteI32(nvm_size_t key, int32_t value) {
 	return nvmWrite(
 		#if NVM_DEBUG
 			&hardPrintInt32, 
@@ -475,7 +475,7 @@ bool nvmWriteI32(nvm_size_t key, int32_t value) {
 	key, value);
 }
 
-bool nvmWriteUI32(nvm_size_t key, uint32_t value) {
+extern "C" bool nvmWriteUI32(nvm_size_t key, uint32_t value) {
 	return nvmWrite(
 		#if NVM_DEBUG
 			&hardPrintUInt32, 
@@ -483,7 +483,7 @@ bool nvmWriteUI32(nvm_size_t key, uint32_t value) {
 	key, value);
 }
 
-bool nvmWriteI64(nvm_size_t key, int64_t value) {
+extern "C" bool nvmWriteI64(nvm_size_t key, int64_t value) {
 	return nvmWrite(
 		#if NVM_DEBUG
 			&hardPrintInt64, 
@@ -491,7 +491,7 @@ bool nvmWriteI64(nvm_size_t key, int64_t value) {
 	key, value);
 }
 
-bool nvmWriteUI64(nvm_size_t key, uint64_t value) {
+extern "C" bool nvmWriteUI64(nvm_size_t key, uint64_t value) {
 	return nvmWrite(
 		#if NVM_DEBUG
 			&hardPrintUInt64, 
@@ -499,7 +499,7 @@ bool nvmWriteUI64(nvm_size_t key, uint64_t value) {
 	key, value);
 }
 
-bool nvmWriteFloat(nvm_size_t key, float value) {
+extern "C" bool nvmWriteFloat(nvm_size_t key, float value) {
 	return nvmWrite(
 		#if NVM_DEBUG
 			&hardPrintFloat, 
@@ -507,7 +507,7 @@ bool nvmWriteFloat(nvm_size_t key, float value) {
 	key, value);
 }
 
-bool nvmWriteDouble(nvm_size_t key, double value) {
+extern "C" bool nvmWriteDouble(nvm_size_t key, double value) {
 	return nvmWrite(
 		#if NVM_DEBUG
 			&hardPrintDouble, 
@@ -515,7 +515,7 @@ bool nvmWriteDouble(nvm_size_t key, double value) {
 	key, value);
 }
 
-bool nvmGetBool(nvm_size_t key, bool *value, bool canDefault) {
+extern "C" bool nvmGetBool(nvm_size_t key, bool *value, bool canDefault) {
 	return nvmGet(
 		#if NVM_DEBUG
 			&hardPrintBool, 
@@ -523,7 +523,7 @@ bool nvmGetBool(nvm_size_t key, bool *value, bool canDefault) {
 	key, value, (bool)DEFAULT_BOOL, canDefault);
 }
 
-bool nvmGetI8(nvm_size_t key, int8_t *value, bool canDefault) {
+extern "C" bool nvmGetI8(nvm_size_t key, int8_t *value, bool canDefault) {
 	return nvmGet(
 		#if NVM_DEBUG
 			&hardPrintInt8, 
@@ -531,7 +531,7 @@ bool nvmGetI8(nvm_size_t key, int8_t *value, bool canDefault) {
 	key, value, (int8_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetUI8(nvm_size_t key, uint8_t *value, bool canDefault) {
+extern "C" bool nvmGetUI8(nvm_size_t key, uint8_t *value, bool canDefault) {
 	return nvmGet(
 		#if NVM_DEBUG
 			&hardPrintUInt8, 
@@ -539,7 +539,7 @@ bool nvmGetUI8(nvm_size_t key, uint8_t *value, bool canDefault) {
 	key, value, (uint8_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetI16(nvm_size_t key, int16_t *value, bool canDefault) {
+extern "C" bool nvmGetI16(nvm_size_t key, int16_t *value, bool canDefault) {
 	return nvmGet(
 		#if NVM_DEBUG
 			&hardPrintInt16, 
@@ -547,7 +547,7 @@ bool nvmGetI16(nvm_size_t key, int16_t *value, bool canDefault) {
 	key, value, (int16_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetUI16(nvm_size_t key, uint16_t *value, bool canDefault) {
+extern "C" bool nvmGetUI16(nvm_size_t key, uint16_t *value, bool canDefault) {
 	return nvmGet(
 		#if NVM_DEBUG
 			&hardPrintUInt16, 
@@ -555,7 +555,7 @@ bool nvmGetUI16(nvm_size_t key, uint16_t *value, bool canDefault) {
 	key, value, (uint16_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetI32(nvm_size_t key, int32_t *value, bool canDefault) {
+extern "C" bool nvmGetI32(nvm_size_t key, int32_t *value, bool canDefault) {
 	return nvmGet(
 		#if NVM_DEBUG
 			&hardPrintInt32, 
@@ -563,7 +563,7 @@ bool nvmGetI32(nvm_size_t key, int32_t *value, bool canDefault) {
 	key, value, (int32_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetUI32(nvm_size_t key, uint32_t *value, bool canDefault) {
+extern "C" bool nvmGetUI32(nvm_size_t key, uint32_t *value, bool canDefault) {
 	return nvmGet(
 		#if NVM_DEBUG
 			&hardPrintUInt32, 
@@ -571,7 +571,7 @@ bool nvmGetUI32(nvm_size_t key, uint32_t *value, bool canDefault) {
 	key, value, (uint32_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetI64(nvm_size_t key, int64_t *value, bool canDefault) {
+extern "C" bool nvmGetI64(nvm_size_t key, int64_t *value, bool canDefault) {
 	return nvmGet(
 		#if NVM_DEBUG
 			&hardPrintInt64, 
@@ -579,7 +579,7 @@ bool nvmGetI64(nvm_size_t key, int64_t *value, bool canDefault) {
 	key, value, (int64_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetUI64(nvm_size_t key, uint64_t *value, bool canDefault) {
+extern "C" bool nvmGetUI64(nvm_size_t key, uint64_t *value, bool canDefault) {
 	return nvmGet(
 		#if NVM_DEBUG
 			&hardPrintUInt64, 
@@ -587,7 +587,7 @@ bool nvmGetUI64(nvm_size_t key, uint64_t *value, bool canDefault) {
 	key, value, (uint64_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetFloat(nvm_size_t key, float *value, bool canDefault) {
+extern "C" bool nvmGetFloat(nvm_size_t key, float *value, bool canDefault) {
 	return nvmGet(
 		#if NVM_DEBUG
 			&hardPrintFloat, 
@@ -595,7 +595,7 @@ bool nvmGetFloat(nvm_size_t key, float *value, bool canDefault) {
 	key, value, (float)DEFAULT_FLOAT, canDefault);
 }
 
-bool nvmGetDouble(nvm_size_t key, double *value, bool canDefault) {
+extern "C" bool nvmGetDouble(nvm_size_t key, double *value, bool canDefault) {
 	return nvmGet(
 		#if NVM_DEBUG
 			&hardPrintDouble, 
