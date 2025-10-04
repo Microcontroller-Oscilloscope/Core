@@ -20,7 +20,6 @@
 
 #ifdef NVM_PREF
 
-#include <Arduino.h>
 #include <Preferences.h>
 #include "../osc_err/osc_err.h"
 #include "../status/debug.h"
@@ -197,7 +196,7 @@ bool nvmClear(void) {
 	#endif
 }
 
-NVMDefaultCode nvmSetDefaults(void) {
+enum NVMDefaultCode nvmSetDefaults(void) {
 
 	// ensures NVM_SIZE isn't too big for microcontroller
 	nvm_size_t nvmMaxValue;
@@ -225,14 +224,14 @@ NVMDefaultCode nvmSetDefaults(void) {
 	}
 
 	// restarts nvm for operations
-	NVMStartCode startCode = nvmInit(NVM_SIZE);
+	enum NVMStartCode startCode = nvmInit(NVM_SIZE);
 	if (startCode != NVM_OK) {
 		//printDefaultDebug(F("nvm default failed init"));
 		return NVM_DEFAULT_FAIL_INIT;
 	}
 
 	// writes critical values
-	NVMDefaultCode code = nvmSetCritDefaults(nvmMaxValue);
+	enum NVMDefaultCode code = nvmSetCritDefaults(nvmMaxValue);
 	if (code != NVM_DEFAULT_OK) {
 		return code;
 	}

@@ -55,6 +55,8 @@ enum VarType {
 #define CAN_DEFAULT true
 #define CAN_NOT_DEFAULT false
 
+#include <math.h>
+
 #define DEFAULT_INT 0
 #define DEFAULT_BOOL false
 #define DEFAULT_FLOAT NAN

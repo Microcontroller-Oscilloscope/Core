@@ -20,12 +20,32 @@
 
 #ifdef NVM_EEPROM
 
-#include <Arduino.h>
 #include <EEPROM.h>
 #include "../osc_err/osc_err.h"
 #include "../status/debug.h"
+#include "../comm/hard_serial/hard_serial.h"
+
+typedef int eeprom_key_t; // type to convert keys to
 
 bool nvmBegan = false;
+
+memCharString notStartedStr[] = {"EEPROM not started"};
+memCharString alreadyStartedStr[] = {"EEPROM already started"};
+memCharString defaultSizeStr[] = {"NVM size given was default, not initialized"};
+memCharString failStartStr[] = {"'EEPROM' library failed to start"};
+memCharString startStr[] = {"Started EEPROM for NVM"};
+memCharString couldntWriteStr[] = {"EEPROM couldn't write value '"};
+memCharString toKeyStr[] = {"' to key "};
+memCharString wroteStr[] = {"EEPROM wrote value '"};
+memCharString fromKeyStr[] = {"' from key "};
+memCharString nullPtrStr[] = {"Null pointer was given"};
+memCharString maxLengthTooShortStr[] = {"Max length not long enough"};
+memCharString invalidInputStr[] = {"Invalid input was given"};
+memCharString defaultedStr[] = {"Invalid input was given"};
+memCharString couldntGetStr[] = {"EEPROM couldn't get value '"};
+memCharString gotStr[] = {"EEPROM get value '"};
+memCharString maxLength0Str[] = {"Max length 0 not accepted"};
+memCharString strTooLongStr[] = {"String too long"};
 
 /**
  * Gets if nvm is started and debugs it
@@ -36,26 +56,26 @@ bool nvmStarted() {
 	if (!nvmBegan) {
 		#ifdef __NVM_DEBUG__
 			printNVM();
-			Serial.println(F("EEPROM not started"));
+			hardPrintMemCharArrayln(notStartedStr);
 		#endif
 		return false;
 	}
 	return true;
 }
 
-enum NVMStartCode nvmInit(uint16_t setNVMSize) {
+enum NVMStartCode nvmInit(nvm_size_t setNVMSize) {
 	if (nvmBegan) {
 		#ifdef __NVM_DEBUG__
 			printNVM();
-			Serial.println(F("EEPROM already started"));
+			hardPrintMemCharArrayln(alreadyStartedStr);
 		#endif
 		return NVM_STARTED;
 	}
 
-	if (setNVMSize == (uint16_t)DEFAULT_NVM_SIZE) {
+	if (setNVMSize == (nvm_size_t)DEFAULT_NVM_SIZE) {
 		#ifdef __NVM_DEBUG__
 			printNVM();
-			Serial.println(F("NVM size given was default, not initialized"));
+			hardPrintMemCharArrayln(defaultSizeStr);
 		#endif
 		return NVM_INVALID_SIZE;
 	}
@@ -83,14 +103,14 @@ enum NVMStartCode nvmInit(uint16_t setNVMSize) {
 	if (!nvmBegan) {
 		#ifdef __ERROR_DEBUG__
 			printError();
-			Serial.println(F("'EEPROM' library failed to start"));
+			hardPrintMemCharArrayln(failStartStr);
 		#endif
 		return NVM_FAILED;
 	}
 
 	#ifdef __NVM_DEBUG__
 		printNVM();
-		Serial.println(F("Started EEPROM for NVM"));
+		hardPrintMemCharArrayln(startStr);
 	#endif
 
 	return NVM_OK;
@@ -110,7 +130,7 @@ bool nvmMaxSize(nvm_size_t *size) {
 	return false;
 }
 
-NVMDefaultCode nvmSetDefaults(void) {
+enum NVMDefaultCode nvmSetDefaults(void) {
 	// ensures NVM_SIZE isn't too big for microcontroller
 	nvm_size_t nvmMaxValue;
 	if (nvmMaxSize(&nvmMaxValue)) {
@@ -125,7 +145,7 @@ NVMDefaultCode nvmSetDefaults(void) {
 	}
 
 	// writes critical values
-	NVMDefaultCode code = nvmSetCritDefaults(nvmMaxValue);
+	enum NVMDefaultCode code = nvmSetCritDefaults(nvmMaxValue);
 	if (code != NVM_DEFAULT_OK) {
 		return code;
 	}
@@ -143,9 +163,9 @@ NVMDefaultCode nvmSetDefaults(void) {
  * @return if write was valid
  */
 template <typename T>
-bool nvmWriteCommit(uint16_t key, T value) {
+bool nvmWriteCommit(nvm_size_t key, T value) {
 	// inserts value
-	EEPROM.put((int)key, value);
+	EEPROM.put((eeprom_key_t)key, value);
 	#ifdef __NVM_COMMIT__
 		EEPROM.commit();
 	#endif
@@ -163,7 +183,7 @@ bool nvmWriteCommit(uint16_t key, T value) {
  * @return if write was valid
  */
 template <typename T>
-bool nvmWrite(uint16_t key, T value) {
+bool nvmWrite(nvm_size_t key, T value) {
 
 	if (!nvmStarted()) {
 		return false;
@@ -174,18 +194,18 @@ bool nvmWrite(uint16_t key, T value) {
 	if (!result) {
 		#ifdef __ERROR_DEBUG__
 			printError();
-			Serial.print(F("EEPROM couldn't write value '"));
+			hardPrintMemCharArray(couldntWriteStr);
 			Serial.print(value);
-			Serial.print(F("' to key "));
+			hardPrintMemCharArray(toKeyStr);
 			Serial.println(key);
 		#endif
 	}
 
 	#ifdef __NVM_DEBUG__
 		printNVM();
-		Serial.print(F("EEPROM wrote value '"));
+		hardPrintMemCharArray(wroteStr);
 		Serial.print(value);
-		Serial.print(F("' from key "));
+		hardPrintMemCharArray(fromKeyStr);
 		Serial.println(key);
 	#endif
 
@@ -204,7 +224,7 @@ bool nvmWrite(uint16_t key, T value) {
  * @return if write was valid
  */
 template <typename T>
-bool nvmWrite64(uint16_t key, T value) {
+bool nvmWrite64(nvm_size_t key, T value) {
 	if (!nvmStarted()) {
 		return false;
 	}
@@ -214,18 +234,18 @@ bool nvmWrite64(uint16_t key, T value) {
 	if (!result) {
 		#ifdef __ERROR_DEBUG__
 			printError();
-			Serial.print(F("EEPROM couldn't write value '"));
+			hardPrintMemCharArray(couldntWriteStr);
 			printInt64(value);
-			Serial.print(F("' to key "));
+			hardPrintMemCharArray(toKeyStr);
 			Serial.println(key);
 		#endif
 	}
 
 	#ifdef __NVM_DEBUG__
 		printNVM();
-		Serial.print(F("EEPROM wrote value '"));
+		hardPrintMemCharArray(wroteStr);
 		printInt64(value);
-		Serial.print(F("' from key "));
+		hardPrintMemCharArray(fromKeyStr);
 		Serial.println(key);
 	#endif
 
@@ -236,7 +256,7 @@ bool nvmWrite64(uint16_t key, T value) {
 
 #ifndef NO_CHAR_ARRAY_SUPPORT
 
-bool nvmWriteCharArray(uint16_t key, char* value, uint8_t maxLength) {
+bool nvmWriteCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 
 	if (!nvmStarted()) {
 		return false;
@@ -247,21 +267,21 @@ bool nvmWriteCharArray(uint16_t key, char* value, uint8_t maxLength) {
 	if (valueLen == 0) {
 		#ifdef __NVM_DEBUG__
 			printNVM();
-			Serial.println(F("Null pointer was given"));
+			hardPrintMemCharArrayln(nullPtrStr);
 		#endif
 		return false;
 	}
 	else if (valueLen > maxLength) {
 		#ifdef __NVM_DEBUG__
 			printNVM();
-			Serial.println(F("Max length not long enough"));
+			hardPrintMemCharArrayln(maxLengthTooShortStr);
 		#endif
 		return false;
 	}
 	else if (valueLen == CHAR_LEN_ERROR) {
 		#ifdef __NVM_DEBUG__
 			printNVM();
-			Serial.println(F("Invalid input was given"));
+			hardPrintMemCharArrayln(invalidInputStr);
 		#endif
 		return false;
 	}
@@ -272,9 +292,9 @@ bool nvmWriteCharArray(uint16_t key, char* value, uint8_t maxLength) {
 		if (!result) {
 			#ifdef __ERROR_DEBUG__
 				printError();
-				Serial.print(F("EEPROM couldn't write value '"));
+				hardPrintMemCharArray(couldntWriteStr);
 				Serial.print(value);
-				Serial.print(F("' to key "));
+				hardPrintMemCharArray(toKeyStr);
 				Serial.println(key);
 			#endif
 			return false;
@@ -283,9 +303,9 @@ bool nvmWriteCharArray(uint16_t key, char* value, uint8_t maxLength) {
 
 	#ifdef __NVM_DEBUG__
 		printNVM();
-		Serial.print(F("EEPROM wrote value '"));
+		hardPrintMemCharArray(wroteStr);
 		Serial.print(value);
-		Serial.print(F("' from key "));
+		hardPrintMemCharArray(fromKeyStr);
 		Serial.println(key);
 	#endif
 
@@ -305,13 +325,13 @@ bool nvmWriteCharArray(uint16_t key, char* value, uint8_t maxLength) {
  * @return if get was successful
  */
 template <typename T>
-bool nvmGetVal(uint16_t key, T *value, T defaultValue, bool canDefault) {
-	EEPROM.get((int)key, *value);
+bool nvmGetVal(nvm_size_t key, T *value, T defaultValue, bool canDefault) {
+	EEPROM.get((eeprom_key_t)key, *value);
 
 	if (*value == defaultValue && !canDefault) {
 		#ifdef __NVM_DEBUG__
 			printNVM();
-			Serial.print(F("EEPROM defaulted"));
+			hardPrintMemCharArrayln(defaultedStr);
 			return false;
 		#endif
 	}
@@ -330,7 +350,7 @@ bool nvmGetVal(uint16_t key, T *value, T defaultValue, bool canDefault) {
  * @return if get was successful
  */
 template <typename T>
-bool nvmGet(uint16_t key, T *value, T defaultValue, bool canDefault) {
+bool nvmGet(nvm_size_t key, T *value, T defaultValue, bool canDefault) {
 	if (!nvmStarted()) {
 		return false;
 	}
@@ -340,18 +360,18 @@ bool nvmGet(uint16_t key, T *value, T defaultValue, bool canDefault) {
 	if (!result) {
 		#ifdef __ERROR_DEBUG__
 			printError();
-			Serial.print(F("EEPROM couldn't get value '"));
+			hardPrintMemCharArray(couldntGetStr);
 			Serial.print(*value);
-			Serial.print(F("' from key "));
+			hardPrintMemCharArray(fromKeyStr);
 			Serial.println(key);
 		#endif
 	}
 
 	#ifdef __NVM_DEBUG__
 		printNVM();
-		Serial.print(F("EEPROM get value '"));
+		hardPrintMemCharArray(gotStr);
 		Serial.print(*value);
-		Serial.print(F("' from key "));
+		hardPrintMemCharArray(fromKeyStr);
 		Serial.println(key);
 	#endif
 
@@ -371,7 +391,7 @@ bool nvmGet(uint16_t key, T *value, T defaultValue, bool canDefault) {
  * @return if get was successful
  */
 template <typename T>
-bool nvmGet64(uint16_t key, T *value, T defaultValue, bool canDefault) {
+bool nvmGet64(nvm_size_t key, T *value, T defaultValue, bool canDefault) {
 	if (!nvmStarted()) {
 		return false;
 	}
@@ -381,18 +401,18 @@ bool nvmGet64(uint16_t key, T *value, T defaultValue, bool canDefault) {
 	if (!result) {
 		#ifdef __ERROR_DEBUG__
 			printError();
-			Serial.print(F("EEPROM couldn't get value '"));
+			hardPrintMemCharArray(couldntGetStr);
 			printInt64(*value);
-			Serial.print(F("' to key "));
+			hardPrintMemCharArray(fromKeyStr);
 			Serial.println(key);
 		#endif
 	}
 
 	#ifdef __NVM_DEBUG__
 		printNVM();
-		Serial.print(F("EEPROM get value '"));
+		hardPrintMemCharArray(gotStr);
 		printInt64(*value);
-		Serial.print(F("' from key "));
+		hardPrintMemCharArray(fromKeyStr);
 		Serial.println(key);
 	#endif
 
@@ -403,7 +423,7 @@ bool nvmGet64(uint16_t key, T *value, T defaultValue, bool canDefault) {
 
 #ifndef NO_CHAR_ARRAY_SUPPORT
 
-bool nvmGetCharArray(uint16_t key, char* value, uint8_t maxLength) {
+bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 
 	if (!nvmStarted()) {
 		return false;
@@ -416,7 +436,7 @@ bool nvmGetCharArray(uint16_t key, char* value, uint8_t maxLength) {
 	if (maxLength == 0U) {
 		#ifdef __NVM_DEBUG__
 			printNVM();
-			Serial.println(F("Max length 0 not accepted"));
+			hardPrintMemCharArrayln(maxLength0Str);
 		#endif
 		return false;
 	}
@@ -440,7 +460,7 @@ bool nvmGetCharArray(uint16_t key, char* value, uint8_t maxLength) {
 	if (!ended) {
 		#ifdef __ERROR_DEBUG__
 			printNVM();
-			Serial.println(F("String too long"));
+			hardPrintMemCharArrayln(strTooLongStr);
 		#endif
 		return false;
 	}
@@ -450,9 +470,9 @@ bool nvmGetCharArray(uint16_t key, char* value, uint8_t maxLength) {
 		if (result[i] == END_OF_CHAR) {
 			#ifdef __NVM_DEBUG__
 				printNVM();
-				Serial.print(F("EEPROM get value '"));
+				hardPrintMemCharArray(gotStr);
 				Serial.print(value);
-				Serial.print(F("' from key "));
+				hardPrintMemCharArray(fromKeyStr);
 				Serial.println(key);
 			#endif
 			return true;
@@ -464,35 +484,35 @@ bool nvmGetCharArray(uint16_t key, char* value, uint8_t maxLength) {
 
 #endif
 
-bool nvmWriteBool(uint16_t key, bool value) {
+bool nvmWriteBool(nvm_size_t key, bool value) {
 	return nvmWrite(key, value);
 }
 
-bool nvmWriteI8(uint16_t key, int8_t value) {
+bool nvmWriteI8(nvm_size_t key, int8_t value) {
 	return nvmWrite(key, value);
 }
 
-bool nvmWriteUI8(uint16_t key, uint8_t value) {
+bool nvmWriteUI8(nvm_size_t key, uint8_t value) {
 	return nvmWrite(key, value);
 }
 
-bool nvmWriteI16(uint16_t key, int16_t value) {
+bool nvmWriteI16(nvm_size_t key, int16_t value) {
 	return nvmWrite(key, value);
 }
 
-bool nvmWriteUI16(uint16_t key, uint16_t value) {
+bool nvmWriteUI16(nvm_size_t key, uint16_t value) {
 	return nvmWrite(key, value);
 }
 
-bool nvmWriteI32(uint16_t key, int32_t value) {
+bool nvmWriteI32(nvm_size_t key, int32_t value) {
 	return nvmWrite(key, value);
 }
 
-bool nvmWriteUI32(uint16_t key, uint32_t value) {
+bool nvmWriteUI32(nvm_size_t key, uint32_t value) {
 	return nvmWrite(key, value);
 }
 
-bool nvmWriteI64(uint16_t key, int64_t value) {
+bool nvmWriteI64(nvm_size_t key, int64_t value) {
 	#ifdef INT64_SUPPORT
 	return nvmWrite(key, value);
 	#else
@@ -500,7 +520,7 @@ bool nvmWriteI64(uint16_t key, int64_t value) {
 	#endif
 }
 
-bool nvmWriteUI64(uint16_t key, uint64_t value) {
+bool nvmWriteUI64(nvm_size_t key, uint64_t value) {
 	#ifdef INT64_SUPPORT
 	return nvmWrite(key, value);
 	#else
@@ -508,43 +528,43 @@ bool nvmWriteUI64(uint16_t key, uint64_t value) {
 	#endif
 }
 
-bool nvmWriteFloat(uint16_t key, float value) {
+bool nvmWriteFloat(nvm_size_t key, float value) {
 	return nvmWrite(key, value);
 }
 
-bool nvmWriteDouble(uint16_t key, double value) {
+bool nvmWriteDouble(nvm_size_t key, double value) {
 	return nvmWrite(key, value);
 }
 
-bool nvmGetBool(uint16_t key, bool *value, bool canDefault) {
+bool nvmGetBool(nvm_size_t key, bool *value, bool canDefault) {
 	return nvmGet(key, value, (bool)DEFAULT_BOOL, canDefault);
 }
 
-bool nvmGetI8(uint16_t key, int8_t *value, bool canDefault) {
+bool nvmGetI8(nvm_size_t key, int8_t *value, bool canDefault) {
 	return nvmGet(key, value, (int8_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetUI8(uint16_t key, uint8_t *value, bool canDefault) {
+bool nvmGetUI8(nvm_size_t key, uint8_t *value, bool canDefault) {
 	return nvmGet(key, value, (uint8_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetI16(uint16_t key, int16_t *value, bool canDefault) {
+bool nvmGetI16(nvm_size_t key, int16_t *value, bool canDefault) {
 	return nvmGet(key, value, (int16_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetUI16(uint16_t key, uint16_t *value, bool canDefault) {
+bool nvmGetUI16(nvm_size_t key, uint16_t *value, bool canDefault) {
 	return nvmGet(key, value, (uint16_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetI32(uint16_t key, int32_t *value, bool canDefault) {
+bool nvmGetI32(nvm_size_t key, int32_t *value, bool canDefault) {
 	return nvmGet(key, value, (int32_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetUI32(uint16_t key, uint32_t *value, bool canDefault) {
+bool nvmGetUI32(nvm_size_t key, uint32_t *value, bool canDefault) {
 	return nvmGet(key, value, (uint32_t)DEFAULT_INT, canDefault);
 }
 
-bool nvmGetI64(uint16_t key, int64_t *value, bool canDefault) {
+bool nvmGetI64(nvm_size_t key, int64_t *value, bool canDefault) {
 	#ifdef INT64_SUPPORT
 	return nvmGet(key, value, (int64_t)DEFAULT_INT, canDefault);
 	#else
@@ -552,7 +572,7 @@ bool nvmGetI64(uint16_t key, int64_t *value, bool canDefault) {
 	#endif
 }
 
-bool nvmGetUI64(uint16_t key, uint64_t *value, bool canDefault) {
+bool nvmGetUI64(nvm_size_t key, uint64_t *value, bool canDefault) {
 	#ifdef INT64_SUPPORT
 	return nvmGet(key, value, (uint64_t)DEFAULT_INT, canDefault);
 	#else
@@ -560,11 +580,11 @@ bool nvmGetUI64(uint16_t key, uint64_t *value, bool canDefault) {
 	#endif
 }
 
-bool nvmGetFloat(uint16_t key, float *value, bool canDefault) {
+bool nvmGetFloat(nvm_size_t key, float *value, bool canDefault) {
 	return nvmGet(key, value, (float)DEFAULT_FLOAT, canDefault);
 }
 
-bool nvmGetDouble(uint16_t key, double *value, bool canDefault) {
+bool nvmGetDouble(nvm_size_t key, double *value, bool canDefault) {
 	return nvmGet(key, value, (double)DEFAULT_FLOAT, canDefault);
 }
 
