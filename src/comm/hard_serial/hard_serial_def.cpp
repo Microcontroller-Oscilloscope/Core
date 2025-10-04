@@ -30,6 +30,14 @@ extern "C" void hardPrintCharArray(const char* value) {
 	Serial.print(value);
 }
 
+extern "C" void hardPrintBool(bool value) {
+	Serial.print(value);
+}
+
+extern "C" void hardPrintChar(char value) {
+	Serial.print(value);
+}
+
 extern "C" void hardPrintInt8(int8_t value) {
 	Serial.print(value);
 }
@@ -54,16 +62,32 @@ extern "C" void hardPrintUInt32(uint32_t value) {
 	Serial.print(value);
 }
 
-extern "C" void hardPrintFloat(float value, uint8_t places) {
+extern "C" void hardPrintFloat(float value) {
+	Serial.print(value, DEFAULT_FLOAT_PLACES);
+}
+
+extern "C" void hardPrintFloatPlaces(float value, uint8_t places) {
 	Serial.print(value, places);
 }
 
-extern "C" void hardPrintDouble(double value, uint8_t places) {
+extern "C" void hardPrintDouble(double value) {
+	Serial.print(value, DEFAULT_DOUBLE_PLACES);
+}
+
+extern "C" void hardPrintDoublePlaces(double value, uint8_t places) {
 	Serial.print(value, places);
 }
 
 extern "C" void hardPrintCharArrayln(const char* value) {
 	Serial.println(value);
+}
+
+extern "C" void hardPrintBoolln(bool value) {
+	Serial.println(value);
+}
+
+extern "C" void hardPrintCharln(char value) {
+	Serial.print(value);
 }
 
 extern "C" void hardPrintInt8ln(int8_t value) {
@@ -90,11 +114,19 @@ extern "C" void hardPrintUInt32ln(uint32_t value) {
 	Serial.println(value);
 }
 
-extern "C" void hardPrintFloatln(float value, uint8_t places) {
+extern "C" void hardPrintFloatln(float value) {
+	Serial.println(value, DEFAULT_FLOAT_PLACES);
+}
+
+extern "C" void hardPrintFloatPlacesln(float value, uint8_t places) {
 	Serial.println(value, places);
 }
 
-extern "C" void hardPrintDoubleln(double value, uint8_t places) {
+extern "C" void hardPrintDoubleln(double value) {
+	Serial.println(value, DEFAULT_DOUBLE_PLACES);
+}
+
+extern "C" void hardPrintDoublePlacesln(double value, uint8_t places) {
 	Serial.println(value, places);
 }
 

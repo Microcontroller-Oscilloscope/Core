@@ -26,6 +26,7 @@
 #include "../comm/hard_serial/hard_serial.h"
 
 typedef int eeprom_key_t; // type to convert keys to
+#define PRINT_KEY hardPrintInt32 // function to print key
 
 bool nvmBegan = false;
 
@@ -41,11 +42,12 @@ memCharString fromKeyStr[] = {"' from key "};
 memCharString nullPtrStr[] = {"Null pointer was given"};
 memCharString maxLengthTooShortStr[] = {"Max length not long enough"};
 memCharString invalidInputStr[] = {"Invalid input was given"};
-memCharString defaultedStr[] = {"Invalid input was given"};
+memCharString defaultedStr[] = {"NVM defaulted"};
 memCharString couldntGetStr[] = {"EEPROM couldn't get value '"};
 memCharString gotStr[] = {"EEPROM get value '"};
 memCharString maxLength0Str[] = {"Max length 0 not accepted"};
 memCharString strTooLongStr[] = {"String too long"};
+memCharString failCommitStr[] = {"EEPROM failed commit"};
 
 /**
  * Gets if nvm is started and debugs it
@@ -167,7 +169,14 @@ bool nvmWriteCommit(nvm_size_t key, T value) {
 	// inserts value
 	EEPROM.put((eeprom_key_t)key, value);
 	#ifdef __NVM_COMMIT__
-		EEPROM.commit();
+		if (!EEPROM.commit()) {
+			#ifdef __NVM_DEBUG__
+				printNVM();
+				hardPrintMemCharArrayln(failCommitStr);
+				return false;
+			#endif
+			return false;
+		}
 	#endif
 
 	return true;
@@ -176,83 +185,41 @@ bool nvmWriteCommit(nvm_size_t key, T value) {
 /**
  * Runs whole write process
  * 
+ * @param printPtr pointer to variable print function
  * @param key key of nvm address
  * @param value value to write to nvm
- * @param var variable type for printing
  * 
  * @return if write was valid
  */
-template <typename T>
-bool nvmWrite(nvm_size_t key, T value) {
+template <typename PRINTPTR, typename T>
+bool nvmWrite(PRINTPTR printPtr, nvm_size_t key, T value) {
 
 	if (!nvmStarted()) {
 		return false;
 	}
 
-	bool result = nvmWriteCommit(key, value);
-
-	if (!result) {
+	if (!nvmWriteCommit(key, value)) {
 		#ifdef __ERROR_DEBUG__
 			printError();
 			hardPrintMemCharArray(couldntWriteStr);
-			Serial.print(value);
+			printPtr(value);
 			hardPrintMemCharArray(toKeyStr);
-			Serial.println(key);
+			PRINT_KEY(key);
+			hardPrintln();
 		#endif
-	}
-
-	#ifdef __NVM_DEBUG__
-		printNVM();
-		hardPrintMemCharArray(wroteStr);
-		Serial.print(value);
-		hardPrintMemCharArray(fromKeyStr);
-		Serial.println(key);
-	#endif
-
-	return result;
-}
-
-#ifndef INT64_SUPPORT
-
-/**
- * Runs whole write process for i64 and u64
- * 
- * @param key key of nvm address
- * @param value value to write to nvm
- * @param var variable type for printing
- * 
- * @return if write was valid
- */
-template <typename T>
-bool nvmWrite64(nvm_size_t key, T value) {
-	if (!nvmStarted()) {
 		return false;
 	}
 
-	bool result = nvmWriteCommit(key, value);
-
-	if (!result) {
-		#ifdef __ERROR_DEBUG__
-			printError();
-			hardPrintMemCharArray(couldntWriteStr);
-			printInt64(value);
-			hardPrintMemCharArray(toKeyStr);
-			Serial.println(key);
-		#endif
-	}
-
 	#ifdef __NVM_DEBUG__
 		printNVM();
 		hardPrintMemCharArray(wroteStr);
-		printInt64(value);
+		printPtr(value);
 		hardPrintMemCharArray(fromKeyStr);
-		Serial.println(key);
+		PRINT_KEY(key);
+		hardPrintln();
 	#endif
-
-	return result;
+	return true;
 }
-
-#endif
 
 #ifndef NO_CHAR_ARRAY_SUPPORT
 
@@ -287,15 +254,16 @@ bool nvmWriteCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 	}
 
 	for (uint8_t i = 0U; i < valueLen; i++) {
-		bool result = nvmWrite(key + i, value[i]);
+		bool result = nvmWrite(&hardPrintChar, key + i, value[i]);
 
 		if (!result) {
 			#ifdef __ERROR_DEBUG__
 				printError();
 				hardPrintMemCharArray(couldntWriteStr);
-				Serial.print(value);
+				hardPrintCharArray(value);
 				hardPrintMemCharArray(toKeyStr);
-				Serial.println(key);
+				PRINT_KEY(key);
+				hardPrintln();
 			#endif
 			return false;
 		}
@@ -304,9 +272,10 @@ bool nvmWriteCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 	#ifdef __NVM_DEBUG__
 		printNVM();
 		hardPrintMemCharArray(wroteStr);
-		Serial.print(value);
+		hardPrintCharArray(value);
 		hardPrintMemCharArray(fromKeyStr);
-		Serial.println(key);
+		PRINT_KEY(key);
+		hardPrintln();
 	#endif
 
 	return true;
@@ -342,6 +311,7 @@ bool nvmGetVal(nvm_size_t key, T *value, T defaultValue, bool canDefault) {
 /**
  * Runs whole get process
  * 
+ * @param printPtr pointer to variable print function
  * @param key key of nvm address
  * @param value value to write to nvm
  * @param defaultValue default value from get
@@ -349,77 +319,34 @@ bool nvmGetVal(nvm_size_t key, T *value, T defaultValue, bool canDefault) {
  * 
  * @return if get was successful
  */
-template <typename T>
-bool nvmGet(nvm_size_t key, T *value, T defaultValue, bool canDefault) {
+template <typename PRINTPTR, typename T>
+bool nvmGet(PRINTPTR printPtr, nvm_size_t key, T *value, T defaultValue, bool canDefault) {
 	if (!nvmStarted()) {
 		return false;
 	}
 
-	bool result = nvmGetVal(key, value, defaultValue, canDefault);
-
-	if (!result) {
+	if (!nvmGetVal(key, value, defaultValue, canDefault)) {
 		#ifdef __ERROR_DEBUG__
 			printError();
 			hardPrintMemCharArray(couldntGetStr);
-			Serial.print(*value);
+			printPtr(*value);
 			hardPrintMemCharArray(fromKeyStr);
-			Serial.println(key);
+			PRINT_KEY(key);
+			hardPrintln();
 		#endif
+		return false;
 	}
 
 	#ifdef __NVM_DEBUG__
 		printNVM();
 		hardPrintMemCharArray(gotStr);
-		Serial.print(*value);
+		printPtr(*value);
 		hardPrintMemCharArray(fromKeyStr);
-		Serial.println(key);
+		PRINT_KEY(key);
+		hardPrintln();
 	#endif
-
-	return result;
+	return true;
 }
-
-#ifndef INT64_SUPPORT
-
-/**
- * Runs whole get process for i64 and u64
- * 
- * @param key key of nvm address
- * @param value value to write to nvm
- * @param defaultValue default value from get
- * @param canDefault if recieving value can default
- * 
- * @return if get was successful
- */
-template <typename T>
-bool nvmGet64(nvm_size_t key, T *value, T defaultValue, bool canDefault) {
-	if (!nvmStarted()) {
-		return false;
-	}
-
-	bool result = nvmGetVal(key, value, defaultValue, canDefault);
-
-	if (!result) {
-		#ifdef __ERROR_DEBUG__
-			printError();
-			hardPrintMemCharArray(couldntGetStr);
-			printInt64(*value);
-			hardPrintMemCharArray(fromKeyStr);
-			Serial.println(key);
-		#endif
-	}
-
-	#ifdef __NVM_DEBUG__
-		printNVM();
-		hardPrintMemCharArray(gotStr);
-		printInt64(*value);
-		hardPrintMemCharArray(fromKeyStr);
-		Serial.println(key);
-	#endif
-
-	return result;
-}
-
-#endif
 
 #ifndef NO_CHAR_ARRAY_SUPPORT
 
@@ -446,7 +373,7 @@ bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 
 	for (uint8_t i = 0U; i < maxLength; i++) {
 		char letter;
-		bool valid = nvmGet(key+i, &letter, (char)DEFAULT_INT, CAN_DEFAULT);
+		bool valid = nvmGet(&hardPrintChar, key+i, &letter, (char)DEFAULT_INT, CAN_DEFAULT);
 		if (!valid) {
 			return false;
 		}
@@ -471,9 +398,10 @@ bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 			#ifdef __NVM_DEBUG__
 				printNVM();
 				hardPrintMemCharArray(gotStr);
-				Serial.print(value);
+				hardPrintCharArray(value);
 				hardPrintMemCharArray(fromKeyStr);
-				Serial.println(key);
+				PRINT_KEY(key);
+				hardPrintln();
 			#endif
 			return true;
 		}
@@ -485,107 +413,91 @@ bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 #endif
 
 bool nvmWriteBool(nvm_size_t key, bool value) {
-	return nvmWrite(key, value);
+	return nvmWrite(&hardPrintBool, key, value);
 }
 
 bool nvmWriteI8(nvm_size_t key, int8_t value) {
-	return nvmWrite(key, value);
+	return nvmWrite(&hardPrintInt8, key, value);
 }
 
 bool nvmWriteUI8(nvm_size_t key, uint8_t value) {
-	return nvmWrite(key, value);
+	return nvmWrite(&hardPrintUInt8, key, value);
 }
 
 bool nvmWriteI16(nvm_size_t key, int16_t value) {
-	return nvmWrite(key, value);
+	return nvmWrite(&hardPrintInt16, key, value);
 }
 
 bool nvmWriteUI16(nvm_size_t key, uint16_t value) {
-	return nvmWrite(key, value);
+	return nvmWrite(&hardPrintUInt16, key, value);
 }
 
 bool nvmWriteI32(nvm_size_t key, int32_t value) {
-	return nvmWrite(key, value);
+	return nvmWrite(&hardPrintInt32, key, value);
 }
 
 bool nvmWriteUI32(nvm_size_t key, uint32_t value) {
-	return nvmWrite(key, value);
+	return nvmWrite(&hardPrintUInt32, key, value);
 }
 
 bool nvmWriteI64(nvm_size_t key, int64_t value) {
-	#ifdef INT64_SUPPORT
-	return nvmWrite(key, value);
-	#else
-	return nvmWrite64(key, value);
-	#endif
+	return nvmWrite(&hardPrintInt64, key, value);
 }
 
 bool nvmWriteUI64(nvm_size_t key, uint64_t value) {
-	#ifdef INT64_SUPPORT
-	return nvmWrite(key, value);
-	#else
-	return nvmWrite64(key, value);
-	#endif
+	return nvmWrite(&hardPrintUInt64, key, value);
 }
 
 bool nvmWriteFloat(nvm_size_t key, float value) {
-	return nvmWrite(key, value);
+	return nvmWrite(&hardPrintFloat, key, value);
 }
 
 bool nvmWriteDouble(nvm_size_t key, double value) {
-	return nvmWrite(key, value);
+	return nvmWrite(&hardPrintDouble, key, value);
 }
 
 bool nvmGetBool(nvm_size_t key, bool *value, bool canDefault) {
-	return nvmGet(key, value, (bool)DEFAULT_BOOL, canDefault);
+	return nvmGet(&hardPrintBool, key, value, (bool)DEFAULT_BOOL, canDefault);
 }
 
 bool nvmGetI8(nvm_size_t key, int8_t *value, bool canDefault) {
-	return nvmGet(key, value, (int8_t)DEFAULT_INT, canDefault);
+	return nvmGet(&hardPrintInt8, key, value, (int8_t)DEFAULT_INT, canDefault);
 }
 
 bool nvmGetUI8(nvm_size_t key, uint8_t *value, bool canDefault) {
-	return nvmGet(key, value, (uint8_t)DEFAULT_INT, canDefault);
+	return nvmGet(&hardPrintUInt8, key, value, (uint8_t)DEFAULT_INT, canDefault);
 }
 
 bool nvmGetI16(nvm_size_t key, int16_t *value, bool canDefault) {
-	return nvmGet(key, value, (int16_t)DEFAULT_INT, canDefault);
+	return nvmGet(&hardPrintInt16, key, value, (int16_t)DEFAULT_INT, canDefault);
 }
 
 bool nvmGetUI16(nvm_size_t key, uint16_t *value, bool canDefault) {
-	return nvmGet(key, value, (uint16_t)DEFAULT_INT, canDefault);
+	return nvmGet(&hardPrintUInt16, key, value, (uint16_t)DEFAULT_INT, canDefault);
 }
 
 bool nvmGetI32(nvm_size_t key, int32_t *value, bool canDefault) {
-	return nvmGet(key, value, (int32_t)DEFAULT_INT, canDefault);
+	return nvmGet(&hardPrintInt32, key, value, (int32_t)DEFAULT_INT, canDefault);
 }
 
 bool nvmGetUI32(nvm_size_t key, uint32_t *value, bool canDefault) {
-	return nvmGet(key, value, (uint32_t)DEFAULT_INT, canDefault);
+	return nvmGet(&hardPrintUInt32, key, value, (uint32_t)DEFAULT_INT, canDefault);
 }
 
 bool nvmGetI64(nvm_size_t key, int64_t *value, bool canDefault) {
-	#ifdef INT64_SUPPORT
-	return nvmGet(key, value, (int64_t)DEFAULT_INT, canDefault);
-	#else
-	return nvmGet64(key, value, (int64_t)DEFAULT_INT, canDefault);
-	#endif
+	return nvmGet(&hardPrintInt64, key, value, (int64_t)DEFAULT_INT, canDefault);
 }
 
 bool nvmGetUI64(nvm_size_t key, uint64_t *value, bool canDefault) {
-	#ifdef INT64_SUPPORT
-	return nvmGet(key, value, (uint64_t)DEFAULT_INT, canDefault);
-	#else
-	return nvmGet64(key, value, (uint64_t)DEFAULT_INT, canDefault);
-	#endif
+	return nvmGet(&hardPrintUInt64, key, value, (uint64_t)DEFAULT_INT, canDefault);
 }
 
 bool nvmGetFloat(nvm_size_t key, float *value, bool canDefault) {
-	return nvmGet(key, value, (float)DEFAULT_FLOAT, canDefault);
+	return nvmGet(&hardPrintFloat, key, value, (float)DEFAULT_FLOAT, canDefault);
 }
 
 bool nvmGetDouble(nvm_size_t key, double *value, bool canDefault) {
-	return nvmGet(key, value, (double)DEFAULT_FLOAT, canDefault);
+	return nvmGet(&hardPrintDouble, key, value, (double)DEFAULT_FLOAT, canDefault);
 }
 
 #endif

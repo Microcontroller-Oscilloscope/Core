@@ -48,6 +48,18 @@ void hardPrintMemCharArray(memCharString* value);
  */
 void hardPrintCharArray(const char* value);
 /**
+ * Prints bool to Serial
+ * 
+ * @param value value to print
+ */
+void hardPrintBool(bool value);
+/**
+ * Prints char to Serial
+ * 
+ * @param value value to print
+ */
+void hardPrintChar(char value);
+/**
  * Prints int8 to Serial
  * 
  * @param value value to print
@@ -99,16 +111,28 @@ void hardPrintUInt64(uint64_t value);
  * Prints float to Serial
  * 
  * @param value value to print
- * @param places amount of decimal places to show
  */
-void hardPrintFloat(float value, uint8_t places);
+void hardPrintFloat(float value);
 /**
- * Prints double to Serial
+ * Prints float to Serial with places
  * 
  * @param value value to print
  * @param places amount of decimal places to show
  */
-void hardPrintDouble(double value, uint8_t places);
+void hardPrintFloatPlaces(float value, uint8_t places);
+/**
+ * Prints double to Serial
+ * 
+ * @param value value to print
+ */
+void hardPrintDouble(double value);
+/**
+ * Prints double to Serial with places
+ * 
+ * @param value value to print
+ * @param places amount of decimal places to show
+ */
+void hardPrintDoublePlaces(double value, uint8_t places);
 
 /**
  * Prints memory char array to Serial with termination
@@ -122,6 +146,18 @@ void hardPrintMemCharArrayln(memCharString* value);
  * @param value value to print
  */
 void hardPrintCharArrayln(const char* value);
+/**
+ * Prints bool to Serial with termination
+ * 
+ * @param value value to print
+ */
+void hardPrintBoolln(bool value);
+/**
+ * Prints char to Serial with termination
+ * 
+ * @param value value to print
+ */
+void hardPrintCharln(char value);
 /**
  * Prints int8 to Serial with termination
  * 
@@ -174,16 +210,28 @@ void hardPrintUInt64ln(uint64_t value);
  * Prints float to Serial with termination
  * 
  * @param value value to print
- * @param places amount of decimal places to show
  */
-void hardPrintFloatln(float value, uint8_t places);
+void hardPrintFloatln(float value);
 /**
- * Prints double to Serial with termination
+ * Prints float to Serial with termination with places
  * 
  * @param value value to print
  * @param places amount of decimal places to show
  */
-void hardPrintDoubleln(double value, uint8_t places);
+void hardPrintFloatPlacesln(float value, uint8_t places);
+/**
+ * Prints double to Serial with termination
+ * 
+ * @param value value to print
+ */
+void hardPrintDoubleln(double value);
+/**
+ * Prints double to Serial with termination with places
+ * 
+ * @param value value to print
+ * @param places amount of decimal places to show
+ */
+void hardPrintDoublePlacesln(double value, uint8_t places);
 /**
  * Prints termination to Serial
  * 
