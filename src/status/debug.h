@@ -34,27 +34,62 @@ extern "C" {
 void printTag(memCharString* tag);
 
 #ifdef __ERROR_DEBUG__
-/**
- * Prints error tag '[Err]:'
- * 
- * @return void
- */
-void printError(void);
+	/**
+	 * Prints error tag '[Err]:'
+	 * 
+	 * @return void
+	 */
+	void printError(void);
+
+	/**
+	 * Prints error tag '[Err]:' and custom statements
+	 * 
+	 * @param params functions to use after printing tag
+	 */
+	#define PRINT_ERROR_DEBUG(params) printError(); params;
+#else
+	/**
+	 * Prints error tag '[Err]:' and custom statements
+	 * 
+	 * @param params functions to use after printing tag
+	 */
+	#define PRINT_ERROR_DEBUG(params)
 #endif
 
 #ifdef __NVM_DEBUG__
-/**
- * Prints nvm tag '[NVM]:'
- * 
- * @return void
- */
-void printNVM(void);
+	/**
+	 * Prints nvm tag '[NVM]:'
+	 * 
+	 * @return void
+	 */
+	void printNVM(void);
+
+	/**
+	 * Prints nvm debug tag '[NVM]:' and custom statements
+	 * 
+	 * @param params functions to use after printing tag
+	 */
+	#define PRINT_NVM_DEBUG(params) printNVM(); params;
+#else
+	/**
+	 * Prints nvm debug tag '[NVM]:' and custom statements
+	 * 
+	 * @param params functions to use after printing tag
+	 */
+	#define PRINT_NVM_DEBUG(params)
 #endif
 
 /**
  * Prints critical error tag '[!!!]:'
  */
 void printCritError(void);
+
+/**
+ * Prints critical error tag '[!!!]:' and custom statements
+ * 
+ * @param params functions to use after printing tag
+ */
+#define PRINT_CRIT_ERROR(params) printCritError(); params;
 
 #ifdef __cplusplus
 }

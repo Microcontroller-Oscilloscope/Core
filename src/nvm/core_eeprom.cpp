@@ -56,10 +56,9 @@ memCharString failCommitStr[] = {"EEPROM failed commit"};
  */
 bool nvmStarted() {
 	if (!nvmBegan) {
-		#ifdef __NVM_DEBUG__
-			printNVM();
+		PRINT_NVM_DEBUG (
 			hardPrintMemCharArrayln(notStartedStr);
-		#endif
+		)
 		return false;
 	}
 	return true;
@@ -67,18 +66,16 @@ bool nvmStarted() {
 
 enum NVMStartCode nvmInit(nvm_size_t setNVMSize) {
 	if (nvmBegan) {
-		#ifdef __NVM_DEBUG__
-			printNVM();
+		PRINT_NVM_DEBUG (
 			hardPrintMemCharArrayln(alreadyStartedStr);
-		#endif
+		)
 		return NVM_STARTED;
 	}
 
 	if (setNVMSize == (nvm_size_t)DEFAULT_NVM_SIZE) {
-		#ifdef __NVM_DEBUG__
-			printNVM();
+		PRINT_NVM_DEBUG (
 			hardPrintMemCharArrayln(defaultSizeStr);
-		#endif
+		)
 		return NVM_INVALID_SIZE;
 	}
 
@@ -103,17 +100,15 @@ enum NVMStartCode nvmInit(nvm_size_t setNVMSize) {
 	#endif
 
 	if (!nvmBegan) {
-		#ifdef __ERROR_DEBUG__
-			printError();
+		PRINT_ERROR_DEBUG (
 			hardPrintMemCharArrayln(failStartStr);
-		#endif
+		)
 		return NVM_FAILED;
 	}
 
-	#ifdef __NVM_DEBUG__
-		printNVM();
+	PRINT_NVM_DEBUG (
 		hardPrintMemCharArrayln(startStr);
-	#endif
+	)
 
 	return NVM_OK;
 }
@@ -170,11 +165,10 @@ bool nvmWriteCommit(nvm_size_t key, T value) {
 	EEPROM.put((eeprom_key_t)key, value);
 	#ifdef __NVM_COMMIT__
 		if (!EEPROM.commit()) {
-			#ifdef __NVM_DEBUG__
-				printNVM();
+			PRINT_NVM_DEBUG (
 				hardPrintMemCharArrayln(failCommitStr);
 				return false;
-			#endif
+			)
 			return false;
 		}
 	#endif
@@ -199,25 +193,23 @@ bool nvmWrite(PRINTPTR printPtr, nvm_size_t key, T value) {
 	}
 
 	if (!nvmWriteCommit(key, value)) {
-		#ifdef __ERROR_DEBUG__
-			printError();
+		PRINT_NVM_DEBUG (
 			hardPrintMemCharArray(couldntWriteStr);
 			printPtr(value);
 			hardPrintMemCharArray(toKeyStr);
 			PRINT_KEY(key);
 			hardPrintln();
-		#endif
+		)
 		return false;
 	}
 
-	#ifdef __NVM_DEBUG__
-		printNVM();
+	PRINT_NVM_DEBUG (
 		hardPrintMemCharArray(wroteStr);
 		printPtr(value);
 		hardPrintMemCharArray(fromKeyStr);
 		PRINT_KEY(key);
 		hardPrintln();
-	#endif
+	)
 	return true;
 }
 
@@ -232,24 +224,21 @@ bool nvmWriteCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 	uint8_t valueLen = charArraySize(value);
 
 	if (valueLen == 0) {
-		#ifdef __NVM_DEBUG__
-			printNVM();
+		PRINT_NVM_DEBUG (
 			hardPrintMemCharArrayln(nullPtrStr);
-		#endif
+		)
 		return false;
 	}
 	else if (valueLen > maxLength) {
-		#ifdef __NVM_DEBUG__
-			printNVM();
+		PRINT_NVM_DEBUG (
 			hardPrintMemCharArrayln(maxLengthTooShortStr);
-		#endif
+		)
 		return false;
 	}
 	else if (valueLen == CHAR_LEN_ERROR) {
-		#ifdef __NVM_DEBUG__
-			printNVM();
+		PRINT_NVM_DEBUG (
 			hardPrintMemCharArrayln(invalidInputStr);
-		#endif
+		)
 		return false;
 	}
 
@@ -257,26 +246,24 @@ bool nvmWriteCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 		bool result = nvmWrite(&hardPrintChar, key + i, value[i]);
 
 		if (!result) {
-			#ifdef __ERROR_DEBUG__
-				printError();
+			PRINT_NVM_DEBUG (
 				hardPrintMemCharArray(couldntWriteStr);
 				hardPrintCharArray(value);
 				hardPrintMemCharArray(toKeyStr);
 				PRINT_KEY(key);
 				hardPrintln();
-			#endif
+			)
 			return false;
 		}
 	}
 
-	#ifdef __NVM_DEBUG__
-		printNVM();
+	PRINT_NVM_DEBUG (
 		hardPrintMemCharArray(wroteStr);
 		hardPrintCharArray(value);
 		hardPrintMemCharArray(fromKeyStr);
 		PRINT_KEY(key);
 		hardPrintln();
-	#endif
+	)
 
 	return true;
 }
@@ -298,13 +285,11 @@ bool nvmGetVal(nvm_size_t key, T *value, T defaultValue, bool canDefault) {
 	EEPROM.get((eeprom_key_t)key, *value);
 
 	if (*value == defaultValue && !canDefault) {
-		#ifdef __NVM_DEBUG__
-			printNVM();
+		PRINT_NVM_DEBUG (
 			hardPrintMemCharArrayln(defaultedStr);
-			return false;
-		#endif
+		)
+		return false;
 	}
-
 	return true;
 }
 
@@ -326,25 +311,23 @@ bool nvmGet(PRINTPTR printPtr, nvm_size_t key, T *value, T defaultValue, bool ca
 	}
 
 	if (!nvmGetVal(key, value, defaultValue, canDefault)) {
-		#ifdef __ERROR_DEBUG__
-			printError();
+		PRINT_NVM_DEBUG (
 			hardPrintMemCharArray(couldntGetStr);
 			printPtr(*value);
 			hardPrintMemCharArray(fromKeyStr);
 			PRINT_KEY(key);
 			hardPrintln();
-		#endif
+		)
 		return false;
 	}
 
-	#ifdef __NVM_DEBUG__
-		printNVM();
+	PRINT_NVM_DEBUG (
 		hardPrintMemCharArray(gotStr);
 		printPtr(*value);
 		hardPrintMemCharArray(fromKeyStr);
 		PRINT_KEY(key);
 		hardPrintln();
-	#endif
+	)
 	return true;
 }
 
@@ -361,10 +344,9 @@ bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 	}
 
 	if (maxLength == 0U) {
-		#ifdef __NVM_DEBUG__
-			printNVM();
+		PRINT_NVM_DEBUG (
 			hardPrintMemCharArrayln(maxLength0Str);
-		#endif
+		)
 		return false;
 	}
 
@@ -375,22 +357,20 @@ bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 		}
 		value[i] = letter;
 		if (letter == END_OF_CHAR) {
-			#ifdef __NVM_DEBUG__
-				printNVM();
+			PRINT_NVM_DEBUG (
 				hardPrintMemCharArray(gotStr);
 				hardPrintCharArray(value);
 				hardPrintMemCharArray(fromKeyStr);
 				PRINT_KEY(key);
 				hardPrintln();
-			#endif
+			)
 			return true;
 		}
 	}
 
-	#ifdef __ERROR_DEBUG__
-		printError();
+	PRINT_NVM_DEBUG (
 		hardPrintMemCharArrayln(strTooLongStr);
-	#endif
+	)
 	return false;
 }
 
