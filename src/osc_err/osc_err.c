@@ -18,16 +18,16 @@
 
 #include "osc_err.h"
 
-#include <Arduino.h>
 #include "../status/debug.h"
 #include "../comm/hard_serial/hard_serial.h"
+#include "../board_common.h"
 
 void errorLoop(enum OSC_ERR err) {
 	#ifndef __TEST_CASES__
 		while(true) {
 			printCritError();
 			hardPrintUInt16ln(err);
-			delay(OSC_ERR_DELAY);
+			hardDelayMS(OSC_ERR_DELAY);
 		}
 	#endif
 }
