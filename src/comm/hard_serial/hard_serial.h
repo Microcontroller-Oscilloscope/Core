@@ -243,4 +243,8 @@ void hardPrintln(void);
 }
 #endif
 
+#ifdef SERIAL_PRINTF
+	#include "hard_serial_printf.h"
+#endif
+
 #endif

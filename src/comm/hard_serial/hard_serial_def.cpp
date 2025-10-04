@@ -18,6 +18,8 @@
 
 #include "hard_serial.h"
 
+#ifndef SERIAL_PRINTF
+
 #ifdef PLATFORMIO
 #include <Arduino.h>
 #endif
@@ -259,5 +261,7 @@ extern "C" void hardPrintInt64ln(int64_t value) {
 extern "C" void hardPrintUInt64ln(uint64_t value) {
 	Serial.println(value);
 }
+
+#endif
 
 #endif
