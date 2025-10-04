@@ -23,57 +23,79 @@
 #include <Preferences.h>
 #include "../osc_err/osc_err.h"
 #include "../status/debug.h"
+#include "../comm/hard_serial/hard_serial.h"
 
 #define GOT_VALUE true
 #define WROTE_VALUE false
 
 #define CHAR_KEY_SIZE NVM_MAX_SIZE_BYTES + 1U
+#define OSC_NAME_SPACE "Osc"
 
 bool nvmBegan = false;
 Preferences preferences;
 
+memCharString prefStr[] = {"Pref "};
+memCharString gotStr[] = {"got, "};
+memCharString wroteStr[] = {"wrote, "};
+memCharString colonStr[] = {": '"};
+memCharString keyStr[] = {"', key: "};
+memCharString failWriteStr[] = {"pref failed write "};
+memCharString nvmStartedStr[] = {"Pref already started"};
+memCharString nvmBadSizeStr[] = {"NVM size given was default, not initialized"};
+memCharString nvmFailStartStr[] = {"Preferences lib failed to start"};
+memCharString nvmStartStr[] = {"Started Preferences for NVM"};
+memCharString nvmEreaseFailStr[] = {"Pref failed to erease nvs"};
+memCharString nvmInitFailStr[] = {"Pref failed to init nvs"};
+memCharString nvmNoClearMethodStr[] = {"No Pref clear method implemented"};
+memCharString nvmNotStartedStr[] = {"Pref not started"};
+memCharString nullPointerStr[] = {"Null pointer was given"};
+memCharString maxLengthTooShortStr[] = {"Max length not long enough"};
+memCharString invalidInputStr[] = {"Invalid input was given"};
+memCharString noDefaultStr[] = {"Can't get default value"};
+memCharString maxLength0Str[] = {"Max length 0 not accepted"};
+memCharString errorGetValueStr[] = {"Error getting value"};
+
 #ifdef __NVM_DEBUG__
 
-/**
- * Prints value retrieved from operations
- * 
- * @param varType variable type to print
- * @param key key linked to value
- * @param value value retrieved
- * @param gets if getting or setting
- */
-template <typename T> void printGotValue(
-	enum VarType varType, const nvm_size_t key, T value, bool gets
-) {
-	printNVM();
-	Serial.print(F("Pref "));
+	/**
+	 * Prints value retrieved from operations
+	 * 
+	 * @param varType variable type to print
+	 * @param key key linked to value
+	 * @param value value retrieved
+	 * @param gets if getting or setting
+	 */
+	template <typename T> void printGotValue(
+		enum VarType varType, const nvm_size_t key, T value, bool gets
+	) {
+		printNVM();
+		hardPrintMemCharArray(prefStr);
 
-	if (gets) {
-		Serial.print(F("got, "));
+		if (gets) {
+			hardPrintMemCharArray(gotStr);
+		}
+		else {
+			hardPrintMemCharArray(wroteStr);
+		}
+
+		printVarType(varType);
+		hardPrintMemCharArray(colonStr);
+		Serial.print(value);
+		hardPrintMemCharArray(keyStr);
+		Serial.println(key);
 	}
-	else {
-		Serial.print(F("wrote, "));
+
+	/**
+	 * Prints that pref failed write
+	 * 
+	 * @param varType variable type attempted
+	 */
+	void nvmWriteFailed(enum VarType varType) {
+		printNVM();
+		hardPrintMemCharArray(failWriteStr);
+		printVarType(varType);
+		hardPrintln();
 	}
-
-	printVarType(varType);
-	Serial.print(F(": '"));
-	Serial.print(value);
-	Serial.print(F("', key: '"));
-	Serial.print(key);
-	Serial.println(F("'"));
-}
-
-/**
- * Prints that pref failed write
- * 
- * @param varType variable type attempted
- */
-void nvmWriteFailed(enum VarType varType) {
-	printNVM();
-	Serial.print(F("pref failed write "));
-	printVarType(varType);
-	Serial.println(F(""));
-}
 
 #endif
 
@@ -81,7 +103,7 @@ enum NVMStartCode nvmInit(nvm_size_t setNVMSize) {
 	if (nvmBegan) {
 		#ifdef __NVM_DEBUG__
 			printNVM();
-			Serial.println(F("Pref already started"));
+			hardPrintMemCharArrayln(nvmStartedStr);
 		#endif
 		return NVM_STARTED;
 	}
@@ -89,16 +111,16 @@ enum NVMStartCode nvmInit(nvm_size_t setNVMSize) {
 	if (setNVMSize == (nvm_size_t)DEFAULT_NVM_SIZE) {
 		#ifdef __NVM_DEBUG__
 			printNVM();
-			Serial.println(F("NVM size given was default, not initialized"));
+			hardPrintMemCharArrayln(nvmBadSizeStr);
 		#endif
 		return NVM_INVALID_SIZE;
 	}
 
 	#ifdef __NVM_BEGIN__
 		#ifdef __NVM_BEGIN_RETURN__
-			nvmBegan = preferences.begin("Osc", false);
+			nvmBegan = preferences.begin(OSC_NAME_SPACE, false);
 		#else
-			preferences.begin("Osc", false);
+			preferences.begin(OSC_NAME_SPACE, false);
 			nvmBegan = true;
 		#endif
 	#else
@@ -108,14 +130,14 @@ enum NVMStartCode nvmInit(nvm_size_t setNVMSize) {
 	if (!nvmBegan) {
 		#ifdef __ERROR_DEBUG__
 			printError();
-			Serial.println(F("Preferences lib failed to start"));
+			hardPrintMemCharArrayln(nvmFailStartStr);
 		#endif
 		return NVM_FAILED;
 	}
 
 	#ifdef __NVM_DEBUG__
 		printNVM();
-		Serial.println(F("Started Preferences for NVM"));
+		hardPrintMemCharArrayln(nvmStartStr);
 	#endif
 
 	return NVM_OK;
@@ -173,7 +195,7 @@ bool nvmClear(void) {
 		if (result) {
 			#ifdef __NVM_DEBUG__
 				printNVM();
-				Serial.println(F("Pref failed to erease nvs"));
+				hardPrintMemCharArrayln(nvmEreaseFailStr);
 			#endif
 			return false;
 		}
@@ -182,7 +204,7 @@ bool nvmClear(void) {
 		if (result) {
 			#ifdef __NVM_DEBUG__
 				printNVM();
-				Serial.println(F("Pref failed to init nvs"));
+				hardPrintMemCharArrayln(nvmInitFailStr);
 			#endif
 			return false;
 		}
@@ -190,7 +212,7 @@ bool nvmClear(void) {
 	#else
 		#ifdef __ERROR_DEBUG__
 			printError();
-			Serial.println(F("No Pref clear method implemented"));
+			hardPrintMemCharArrayln(nvmNoClearMethodStr);
 		#endif
 		return false;
 	#endif
@@ -249,7 +271,7 @@ bool nvmStarted(void) {
 	if (!nvmBegan) {
 		#ifdef __ERROR_DEBUG__
 			printError();
-			Serial.println(F("Pref not started"));
+			hardPrintMemCharArray(nvmNotStartedStr);
 		#endif
 		return false;
 	}
@@ -315,21 +337,21 @@ bool nvmWriteCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 	if (valueLen == 0) {
 		#ifdef __NVM_DEBUG__
 			printNVM();
-			Serial.println(F("Null pointer was given"));
+			hardPrintMemCharArrayln(nullPointerStr);
 		#endif
 		return false;
 	}
 	else if (valueLen > maxLength) {
 		#ifdef __NVM_DEBUG__
 			printNVM();
-			Serial.println(F("Max length not long enough"));
+			hardPrintMemCharArrayln(maxLengthTooShortStr);
 		#endif
 		return false;
 	}
 	else if (valueLen == CHAR_LEN_ERROR) {
 		#ifdef __NVM_DEBUG__
 			printNVM();
-			Serial.println(F("Invalid input was given"));
+			hardPrintMemCharArrayln(invalidInputStr);
 		#endif
 		return false;
 	}
@@ -378,7 +400,7 @@ bool nvmGet(PTR prefptr, const nvm_size_t key, VAL *value, VAL defValue, VarType
 	if (!canDefault && *value == defValue) {
 		#ifdef __NVM_DEBUG__
 			printNVM();
-			Serial.println(F("Can't get default value"));
+			hardPrintMemCharArrayln(noDefaultStr);
 		#endif
 		return false;
 	}
@@ -403,7 +425,7 @@ bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 	if (maxLength == 0U) {
 		#ifdef __NVM_DEBUG__
 			printNVM();
-			Serial.println(F("Max length 0 not accepted"));
+			hardPrintMemCharArrayln(maxLength0Str);
 		#endif
 		return false;
 	}
@@ -417,7 +439,7 @@ bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 	if (valueLen != charSize) {
 		#ifdef __NVM_DEBUG__
 			printNVM();
-			Serial.println(F("Error getting value"));
+			hardPrintMemCharArrayln(errorGetValueStr);
 		#endif
 		return false;
 	}

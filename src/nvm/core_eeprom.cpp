@@ -30,24 +30,28 @@ typedef int eeprom_key_t; // type to convert keys to
 
 bool nvmBegan = false;
 
-memCharString notStartedStr[] = {"EEPROM not started"};
-memCharString alreadyStartedStr[] = {"EEPROM already started"};
-memCharString defaultSizeStr[] = {"NVM size given was default, not initialized"};
-memCharString failStartStr[] = {"'EEPROM' library failed to start"};
-memCharString startStr[] = {"Started EEPROM for NVM"};
-memCharString couldntWriteStr[] = {"EEPROM couldn't write value '"};
-memCharString toKeyStr[] = {"' to key "};
-memCharString wroteStr[] = {"EEPROM wrote value '"};
-memCharString fromKeyStr[] = {"' from key "};
-memCharString nullPtrStr[] = {"Null pointer was given"};
-memCharString maxLengthTooShortStr[] = {"Max length not long enough"};
-memCharString invalidInputStr[] = {"Invalid input was given"};
-memCharString defaultedStr[] = {"NVM defaulted"};
-memCharString couldntGetStr[] = {"EEPROM couldn't get value '"};
-memCharString gotStr[] = {"EEPROM get value '"};
-memCharString maxLength0Str[] = {"Max length 0 not accepted"};
-memCharString strTooLongStr[] = {"String too long"};
-memCharString failCommitStr[] = {"EEPROM failed commit"};
+#if defined(__NVM_DEBUG__) || defined(__ERROR_DEBUG__)
+
+	memCharString notStartedStr[] = {"EEPROM not started"};
+	memCharString alreadyStartedStr[] = {"EEPROM already started"};
+	memCharString defaultSizeStr[] = {"NVM size given was default, not initialized"};
+	memCharString failStartStr[] = {"'EEPROM' library failed to start"};
+	memCharString startStr[] = {"Started EEPROM for NVM"};
+	memCharString couldntWriteStr[] = {"EEPROM couldn't write value '"};
+	memCharString toKeyStr[] = {"' to key "};
+	memCharString wroteStr[] = {"EEPROM wrote value '"};
+	memCharString fromKeyStr[] = {"' from key "};
+	memCharString nullPtrStr[] = {"Null pointer was given"};
+	memCharString maxLengthTooShortStr[] = {"Max length not long enough"};
+	memCharString invalidInputStr[] = {"Invalid input was given"};
+	memCharString defaultedStr[] = {"NVM defaulted"};
+	memCharString couldntGetStr[] = {"EEPROM couldn't get value '"};
+	memCharString gotStr[] = {"EEPROM get value '"};
+	memCharString maxLength0Str[] = {"Max length 0 not accepted"};
+	memCharString strTooLongStr[] = {"String too long"};
+	memCharString failCommitStr[] = {"EEPROM failed commit"};
+
+#endif
 
 /**
  * Gets if nvm is started and debugs it
