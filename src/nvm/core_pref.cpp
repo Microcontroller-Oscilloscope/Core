@@ -30,43 +30,48 @@
 
 #define CHAR_KEY_SIZE NVM_MAX_SIZE_BYTES + 1U
 #define OSC_NAME_SPACE "Osc"
+#define PRINT_KEY hardPrintUInt16 // function to print key
 
 bool nvmBegan = false;
 Preferences preferences;
 
-memCharString prefStr[] = {"Pref "};
-memCharString gotStr[] = {"got, "};
-memCharString wroteStr[] = {"wrote, "};
-memCharString colonStr[] = {": '"};
-memCharString keyStr[] = {"', key: "};
-memCharString failWriteStr[] = {"pref failed write "};
-memCharString nvmStartedStr[] = {"Pref already started"};
-memCharString nvmBadSizeStr[] = {"NVM size given was default, not initialized"};
-memCharString nvmFailStartStr[] = {"Preferences lib failed to start"};
-memCharString nvmStartStr[] = {"Started Preferences for NVM"};
-memCharString nvmEreaseFailStr[] = {"Pref failed to erease nvs"};
-memCharString nvmInitFailStr[] = {"Pref failed to init nvs"};
-memCharString nvmNoClearMethodStr[] = {"No Pref clear method implemented"};
-memCharString nvmNotStartedStr[] = {"Pref not started"};
-memCharString nullPointerStr[] = {"Null pointer was given"};
-memCharString maxLengthTooShortStr[] = {"Max length not long enough"};
-memCharString invalidInputStr[] = {"Invalid input was given"};
-memCharString noDefaultStr[] = {"Can't get default value"};
-memCharString maxLength0Str[] = {"Max length 0 not accepted"};
-memCharString errorGetValueStr[] = {"Error getting value"};
+#if defined(__NVM_DEBUG__) || defined(__ERROR_DEBUG__)
+
+	memCharString prefStr[] = {"Pref "};
+	memCharString gotStr[] = {"got, "};
+	memCharString wroteStr[] = {"wrote, "};
+	memCharString colonStr[] = {": '"};
+	memCharString keyStr[] = {"', key: "};
+	memCharString failWriteStr[] = {"pref failed write "};
+	memCharString nvmStartedStr[] = {"Pref already started"};
+	memCharString nvmBadSizeStr[] = {"NVM size given was default, not initialized"};
+	memCharString nvmFailStartStr[] = {"Preferences lib failed to start"};
+	memCharString nvmStartStr[] = {"Started Preferences for NVM"};
+	memCharString nvmEreaseFailStr[] = {"Pref failed to erease nvs"};
+	memCharString nvmInitFailStr[] = {"Pref failed to init nvs"};
+	memCharString nvmNoClearMethodStr[] = {"No Pref clear method implemented"};
+	memCharString nvmNotStartedStr[] = {"Pref not started"};
+	memCharString nullPointerStr[] = {"Null pointer was given"};
+	memCharString maxLengthTooShortStr[] = {"Max length not long enough"};
+	memCharString invalidInputStr[] = {"Invalid input was given"};
+	memCharString noDefaultStr[] = {"Can't get default value"};
+	memCharString maxLength0Str[] = {"Max length 0 not accepted"};
+	memCharString errorGetValueStr[] = {"Error getting value"};
+
+#endif
 
 #ifdef __NVM_DEBUG__
 
 	/**
 	 * Prints value retrieved from operations
 	 * 
-	 * @param varType variable type to print
+	 * @param printPtr pointer to variable print function
 	 * @param key key linked to value
 	 * @param value value retrieved
 	 * @param gets if getting or setting
 	 */
-	template <typename T> void printGotValue(
-		enum VarType varType, const nvm_size_t key, T value, bool gets
+	template <typename PRINTPTR, typename T> void printGotValue(
+		PRINTPTR printPtr, const nvm_size_t key, T value, bool gets
 	) {
 		printNVM();
 		hardPrintMemCharArray(prefStr);
@@ -78,11 +83,11 @@ memCharString errorGetValueStr[] = {"Error getting value"};
 			hardPrintMemCharArray(wroteStr);
 		}
 
-		printVarType(varType);
 		hardPrintMemCharArray(colonStr);
-		Serial.print(value);
+		printPtr(value);
 		hardPrintMemCharArray(keyStr);
-		Serial.println(key);
+		PRINT_KEY(key);
+		hardPrintln();
 	}
 
 	/**
@@ -235,20 +240,17 @@ enum NVMDefaultCode nvmSetDefaults(void) {
 
 	// ensures clear works
 	if (!nvmClear()) {
-		//printDefaultDebug(F("nvm default failed clear"));
 		return NVM_DEFAULT_FAIL_CLEAR;
 	}
 
 	// stops nvm
 	if (!nvmStop()) {
-		//printDefaultDebug(F("nvm default failed stop"));
 		return NVM_DEFAULT_FAIL_STOP;
 	}
 
 	// restarts nvm for operations
 	enum NVMStartCode startCode = nvmInit(NVM_SIZE);
 	if (startCode != NVM_OK) {
-		//printDefaultDebug(F("nvm default failed init"));
 		return NVM_DEFAULT_FAIL_INIT;
 	}
 
@@ -295,6 +297,7 @@ void keyToChar(nvm_size_t key, char* keyStr) {
 /**
  * Writes value to Preferences
  * 
+ * @param printPtr pointer to variable print function
  * @param prefptr pointer to Preferences put function
  * @param key key of value to write
  * @param value value to write to key
@@ -302,8 +305,8 @@ void keyToChar(nvm_size_t key, char* keyStr) {
  * 
  * @return if write was successful
  */
-template <typename PTR, typename VAL>
-bool nvmWrite(PTR prefptr, const nvm_size_t key, VAL value, VarType var) {
+template <typename PRINTPTR, typename PTR, typename VAL>
+bool nvmWrite(PRINTPTR printPtr, PTR prefptr, const nvm_size_t key, VAL value, VarType var) {
 
 	if (!nvmStarted()) {
 		return false;
@@ -319,7 +322,7 @@ bool nvmWrite(PTR prefptr, const nvm_size_t key, VAL value, VarType var) {
 			nvmWriteFailed(var);
 		}
 		else {
-			printGotValue(var, key, value, WROTE_VALUE);
+			printGotValue(printPtr, key, value, WROTE_VALUE);
 		}
 	#endif
 
@@ -366,7 +369,7 @@ bool nvmWriteCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 		nvmWriteFailed(VAR_CHAR_ARRAY);
 	}
 	else {
-		printGotValue(VAR_CHAR_ARRAY, key, value, WROTE_VALUE);
+		printGotValue(&hardPrintCharArray, key, value, WROTE_VALUE);
 	}
 	#endif
 
@@ -376,6 +379,7 @@ bool nvmWriteCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 /**
  * Gets value from Preferences
  * 
+ * @param printPtr pointer to variable print function
  * @param prefptr pointer to Preferences get function
  * @param key key of value to read
  * @param value value to read from key
@@ -385,8 +389,8 @@ bool nvmWriteCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
  * 
  * @return if get was successful
  */
-template <typename PTR, typename VAL>
-bool nvmGet(PTR prefptr, const nvm_size_t key, VAL *value, VAL defValue, VarType var, bool canDefault) {
+template <typename PRINTPTR, typename PTR, typename VAL>
+bool nvmGet(PRINTPTR printPtr, PTR prefptr, const nvm_size_t key, VAL *value, VAL defValue, VarType var, bool canDefault) {
 
 	if (!nvmStarted()) {
 		return false;
@@ -406,7 +410,7 @@ bool nvmGet(PTR prefptr, const nvm_size_t key, VAL *value, VAL defValue, VarType
 	}
 
 	#ifdef __NVM_DEBUG__
-		printGotValue(var, key, *value, GOT_VALUE);
+		printGotValue(printPtr, key, *value, GOT_VALUE);
 	#endif
 
 	return true;
@@ -445,98 +449,98 @@ bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 	}
 
 	#ifdef __NVM_DEBUG__
-		printGotValue(VAR_CHAR_ARRAY, key, value, GOT_VALUE);
+		printGotValue(&hardPrintCharArray, key, value, GOT_VALUE);
 	#endif
 
 	return true;
 }
 
 bool nvmWriteBool(nvm_size_t key, bool value) {
-	return nvmWrite(&Preferences::putBool, key, value, VAR_BOOL);
+	return nvmWrite(&hardPrintBool, &Preferences::putBool, key, value, VAR_BOOL);
 }
 
 bool nvmWriteI8(nvm_size_t key, int8_t value) {
-	return nvmWrite(&Preferences::putChar, key, value, VAR_INT8);
+	return nvmWrite(&hardPrintInt8, &Preferences::putChar, key, value, VAR_INT8);
 }
 
 bool nvmWriteUI8(nvm_size_t key, uint8_t value) {
-	return nvmWrite(&Preferences::putUChar, key, value, VAR_UINT8);
+	return nvmWrite(&hardPrintUInt8, &Preferences::putUChar, key, value, VAR_UINT8);
 }
 
 bool nvmWriteI16(nvm_size_t key, int16_t value) {
-	return nvmWrite(&Preferences::putShort, key, value, VAR_INT16);
+	return nvmWrite(&hardPrintInt16, &Preferences::putShort, key, value, VAR_INT16);
 }
 
 bool nvmWriteUI16(nvm_size_t key, uint16_t value) {
-	return nvmWrite(&Preferences::putUShort, key, value, VAR_UINT16);
+	return nvmWrite(&hardPrintUInt16, &Preferences::putUShort, key, value, VAR_UINT16);
 }
 
 bool nvmWriteI32(nvm_size_t key, int32_t value) {
-	return nvmWrite(&Preferences::putInt, key, value, VAR_INT32);
+	return nvmWrite(&hardPrintInt32, &Preferences::putInt, key, value, VAR_INT32);
 }
 
 bool nvmWriteUI32(nvm_size_t key, uint32_t value) {
-	return nvmWrite(&Preferences::putUInt, key, value, VAR_UINT32);
+	return nvmWrite(&hardPrintUInt32, &Preferences::putUInt, key, value, VAR_UINT32);
 }
 
 bool nvmWriteI64(nvm_size_t key, int64_t value) {
-	return nvmWrite(&Preferences::putLong64, key, value, VAR_INT64);
+	return nvmWrite(&hardPrintInt64, &Preferences::putLong64, key, value, VAR_INT64);
 }
 
 bool nvmWriteUI64(nvm_size_t key, uint64_t value) {
-	return nvmWrite(&Preferences::putULong64, key, value, VAR_UINT64);
+	return nvmWrite(&hardPrintUInt64, &Preferences::putULong64, key, value, VAR_UINT64);
 }
 
 bool nvmWriteFloat(nvm_size_t key, float value) {
-	return nvmWrite(&Preferences::putFloat, key, value, VAR_FLOAT);
+	return nvmWrite(&hardPrintFloat, &Preferences::putFloat, key, value, VAR_FLOAT);
 }
 
 bool nvmWriteDouble(nvm_size_t key, double value) {
-	return nvmWrite(&Preferences::putDouble, key, value, VAR_DOUBLE);
+	return nvmWrite(&hardPrintDouble, &Preferences::putDouble, key, value, VAR_DOUBLE);
 }
 
 bool nvmGetBool(nvm_size_t key, bool *value, bool canDefault) {
-	return nvmGet(&Preferences::getBool, key, value, (bool)DEFAULT_BOOL, VAR_BOOL, canDefault);
+	return nvmGet(&hardPrintBool, &Preferences::getBool, key, value, (bool)DEFAULT_BOOL, VAR_BOOL, canDefault);
 }
 
 bool nvmGetI8(nvm_size_t key, int8_t *value, bool canDefault) {
-	return nvmGet(&Preferences::getChar, key, value, (int8_t)DEFAULT_INT, VAR_INT8, canDefault);
+	return nvmGet(&hardPrintInt8, &Preferences::getChar, key, value, (int8_t)DEFAULT_INT, VAR_INT8, canDefault);
 }
 
 bool nvmGetUI8(nvm_size_t key, uint8_t *value, bool canDefault) {
-	return nvmGet(&Preferences::getUChar, key, value, (uint8_t)DEFAULT_INT, VAR_UINT8, canDefault);
+	return nvmGet(&hardPrintUInt8, &Preferences::getUChar, key, value, (uint8_t)DEFAULT_INT, VAR_UINT8, canDefault);
 }
 
 bool nvmGetI16(nvm_size_t key, int16_t *value, bool canDefault) {
-	return nvmGet(&Preferences::getShort, key, value, (int16_t)DEFAULT_INT, VAR_INT16, canDefault);
+	return nvmGet(&hardPrintInt16, &Preferences::getShort, key, value, (int16_t)DEFAULT_INT, VAR_INT16, canDefault);
 }
 
 bool nvmGetUI16(nvm_size_t key, uint16_t *value, bool canDefault) {
-	return nvmGet(&Preferences::getUShort, key, value, (uint16_t)DEFAULT_INT, VAR_UINT16, canDefault);
+	return nvmGet(&hardPrintUInt16, &Preferences::getUShort, key, value, (uint16_t)DEFAULT_INT, VAR_UINT16, canDefault);
 }
 
 bool nvmGetI32(nvm_size_t key, int32_t *value, bool canDefault) {
-	return nvmGet(&Preferences::getInt, key, value, (int32_t)DEFAULT_INT, VAR_INT32, canDefault);
+	return nvmGet(&hardPrintInt32, &Preferences::getInt, key, value, (int32_t)DEFAULT_INT, VAR_INT32, canDefault);
 }
 
 bool nvmGetUI32(nvm_size_t key, uint32_t *value, bool canDefault) {
-	return nvmGet(&Preferences::getUInt, key, value, (uint32_t)DEFAULT_INT, VAR_UINT32, canDefault);
+	return nvmGet(&hardPrintUInt32, &Preferences::getUInt, key, value, (uint32_t)DEFAULT_INT, VAR_UINT32, canDefault);
 }
 
 bool nvmGetI64(nvm_size_t key, int64_t *value, bool canDefault) {
-	return nvmGet(&Preferences::getLong64, key, value, (int64_t)DEFAULT_INT, VAR_INT64, canDefault);
+	return nvmGet(&hardPrintInt64, &Preferences::getLong64, key, value, (int64_t)DEFAULT_INT, VAR_INT64, canDefault);
 }
 
 bool nvmGetUI64(nvm_size_t key, uint64_t *value, bool canDefault) {
-	return nvmGet(&Preferences::getULong64, key, value, (uint64_t)DEFAULT_INT, VAR_UINT64, canDefault);
+	return nvmGet(&hardPrintUInt64, &Preferences::getULong64, key, value, (uint64_t)DEFAULT_INT, VAR_UINT64, canDefault);
 }
 
 bool nvmGetFloat(nvm_size_t key, float *value, bool canDefault) {
-	return nvmGet(&Preferences::getFloat, key, value, (float)DEFAULT_FLOAT, VAR_FLOAT, canDefault);
+	return nvmGet(&hardPrintFloat, &Preferences::getFloat, key, value, (float)DEFAULT_FLOAT, VAR_FLOAT, canDefault);
 }
 
 bool nvmGetDouble(nvm_size_t key, double *value, bool canDefault) {
-	return nvmGet(&Preferences::getDouble, key, value, (double)DEFAULT_FLOAT, VAR_DOUBLE, canDefault);
+	return nvmGet(&hardPrintDouble, &Preferences::getDouble, key, value, (double)DEFAULT_FLOAT, VAR_DOUBLE, canDefault);
 }
 
 #endif
