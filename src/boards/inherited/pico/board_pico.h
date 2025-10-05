@@ -61,13 +61,11 @@
 	 * NVM Config
 	****************************/
 
-	#if !NVM_CHECK()
-		#ifndef __NVM_BEGIN__
-			#define __NVM_BEGIN__ // Calls begin function for NVM
-		#endif
-		#ifndef __NVM_BEGIN_SIZE__
-			#define __NVM_BEGIN_SIZE__ // Calls begin function with NVM size
-		#endif
+	#ifndef __NVM_BEGIN__
+		#define __NVM_BEGIN__ // Calls begin function for NVM
+	#endif
+	#ifndef __NVM_BEGIN_SIZE__
+		#define __NVM_BEGIN_SIZE__ // Calls begin function with NVM size
 	#endif
 
 	/****************************

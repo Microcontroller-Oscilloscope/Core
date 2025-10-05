@@ -64,12 +64,21 @@
 		#define STATUS_LED_PIN 13 // pin for status LED
 	#endif
 
+	#ifndef SERIAL_INTERNAL
+		#define SERIAL_INTERNAL // uses boards internal functions for transmission
+	#endif
+
+	#ifdef SERIAL_INTERNAL
+		#ifndef NO_FLOAT_PRINT_SUPPORT
+			#define NO_FLOAT_PRINT_SUPPORT
+		#endif
+	#endif
+
 	/****************************
 	 * NVM Config
 	****************************/
 
-	#if !NVM_CHECK()
-	#endif
+	
 
 	/****************************
 	 * Timer Config

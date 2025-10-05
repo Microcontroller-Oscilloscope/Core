@@ -21,6 +21,7 @@
 
 #define DEFAULT_FLOAT_PLACES 2
 #define DEFAULT_DOUBLE_PLACES 4
+#define ASCII0 48 // ASCII code for printing 0
 
 #include "../../compile_flags/compile_flags.h"
 

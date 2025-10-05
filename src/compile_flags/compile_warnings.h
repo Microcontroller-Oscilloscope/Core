@@ -36,8 +36,8 @@
 		#warning Compiling in Dev mode for Unity testing
 	#endif
 
-	#if defined(__ENABLED_DEV_RELEASE__) || defined(__ENABLED_DEV_TEST__)
-		#warning No NVM flags are enabled in board header files. Ensure they are included in the board .ini files
+	#if defined(NO_FLOAT_PRINT_SUPPORT)
+		#warning Float/Double printing functions wont display anything
 	#endif
 
 #endif

@@ -18,7 +18,7 @@
 
 #include "hard_serial.h"
 
-#ifndef SERIAL_PRINTF
+#if !defined(SERIAL_PRINTF) && !defined(SERIAL_INTERNAL)
 
 #ifdef PLATFORMIO
 #include <Arduino.h>

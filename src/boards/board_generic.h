@@ -55,11 +55,6 @@
 // default nvm size when flash is used instead of dedicated EEPROM
 #define FLASH_NVM_SIZE 4096
 
-// checks if any default nvm methods are called
-#define NVM_CHECK() (defined(__NVM_BEGIN__) || defined(__NVM_BEGIN_SIZE__) \
-		|| defined(__NVM_BEGIN_RETURN__) || defined(__NVM_COMMIT__)) \
-		|| !defined(__ENABLED_DEV_RELEASE__) || !defined(__ENABLED_DEV_TEST__)
-
 #ifdef __cplusplus
 extern "C" {
 #endif
