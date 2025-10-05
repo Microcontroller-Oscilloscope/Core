@@ -22,6 +22,7 @@
 #define DEFAULT_FLOAT_PLACES 2
 #define DEFAULT_DOUBLE_PLACES 4
 #define ASCII0 48 // ASCII code for printing 0
+#define INT64_SIGN 0b1000000000000000000000000000000000000000000000000000000000000000 // sign for int64
 
 #include "../../compile_flags/compile_flags.h"
 
@@ -38,6 +39,11 @@ void hardPrintBegin(uint32_t baud);
 
 /**
  * Prints memory char array to Serial
+ * 
+ * @warning ONLY USE WITH memCharString CONSTANTS
+ * @warning ex:
+ * @warning memCharString myVariable[] = {"myValue"};
+ * @warning hardPrintMemCharArray(myVariable)
  * 
  * @param value value to print
  */
@@ -137,6 +143,11 @@ void hardPrintDoublePlaces(double value, uint8_t places);
 
 /**
  * Prints memory char array to Serial with termination
+ * 
+ * @warning ONLY USE WITH memCharString CONSTANTS
+ * @warning ex:
+ * @warning memCharString myVariable[] = {"myValue"};
+ * @warning hardPrintMemCharArrayln(myVariable)
  * 
  * @param value value to print
  */

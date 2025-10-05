@@ -191,18 +191,9 @@ extern "C" uint64_t toNPower(uint8_t base, uint8_t power) {
 
 extern "C" void hardPrintInt64(int64_t value) {
 
-	if (value == 0) {
-		Serial.print("0");
-		return;
-	}
-
-	Serial.print(F("-"));
-	value *= -1;
-
-	// prints I64 min
-	if (value < 0) {
-		Serial.print(F("-9223372036854775808"));
-		return;
+	if (value & INT64_SIGN) {
+		value *= -1;
+		hardPrintChar('-');
 	}
 
 	hardPrintUInt64(value);
@@ -211,25 +202,27 @@ extern "C" void hardPrintInt64(int64_t value) {
 extern "C" void hardPrintUInt64(uint64_t value) {
 
 	// prints 0
-	if (value == 0) {
-		Serial.print("0");
+	if (!value) {
+		hardPrintChar('0');
 		return;
 	}
 
 	int8_t digits = 0;
-	uint64_t temp = value;
 
-	// gets count of digits
-	while (temp > 0) {
-		digits++;
-		temp = temp/10U;
+	{
+		uint64_t temp = value;
+		// gets count of digits
+		while (temp > 0) {
+			digits++;
+			temp = temp/10U;
+		}
 	}
 
 	// prints digits
 	for (int8_t i = digits - 1; i >= 0; i--) {
 		uint64_t power = toNPower((uint8_t)10, (uint8_t)i);
 		uint64_t leftover = value % power;
-		Serial.print((uint8_t)((value - leftover) / power));
+		hardPrintUInt8((uint8_t)((value - leftover) / power));
 		value -= value - leftover;
 	}
 }

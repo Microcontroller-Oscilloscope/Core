@@ -68,6 +68,10 @@
 		#define SERIAL_INTERNAL // uses boards internal functions for transmission
 	#endif
 
+	#ifndef SERIAL_INTERNAL
+		#define SERIAL_PRINTF // uses printf as serial
+	#endif
+
 	#ifdef SERIAL_INTERNAL
 		#ifndef NO_FLOAT_PRINT_SUPPORT
 			#define NO_FLOAT_PRINT_SUPPORT

@@ -18,7 +18,11 @@
 
 #include "../board.h"
 
-#if defined(UNOR3) && defined(SERIAL_INTERNAL)
+#if defined(UNOR3) && defined(SERIAL_PRINTF) && !defined(SERIAL_INTERNAL)
+
+void hardPrintBegin(uint32_t baud) {}
+
+#elif defined(UNOR3) && defined(SERIAL_INTERNAL) && !defined(SERIAL_PRINTF)
 
 #include "../../comm/hard_serial/hard_serial.h"
 
@@ -44,7 +48,6 @@
 #define INT8_MAX_DIGITS 3 // max number of digits for int8
 #define INT16_MAX_DIGITS 5 // max number of digits for int16
 #define INT32_MAX_DIGITS 10 // max number of digits for int32
-#define INT64_SIGN 0b1000000000000000000000000000000000000000000000000000000000000000 // sign for int64
 
 uint8_t charArraySize(const char* value) {
 
@@ -86,6 +89,18 @@ void uartTransmit(uint8_t value) {
 	sei();
 }
 
+/**
+ * Copies flash message to serial
+ * 
+ * @param message flash message to print
+ * @param messageSize size of message to print
+ */
+void copyMessage(memCharString *message, uint8_t messageSize) {
+	for (uint8_t i = 0; i < messageSize; i++) {
+		hardPrintChar((char)pgm_read_byte_near(message + i));
+	}
+}
+
 void hardPrintBegin(uint32_t baud) {
 	cli();
 	// set baud rate
@@ -99,7 +114,7 @@ void hardPrintBegin(uint32_t baud) {
 }
 
 void hardPrintMemCharArray(memCharString* value) {
-	hardPrintCharArray(value);
+	copyMessage(value, strlen_P(value));
 }
 
 void hardPrintCharArray(const char* value) {
@@ -197,7 +212,8 @@ void hardPrintDouble(double value) {}
 void hardPrintDoublePlaces(double value, uint8_t places) {}
 
 void hardPrintMemCharArrayln(memCharString* value) {
-	hardPrintCharArrayln(value);
+	copyMessage(value, strlen_P(value));
+	uartTransmit('\n');
 }
 
 void hardPrintCharArrayln(const char* value) {

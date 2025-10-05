@@ -28,16 +28,18 @@ extern "C" {
 /**
  * Prints formatted tag to serial monitor '[tag]:'
  * 
+ * @warning ONLY USE WITH memCharString CONSTANTS
+ * @warning ex:
+ * @warning memCharString myVariable[] = {"myValue"};
+ * @warning printTag(myVariable)
+ * 
  * @param tag tag to print
- * @return void
  */
 void printTag(memCharString* tag);
 
 #ifdef __ERROR_DEBUG__
 	/**
 	 * Prints error tag '[Err]:'
-	 * 
-	 * @return void
 	 */
 	void printError(void);
 
@@ -59,8 +61,6 @@ void printTag(memCharString* tag);
 #ifdef __NVM_DEBUG__
 	/**
 	 * Prints nvm tag '[NVM]:'
-	 * 
-	 * @return void
 	 */
 	void printNVM(void);
 

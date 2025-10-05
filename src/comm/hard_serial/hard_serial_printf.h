@@ -89,42 +89,42 @@ inline void hardPrintUInt16(uint16_t value) {
 extern "C"
 #endif
 inline void hardPrintInt32(int32_t value) {
-	printf("%d", value);
+	printf("%ld", value);
 }
 
 #ifdef __cplusplus
 extern "C"
 #endif
 inline void hardPrintUInt32(uint32_t value) {
-	printf("%u", value);
+	printf("%lu", value);
 }
 
 #ifdef __cplusplus
 extern "C"
 #endif
 inline void hardPrintInt64(int64_t value) {
-	printf("%d", value);
+	printf("%lld", value);
 }
 
 #ifdef __cplusplus
 extern "C"
 #endif
 inline void hardPrintUInt64(uint64_t value) {
-	printf("%u", value);
+	printf("%llu", value);
 }
 
 #ifdef __cplusplus
 extern "C"
 #endif
 inline void hardPrintFloat(float value) {
-	printf("%f", value);
+	printf("%f", (double)value);
 }
 
 #ifdef __cplusplus
 extern "C"
 #endif
 inline void hardPrintFloatPlaces(float value, uint8_t places) {
-	printf("%.*f", places, value);
+	printf("%.*f", places, (double)value);
 }
 
 #ifdef __cplusplus
@@ -203,42 +203,42 @@ inline void hardPrintUInt16ln(uint16_t value) {
 extern "C"
 #endif
 inline void hardPrintInt32ln(int32_t value) {
-	printf("%d\n", value);
+	printf("%ld\n", value);
 }
 
 #ifdef __cplusplus
 extern "C"
 #endif
 inline void hardPrintUInt32ln(uint32_t value) {
-	printf("%u\n", value);
+	printf("%lu\n", value);
 }
 
 #ifdef __cplusplus
 extern "C"
 #endif
 inline void hardPrintInt64ln(int64_t value) {
-	printf("%d\n", value);
+	printf("%lld\n", value);
 }
 
 #ifdef __cplusplus
 extern "C"
 #endif
 inline void hardPrintUInt64ln(uint64_t value) {
-	printf("%u\n", value);
+	printf("%llu\n", value);
 }
 
 #ifdef __cplusplus
 extern "C"
 #endif
 inline void hardPrintFloatln(float value) {
-	printf("%f\n", value);
+	printf("%f\n", (double)value);
 }
 
 #ifdef __cplusplus
 extern "C"
 #endif
 inline void hardPrintFloatPlacesln(float value, uint8_t places) {
-	printf("%.*f\n", places, value);
+	printf("%.*f\n", places, (double)value);
 }
 
 #ifdef __cplusplus
