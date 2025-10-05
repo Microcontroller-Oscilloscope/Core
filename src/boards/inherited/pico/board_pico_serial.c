@@ -20,7 +20,7 @@
 
 #if defined(PICO) && defined(SERIAL_PRINTF)
 
-//#include "../../../comm/hard_serial/hard_serial.h"
+#include "../../../comm/hard_serial/hard_serial.h"
 
 #ifdef PLATFORMIO
 

@@ -21,7 +21,7 @@
 
 #include "../../compile_flags/compile_flags.h"
 
-#ifdef SERIAL_PRINTF
+#if defined(SERIAL_PRINTF) && !defined(SERIAL_INTERNAL)
 
 #include <stdio.h>
 
@@ -29,236 +29,137 @@
 extern "C" {
 #endif
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintMemCharArray(memCharString* value) {
+static inline void hardPrintMemCharArray(memCharString* value) {
 	printf(value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintCharArray(const char* value) {
+static inline void hardPrintCharArray(const char* value) {
 	printf(value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintBool(bool value) {
+static inline void hardPrintBool(bool value) {
 	printf("%d", value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintChar(char value) {
+static inline void hardPrintChar(char value) {
 	printf("%c", value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintInt8(int8_t value) {
+static inline void hardPrintInt8(int8_t value) {
 	printf("%d", value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintUInt8(uint8_t value) {
+static inline void hardPrintUInt8(uint8_t value) {
 	printf("%u", value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintInt16(int16_t value) {
+static inline void hardPrintInt16(int16_t value) {
 	printf("%d", value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintUInt16(uint16_t value) {
+static inline void hardPrintUInt16(uint16_t value) {
 	printf("%u", value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintInt32(int32_t value) {
+static inline void hardPrintInt32(int32_t value) {
 	printf("%ld", value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintUInt32(uint32_t value) {
+static inline void hardPrintUInt32(uint32_t value) {
 	printf("%lu", value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintInt64(int64_t value) {
+static inline void hardPrintInt64(int64_t value) {
 	printf("%lld", value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintUInt64(uint64_t value) {
+static inline void hardPrintUInt64(uint64_t value) {
 	printf("%llu", value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintFloat(float value) {
+static inline void hardPrintFloat(float value) {
 	printf("%f", (double)value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintFloatPlaces(float value, uint8_t places) {
+static inline void hardPrintFloatPlaces(float value, uint8_t places) {
 	printf("%.*f", places, (double)value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintDouble(double value) {
+static inline void hardPrintDouble(double value) {
 	printf("%f", value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintDoublePlaces(double value, uint8_t places) {
+static inline void hardPrintDoublePlaces(double value, uint8_t places) {
 	printf("%.*f", places, value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintMemCharArrayln(memCharString* value) {
+static inline void hardPrintMemCharArrayln(memCharString* value) {
 	printf(value);
 	printf("\n");
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintCharArrayln(const char* value) {
+static inline void hardPrintCharArrayln(const char* value) {
 	printf(value);
 	printf("\n");
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintBoolln(bool value) {
+static inline void hardPrintBoolln(bool value) {
 	printf("%d\n", value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintCharln(char value) {
+static inline void hardPrintCharln(char value) {
 	printf("%c\n", value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintInt8ln(int8_t value) {
+static inline void hardPrintInt8ln(int8_t value) {
 	printf("%d\n", value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintUInt8ln(uint8_t value) {
+static inline void hardPrintUInt8ln(uint8_t value) {
 	printf("%u\n", value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintInt16ln(int16_t value) {
+static inline void hardPrintInt16ln(int16_t value) {
 	printf("%d\n", value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintUInt16ln(uint16_t value) {
+static inline void hardPrintUInt16ln(uint16_t value) {
 	printf("%u\n", value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintInt32ln(int32_t value) {
+static inline void hardPrintInt32ln(int32_t value) {
 	printf("%ld\n", value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintUInt32ln(uint32_t value) {
+static inline void hardPrintUInt32ln(uint32_t value) {
 	printf("%lu\n", value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintInt64ln(int64_t value) {
+static inline void hardPrintInt64ln(int64_t value) {
 	printf("%lld\n", value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintUInt64ln(uint64_t value) {
+static inline void hardPrintUInt64ln(uint64_t value) {
 	printf("%llu\n", value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintFloatln(float value) {
+static inline void hardPrintFloatln(float value) {
 	printf("%f\n", (double)value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintFloatPlacesln(float value, uint8_t places) {
+static inline void hardPrintFloatPlacesln(float value, uint8_t places) {
 	printf("%.*f\n", places, (double)value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintDoubleln(double value) {
+static inline void hardPrintDoubleln(double value) {
 	printf("%f\n", value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintDoublePlacesln(double value, uint8_t places) {
+static inline void hardPrintDoublePlacesln(double value, uint8_t places) {
 	printf("%.*f\n", places, value);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
-inline void hardPrintln(void) {
+static inline void hardPrintln(void) {
 	printf("\n");
 }
 

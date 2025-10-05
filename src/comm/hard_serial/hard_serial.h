@@ -37,6 +37,8 @@ extern "C" {
  */
 void hardPrintBegin(uint32_t baud);
 
+#ifndef SERIAL_PRINTF
+
 /**
  * Prints memory char array to Serial
  * 
@@ -250,6 +252,8 @@ void hardPrintDoublePlacesln(double value, uint8_t places);
  * @param value value to print
  */
 void hardPrintln(void);
+
+#endif
 
 #ifdef __cplusplus
 }

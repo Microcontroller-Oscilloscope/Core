@@ -20,7 +20,7 @@
 
 #if defined(ESP32DEVC) && defined(SERIAL_PRINTF)
 
-//#include "../../comm/hard_serial/hard_serial.h"
+#include "../../comm/hard_serial/hard_serial.h"
 
 #include <driver/uart.h>
 
