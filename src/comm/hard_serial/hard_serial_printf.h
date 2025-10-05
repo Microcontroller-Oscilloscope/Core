@@ -16,9 +16,14 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#ifndef HARD_SERIAL_PRINTF_H
+#define HARD_SERIAL_PRINTF_H
+
 #include "../../compile_flags/compile_flags.h"
 
 #ifdef SERIAL_PRINTF
+
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -259,6 +264,8 @@ inline void hardPrintln(void) {
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
 
 #endif

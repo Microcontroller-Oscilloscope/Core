@@ -53,6 +53,10 @@
 		#define EXTERNAL_STATUS_LED_PIN 22 // pin for external status LED
 	#endif
 
+	#ifndef SERIAL_PRINTF
+		#define SERIAL_PRINTF // uses printf as serial
+	#endif
+
 	/****************************
 	 * NVM Config
 	****************************/
