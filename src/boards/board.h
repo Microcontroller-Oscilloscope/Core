@@ -29,6 +29,11 @@
 	#define DEFAULT_BAUD_RATE 9600 // default baud rate for microcontrollers
 #endif
 
+#ifndef PROG_FLASH
+	#define PROG_FLASH
+	#define EMPTY_PROG_FLASH
+#endif
+
 /****************************
  * Checks Required Flags
 ****************************/

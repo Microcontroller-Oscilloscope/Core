@@ -34,7 +34,9 @@
 
 	#include <avr/pgmspace.h>
 
-	typedef const PROGMEM char memCharString;
+	typedef const char memCharString;
+
+	#define PROG_FLASH PROGMEM // storage specifier for flash space
 
 	/****************************
 	 * Board Overrides

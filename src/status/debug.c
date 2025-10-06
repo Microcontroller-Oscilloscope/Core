@@ -19,12 +19,12 @@
 #include "debug.h"
 #include "../comm/hard_serial/hard_serial.h"
 
-memCharString leftBracket[] = {"["};
-memCharString rightBracket[] = {"]:"};
+memCharString leftBracket[] PROG_FLASH = {"["};
+memCharString rightBracket[] PROG_FLASH = {"]:"};
 
-memCharString errorTag[] = {"Err"};
-memCharString nvmTag[] = {"NVM"};
-memCharString critErrorTag[] = {"!!!"};
+memCharString errorTag[] PROG_FLASH = {"Err"};
+memCharString nvmTag[] PROG_FLASH = {"NVM"};
+memCharString critErrorTag[] PROG_FLASH = {"!!!"};
 
 void printTag(memCharString* tag) {
 	hardPrintMemCharArray(leftBracket);
