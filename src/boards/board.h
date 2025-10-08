@@ -63,6 +63,20 @@
 	#endif
 #endif
 
+#ifndef NUM_IO_PINS
+	#error NUM_IO_PINS needs to be defined
+	typedef uint8_t pin_t;
+#else
+	#if NUM_IO_PINS < 256
+		typedef uint8_t pin_t;
+	#elif NUM_IO_PINS < 65536
+		typedef uint16_t pin_t;
+	#else
+		#error Board cant have more than 65536 pins!!!
+		typedef uint8_t pin_t;
+	#endif
+#endif
+
 /****************************
  * Changes Flags When Testing
 ****************************/

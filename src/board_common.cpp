@@ -28,6 +28,8 @@ extern "C" void hardDelayUS(uint32_t delayAmount) {
 	delayMicroseconds(delayAmount);
 }
 
+#ifndef IO_INTERNAL
+
 extern "C" void hardPinMode(uint8_t pin, PinMode mode) {
 	pinMode(pin, mode);
 }
@@ -35,3 +37,5 @@ extern "C" void hardPinMode(uint8_t pin, PinMode mode) {
 extern "C" void hardDigitalWrite(uint8_t pin, uint8_t value) {
 	digitalWrite(pin, value);
 }
+
+#endif

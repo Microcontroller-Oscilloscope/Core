@@ -52,6 +52,13 @@
  */
 #define CONCATENATE3(a, b, c) a ## b ## c
 
+/**
+ * Converts bit to bit mask
+ * 
+ * @param bit bit to shift to
+ */
+#define TO_BIT(bit) (1 << (bit))
+
 // default nvm size when flash is used instead of dedicated EEPROM
 #define FLASH_NVM_SIZE 4096
 

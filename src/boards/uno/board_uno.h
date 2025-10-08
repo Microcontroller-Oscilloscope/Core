@@ -28,6 +28,8 @@
 
 #ifdef UNOR3
 
+	#include "board_uno_pins.h"
+
 	/****************************
 	 * Type Defines
 	****************************/
@@ -63,7 +65,7 @@
 	#endif
 
 	#ifndef STATUS_LED_PIN
-		#define STATUS_LED_PIN 13 // pin for status LED
+		#define STATUS_LED_PIN INTERNAL_LED // pin for status LED
 	#endif
 
 	#ifndef SERIAL_INTERNAL
@@ -78,6 +80,10 @@
 		#ifndef NO_FLOAT_PRINT_SUPPORT
 			#define NO_FLOAT_PRINT_SUPPORT
 		#endif
+	#endif
+
+	#ifndef IO_INTERNAL
+		#define IO_INTERNAL // uses internal IO functions to set pins
 	#endif
 
 	/****************************
