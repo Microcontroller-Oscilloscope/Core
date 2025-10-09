@@ -21,7 +21,6 @@
 #if defined(PICO1W) && defined(IO_INTERNAL)
 
 #include "../../board_common.h"
-#include "../../comm/hard_serial/hard_serial.h"
 
 #include <stdio.h>
 #include <pico/stdlib.h>
