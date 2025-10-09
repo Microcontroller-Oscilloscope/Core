@@ -50,6 +50,7 @@ const struct pinData PINS_D PROGMEM = {
 
 //const struct pinData digitalPins[] PROGMEM = {
 const struct pinData *const digitalPins[] PROGMEM = {
+	&PINS_D, // port D
 	&PINS_D,
 	&PINS_D,
 	&PINS_D,
@@ -57,14 +58,13 @@ const struct pinData *const digitalPins[] PROGMEM = {
 	&PINS_D,
 	&PINS_D,
 	&PINS_D,
-	&PINS_D,
+	&PINS_B, // port B
 	&PINS_B,
 	&PINS_B,
 	&PINS_B,
 	&PINS_B,
 	&PINS_B,
-	&PINS_B,
-	&PINS_C,
+	&PINS_C, // port C
 	&PINS_C,
 	&PINS_C,
 	&PINS_C,
@@ -95,30 +95,27 @@ const uint8_t pinMask[] PROGMEM = {
 	TO_BIT(5),
 };
 
-#define REF_TYPE ->
+void hardPinMode(pin_t pin, enum pinModeState mode) {
 
-void hardPinMode(pin_t pin, PinMode mode) {
-
-	if (mode == INPUT) {
-		*(digitalPins[pin] REF_TYPE DDR) &= ~(pinMask[pin]); // sets input
+	if (mode == PIN_MODE_INPUT) {
+		*(digitalPins[pin] -> DDR) &= ~(pinMask[pin]); // sets input
 	}
-	else if (mode == OUTPUT) {
-		*(digitalPins[pin] REF_TYPE DDR) |= (pinMask[pin]); // sets output
+	else if (mode == PIN_MODE_OUTPUT) {
+		*(digitalPins[pin] -> DDR) |= (pinMask[pin]); // sets output
 	}
-	else if (mode == INPUT_PULLUP) {
-		*(digitalPins[pin] REF_TYPE DDR) &= ~(pinMask[pin]); // sets input
-		*(digitalPins[pin] REF_TYPE PORT) |= (pinMask[pin]); // sets pullup
-		
+	else if (mode == PIN_MODE_INPUT_PULL_UP) {
+		*(digitalPins[pin] -> DDR) &= ~(pinMask[pin]); // sets input
+		*(digitalPins[pin] -> PORT) |= (pinMask[pin]); // sets pullup
 	}
 }
 
-void hardDigitalWrite(pin_t pin, uint8_t value) {
+void hardDigitalWrite(pin_t pin, enum digitalState value) {
 	
 	if (value) {
-		*(digitalPins[pin] REF_TYPE PORT) |= (pinMask[pin]); // sets HIGH
+		*(digitalPins[pin] -> PORT) |= (pinMask[pin]); // sets HIGH
 	}
 	else {
-		*(digitalPins[pin] REF_TYPE PORT) &= ~(pinMask[pin]); // sets LOW
+		*(digitalPins[pin] -> PORT) &= ~(pinMask[pin]); // sets LOW
 	}
 }
 

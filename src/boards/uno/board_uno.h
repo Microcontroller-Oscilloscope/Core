@@ -30,6 +30,10 @@
 
 	#include "board_uno_pins.h"
 
+	#ifndef NUM_IO_PINS
+		#define NUM_IO_PINS 20 // number pins available to controller
+	#endif
+
 	/****************************
 	 * Type Defines
 	****************************/
@@ -51,8 +55,6 @@
 	#ifndef CORE_COUNT
 		#define CORE_COUNT 1 // amount of CPU cores available to board
 	#endif
-
-	typedef uint8_t PinMode;
 
 	#ifndef INPUT
 		#define INPUT 0x0

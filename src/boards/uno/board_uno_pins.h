@@ -35,47 +35,8 @@
  *                     +----+
  */
 
-#ifndef NUM_IO_PINS
-	#define NUM_IO_PINS 20 // number pins available to controller
-#endif
-
-// serial
-#ifndef RX0
-	#define RX0 0
-#endif
-#ifndef TX0
-	#define TX0 1
-#endif
-#ifndef SERIAL_COUNT
-	#define SERIAL_COUNT 1
-#endif
-
-// SPI
-#ifndef CS0
-	#define CS0 10
-#endif
-#ifndef COPI0
-	#define COPI0 11
-#endif
-#ifndef CIPO0
-	#define CIPO0 12
-#endif
-#ifndef SCK0
-	#define SCK0 13
-#endif
-#ifndef SPI_COUNT
-	#define SPI_COUNT 1
-#endif
-
-// I2C
-#ifndef SDA0
-	#define SDA0 18
-#endif
-#ifndef SCL0
-	#define SCL0 19
-#endif
-#ifndef I2C_COUNT
-	#define I2C_COUNT 1
+#ifdef PLATFORMIO
+	#include <pins_arduino.h>
 #endif
 
 // digital
@@ -140,47 +101,91 @@
 	#define D19 19
 #endif
 
+// serial
+#ifndef RX0
+	#define RX0 D0
+#endif
+#ifndef TX0
+	#define TX0 D1
+#endif
+#ifndef SERIAL_COUNT
+	#define SERIAL_COUNT 1
+#endif
+
+// SPI
+#ifndef CS0
+	#define CS0 D10
+#endif
+#ifndef COPI0
+	#define COPI0 D11
+#endif
+#ifndef CIPO0
+	#define CIPO0 D12
+#endif
+#ifndef SCK0
+	#define SCK0 D13
+#endif
+#ifndef SPI_COUNT
+	#define SPI_COUNT 1
+#endif
+
+// I2C
+#ifndef SDA0
+	#define SDA0 D18
+#endif
+#ifndef SCL0
+	#define SCL0 D19
+#endif
+#ifndef I2C_COUNT
+	#define I2C_COUNT 1
+#endif
+
 // analog
 #ifndef ADC0
-	#define ADC0 14
+	#define ADC0 D14
 #endif
 #ifndef ADC1
-	#define ADC1 15
+	#define ADC1 D15
 #endif
 #ifndef ADC2
-	#define ADC2 16
+	#define ADC2 D16
 #endif
 #ifndef ADC3
-	#define ADC3 17
+	#define ADC3 D17
 #endif
 #ifndef ADC4
-	#define ADC4 18
+	#define ADC4 D18
 #endif
 #ifndef ADC5
-	#define ADC5 19
+	#define ADC5 D19
 #endif
 #ifndef ADC_COUNT
 	#define ADC_COUNT 6
 #endif
 
+// DAC
+#ifndef DAC_COUNT
+	#define DAC_COUNT 0
+#endif
+
 // PWM
 #ifndef PWM0
-	#define PWM0 3
+	#define PWM0 D3
 #endif
 #ifndef PWM1
-	#define PWM1 5
+	#define PWM1 D5
 #endif
 #ifndef PWM2
-	#define PWM2 6
+	#define PWM2 D6
 #endif
 #ifndef PWM3
-	#define PWM3 9
+	#define PWM3 D9
 #endif
 #ifndef PWM4
-	#define PWM4 10
+	#define PWM4 D10
 #endif
 #ifndef PWM5
-	#define PWM5 11
+	#define PWM5 D11
 #endif
 #ifndef PWM_COUNT
 	#define PWM_COUNT 6

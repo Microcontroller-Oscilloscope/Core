@@ -21,15 +21,24 @@
 
 #include "compile_flags/compile_flags.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // states for digital writes
-enum DIGITAL_STATE {
+enum digitalState {
 	DIGITAL_LOW,
 	DIGITAL_HIGH
 };
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+// states for pin modes
+enum pinModeState {
+	PIN_MODE_DISABLED,
+	PIN_MODE_OUTPUT,
+	PIN_MODE_INPUT,
+	//PIN_MODE_INPUT_PULL_DOWN,
+	PIN_MODE_INPUT_PULL_UP,
+};
 
 /**
  * Delays microcontroller for milliseconds
@@ -51,7 +60,7 @@ void hardDelayUS(uint32_t delayAmount);
  * @param pin pin to configure
  * @param mode mode to operate in
  */
-void hardPinMode(uint8_t pin, PinMode mode);
+void hardPinMode(pin_t pin, enum pinModeState mode);
 
 /**
  * Sets digital pin state
@@ -59,7 +68,7 @@ void hardPinMode(uint8_t pin, PinMode mode);
  * @param pin pin to set
  * @param value value to set
  */
-void hardDigitalWrite(uint8_t pin, uint8_t value);
+void hardDigitalWrite(pin_t pin, enum digitalState value);
 
 #ifdef __cplusplus
 }

@@ -28,6 +28,12 @@
 
 #ifdef ESP32DEVC
 
+	#include "board_esp32_pins.h"
+
+	#ifndef NUM_IO_PINS
+		#define NUM_IO_PINS 32 // number pins available to controller
+	#endif
+
 	#include <esp_attr.h>
 	#include <esp32-hal-gpio.h>
 
@@ -53,7 +59,7 @@
 		#define CORE_COUNT 2 // amount of CPU cores available to board
 	#endif
 
-	typedef uint8_t PinMode;
+	#include <hal/gpio_types.h>
 
 	#ifndef EXTERNAL_LED_PIN
 		#define EXTERNAL_STATUS_LED_PIN 23 // pin for external status LED
@@ -61,6 +67,10 @@
 
 	#ifndef SERIAL_PRINTF
 		#define SERIAL_PRINTF // uses printf as serial
+	#endif
+
+	#ifndef IO_INTERNAL
+		#define IO_INTERNAL // uses internal IO functions to set pins
 	#endif
 
 	/****************************
