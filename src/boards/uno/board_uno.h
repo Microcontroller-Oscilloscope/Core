@@ -88,6 +88,10 @@
 		#define IO_INTERNAL // uses internal IO functions to set pins
 	#endif
 
+	#ifndef DELAY_INTERNAL
+		#define DELAY_INTERNAL // uses internal delay functions
+	#endif
+
 	/****************************
 	 * NVM Config
 	****************************/
