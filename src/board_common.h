@@ -41,6 +41,13 @@ enum pinModeState {
 };
 
 /**
+ * Initializes any board specific requirements
+ * 
+ * @return if init was successful
+ */
+bool initBoard();
+
+/**
  * Delays microcontroller for milliseconds
  * 
  * @param delayAmount amount to delay

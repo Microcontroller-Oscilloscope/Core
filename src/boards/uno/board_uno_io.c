@@ -95,6 +95,10 @@ const uint8_t pinMask[] PROGMEM = {
 	TO_BIT(5),
 };
 
+bool initBoard() {
+	return true;
+}
+
 void hardPinMode(pin_t pin, enum pinModeState mode) {
 
 	if (mode == PIN_MODE_INPUT) {

@@ -45,16 +45,6 @@
 		#define CORE_COUNT 2 // amount of CPU cores available to board
 	#endif
 
-	#include <pins_arduino.h>
-
-	#ifndef STATUS_LED_PIN
-		#define STATUS_LED_PIN LED_BUILTIN // pin for status LED
-	#endif
-
-	#ifndef EXTERNAL_LED_PIN
-		#define EXTERNAL_STATUS_LED_PIN 22 // pin for external status LED
-	#endif
-
 	#ifndef SERIAL_PRINTF
 		#define SERIAL_PRINTF // uses printf as serial
 	#endif

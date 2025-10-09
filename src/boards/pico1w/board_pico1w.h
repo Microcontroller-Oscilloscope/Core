@@ -29,7 +29,23 @@
 
 #ifdef PICO1W
 
+	#include "board_pico1w_pins.h"
+
 	#include "../inherited/pico/board_pico.h"
+
+	#include <pins_arduino.h>
+
+	#ifndef EXTERNAL_LED_PIN
+		#define EXTERNAL_STATUS_LED_PIN D22 // pin for external status LED
+	#endif
+
+	#ifndef STATUS_LED_PIN
+		#define STATUS_LED_PIN CYW43_WL_GPIO_LED_PIN // pin for status LED
+	#endif
+
+	#ifndef IO_INTERNAL
+		#define IO_INTERNAL // uses internal IO functions to set pins
+	#endif
 
 #endif
 #endif

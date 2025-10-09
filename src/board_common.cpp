@@ -30,11 +30,25 @@ extern "C" void hardDelayUS(uint32_t delayAmount) {
 
 #ifndef IO_INTERNAL
 
-extern "C" void hardPinMode(uint8_t pin, PinMode mode) {
-	pinMode(pin, mode);
+extern "C" bool initBoard() {
+	return true;
 }
 
-extern "C" void hardDigitalWrite(uint8_t pin, uint8_t value) {
+extern "C" void hardPinMode(pin_t pin, pinModeState mode) {
+	pinMode(pin, mode);
+
+	if (mode == PIN_MODE_INPUT) {
+		pinMode(pin, INPUT);
+	}
+	else if (mode == PIN_MODE_OUTPUT) {
+		pinMode(pin, OUTPUT);
+	}
+	else if (mode == PIN_MODE_INPUT_PULL_UP) {
+		pinMode(pin, INPUT_PULLUP);
+	}
+}
+
+extern "C" void hardDigitalWrite(pin_t pin, enum digitalState value) {
 	digitalWrite(pin, value);
 }
 

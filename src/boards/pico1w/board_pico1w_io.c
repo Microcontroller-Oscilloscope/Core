@@ -1,5 +1,5 @@
 /*
-	board_esp32_io.h - IO configuration for Espressif ESP32
+	board_uno_io.c - IO configuration for Raspberry Pi Pico W
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -18,35 +18,53 @@
 
 #include "../board.h"
 
-#if defined(ESP32DEVC) && defined(IO_INTERNAL)
+#if defined(PICO1W) && defined(IO_INTERNAL)
 
 #include "../../board_common.h"
+#include "../../comm/hard_serial/hard_serial.h"
+
+#include <stdio.h>
+#include <pico/stdlib.h>
+#include <pico/cyw43_arch.h>
 
 bool initBoard() {
+
+	//stdio_init_all();
+	//cyw43_arch_init();
+
 	return true;
 }
 
 void hardPinMode(pin_t pin, enum pinModeState mode) {
 	if (mode == PIN_MODE_DISABLED) {
-		gpio_set_direction(pin, GPIO_MODE_DISABLE);
-		gpio_set_pull_mode(pin, GPIO_PULLUP_DISABLE);
+		gpio_deinit(pin);
 	}
 	else if (mode == PIN_MODE_OUTPUT) {
-		gpio_set_direction(pin, GPIO_MODE_OUTPUT);
-		gpio_set_pull_mode(pin, GPIO_PULLUP_DISABLE);
+		gpio_init(pin);
+		gpio_set_drive_strength(pin, GPIO_DRIVE_STRENGTH_4MA);
+		gpio_set_dir(pin, GPIO_OUT);
 	}
 	else if (mode == PIN_MODE_INPUT) {
-		gpio_set_direction(pin, GPIO_MODE_INPUT);
-		gpio_set_pull_mode(pin, GPIO_PULLUP_DISABLE);
+		gpio_init(pin);
+		gpio_set_dir(pin, GPIO_IN);
+		gpio_disable_pulls(pin);
 	}
 	else if (mode == PIN_MODE_INPUT_PULL_UP) {
-		gpio_set_direction(pin, GPIO_MODE_INPUT);
-		gpio_set_pull_mode(pin, GPIO_PULLUP_ENABLE);
+		gpio_init(pin);
+		gpio_set_dir(pin, GPIO_IN);
+		gpio_pull_up(pin);
+		gpio_put(pin, 0);
 	}
 }
 
 void hardDigitalWrite(pin_t pin, enum digitalState value) {
-	gpio_set_level(pin, value);
+
+	if (pin == STATUS_LED_PIN) {
+		cyw43_arch_gpio_put(pin, value);
+	}
+	else {
+		gpio_put(pin, value);
+	}
 }
 
 #endif
