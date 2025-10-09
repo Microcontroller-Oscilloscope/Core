@@ -1,5 +1,5 @@
 /*
-	board_uno_delay.c - delay configuration for Raspberry Pi Pico W
+	board_esp32_delay.h - delay configuration for Espressif ESP32
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -18,18 +18,16 @@
 
 #include "../board.h"
 
-#if defined(PICO1W) && defined(DELAY_INTERNAL)
+#if defined(ESP32DEVC) && defined(DELAY_INTERNAL)
 
 #include "../../board_common.h"
 
-#include <pico/stdlib.h>
-
 void hardDelayMS(uint32_t delayAmount) {
-	sleep_ms(delayAmount);
+	vTaskDelay(delayAmount / portTICK_PERIOD_MS);
 }
 
 void hardDelayUS(uint32_t delayAmount) {
-	sleep_us(delayAmount);
+	ets_delay_us(delayAmount);
 }
 
 #endif
