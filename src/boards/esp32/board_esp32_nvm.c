@@ -183,9 +183,62 @@ void keyToChar(nvm_size_t key, char* keyStr) {
 	} \
 	return true;
 
-bool nvmWriteCharArray(nvm_size_t key, char* value, uint8_t maxLength) {}
+bool nvmWriteCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
+	if (!nvmBegan) {
+		return false;
+	}
 
-bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {}
+	uint8_t valueLen = charArraySize(value);
+	if (valueLen == 0) {
+		return false;
+	}
+	else if (valueLen > maxLength) {
+		return false;
+	}
+	else if (valueLen == CHAR_LEN_ERROR) {
+		return false;
+	}
+
+	char keyStr[CHAR_KEY_SIZE];
+	keyToChar(key, keyStr);
+	
+	if (nvs_set_str(handler, keyStr, value) != ESP_OK) {
+		return false;
+	}
+	if (nvs_commit(handler) != ESP_OK) {
+		return false;
+	}
+
+	return true;
+}
+
+bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
+	if (!nvmBegan) {
+		return false;
+	}
+	if (value == NULL) {
+		return false;
+	}
+	if (maxLength == 0U) {
+		return false;
+	}
+	
+	char keyStr[CHAR_KEY_SIZE];
+	keyToChar(key, keyStr);
+
+	size_t strSize = 0;
+	if (nvs_get_str(handler, keyStr, NULL, &strSize) != ESP_OK) {
+		return false;
+	}
+	if (strSize > maxLength) {
+		return false;
+	}
+	if (nvs_get_str(handler, keyStr, value, &strSize) != ESP_OK) {
+		return false;
+	}
+
+	return true;
+}
 
 bool nvmWriteBool(nvm_size_t key, bool value) {
 	SET_NVS(key, nvs_set_u8, value);
