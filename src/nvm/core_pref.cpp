@@ -18,7 +18,7 @@
 
 #include "core_pref.h"
 
-#ifdef NVM_PREF
+#if defined(NVM_PREF) && !defined(NVM_INTERNAL)
 
 #include <Preferences.h>
 #include "../osc_err/osc_err.h"
