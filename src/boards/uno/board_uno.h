@@ -92,6 +92,10 @@
 		#define DELAY_INTERNAL // uses internal delay functions
 	#endif
 
+	#ifndef NVM_INTERNAL
+		#define NVM_INTERNAL // uses internal nvm functions
+	#endif
+
 	/****************************
 	 * NVM Config
 	****************************/

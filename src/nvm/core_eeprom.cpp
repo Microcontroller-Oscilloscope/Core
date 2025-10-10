@@ -18,7 +18,7 @@
 
 #include "core_eeprom.h"
 
-#ifdef NVM_EEPROM
+#if defined(NVM_EEPROM) && !defined(NVM_INTERNAL)
 
 #include <EEPROM.h>
 #include "../osc_err/osc_err.h"

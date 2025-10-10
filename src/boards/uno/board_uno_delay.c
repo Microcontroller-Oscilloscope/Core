@@ -22,7 +22,7 @@
 
 #include "../../board_common.h"
 
-#include <avr/delay.h>
+#include <util/delay.h>
 
 void hardDelayMS(uint32_t delayAmount) {
 	_delay_ms(delayAmount);

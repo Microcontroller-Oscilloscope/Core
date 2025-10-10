@@ -1,0 +1,190 @@
+/*
+	board_uno_nvm.c - nvm configuration for Arduino Uno
+	Copyright (C) 2025 Camren Chraplak
+
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+#include "../board.h"
+
+#if defined(UNOR3) && defined(NVM_INTERNAL)
+
+#include "../../board_common.h"
+#include "../../nvm/generic_nvm.h"
+
+#include <string.h>
+#include <avr/eeprom.h>
+
+bool nvmBegan = false;
+
+enum NVMStartCode nvmInit(nvm_size_t setNVMSize) {
+	if (nvmBegan) {
+		return NVM_STARTED;
+	}
+	if (setNVMSize == (nvm_size_t)DEFAULT_NVM_SIZE) {
+		return NVM_INVALID_SIZE;
+	}
+	nvmBegan = true;
+	return NVM_OK;
+}
+
+bool nvmMaxSize(nvm_size_t *size) {
+	if (nvmBegan) {
+		*size = (nvm_size_t)(E2END + 1);
+		if (*size == 0) {
+			*size = NVM_MAX_SIZE;
+		}
+		return true;
+	}
+
+	*size = DEFAULT_NVM_SIZE;
+	return false;
+}
+
+enum NVMDefaultCode nvmSetDefaults(void) {
+	// ensures NVM_SIZE isn't too big for microcontroller
+	nvm_size_t nvmMaxValue;
+	if (nvmMaxSize(&nvmMaxValue)) {
+		if (NVM_SIZE > nvmMaxValue) {
+			return NVM_DEFAULT_SIZE_TOO_BIG;
+		}
+	}
+	else {
+		// if nvm not started or unable to get size
+		return NVM_DEFAULT_FAIL_MAX_SIZE;
+	}
+
+	// writes critical values
+	enum NVMDefaultCode code = nvmSetCritDefaults(nvmMaxValue);
+	if (code != NVM_DEFAULT_OK) {
+		return code;
+	}
+
+	//writes platform values
+	return nvmSetEnvDefaults();
+}
+
+bool nvmWriteCharArray(nvm_size_t key, char* value, uint8_t maxLength) {return false;}
+
+bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {return false;}
+
+void nvmWrite(uint8_t addr, uint8_t val) {
+	eeprom_busy_wait();
+	__EEPUT(addr, val);
+}
+
+#define NVM_WRITE(key, value, type) \
+	if (!nvmBegan) { \
+		return false; \
+	} \
+	for (uint8_t i = 0; i < sizeof(type); i++) { \
+		nvmWrite(key + i, (value >> (i*8))); \
+	} \
+	return true;
+
+bool nvmWriteBool(nvm_size_t key, bool value) {
+	NVM_WRITE(key, value, bool);
+}
+
+bool nvmWriteI8(nvm_size_t key, int8_t value) {
+	NVM_WRITE(key, value, int8_t);
+}
+
+bool nvmWriteUI8(nvm_size_t key, uint8_t value) {
+	NVM_WRITE(key, value, uint8_t);
+}
+
+bool nvmWriteI16(nvm_size_t key, int16_t value) {
+	NVM_WRITE(key, value, int16_t);
+}
+
+bool nvmWriteUI16(nvm_size_t key, uint16_t value) {
+	NVM_WRITE(key, value, uint16_t);
+}
+
+bool nvmWriteI32(nvm_size_t key, int32_t value) {
+	NVM_WRITE(key, value, int32_t);
+}
+
+bool nvmWriteUI32(nvm_size_t key, uint32_t value) {
+	NVM_WRITE(key, value, uint32_t);
+}
+
+bool nvmWriteI64(nvm_size_t key, int64_t value) {
+	NVM_WRITE(key, value, int64_t);
+}
+
+bool nvmWriteUI64(nvm_size_t key, uint64_t value) {
+	NVM_WRITE(key, value, uint64_t);
+}
+
+bool nvmWriteFloat(nvm_size_t key, float value) {return false;}
+
+bool nvmWriteDouble(nvm_size_t key, double value) {return false;}
+
+void nvmGet(uint8_t addr, uint8_t *var) {
+	eeprom_busy_wait();
+	__EEGET(*var, addr);
+}
+
+#define NVM_GET(key, value, type) \
+	if (!nvmBegan) { \
+		return false; \
+	} \
+	for (uint8_t i = 0; i < sizeof(type); i++) { \
+		nvmGet(key + i, (uint8_t*)value + i); \
+	} \
+	return true;
+
+bool nvmGetBool(nvm_size_t key, bool *value, bool canDefault) {
+	NVM_GET(key, value, bool);
+}
+
+bool nvmGetI8(nvm_size_t key, int8_t *value, bool canDefault) {
+	NVM_GET(key, value, int8_t);
+}
+
+bool nvmGetUI8(nvm_size_t key, uint8_t *value, bool canDefault) {
+	NVM_GET(key, value, uint8_t);
+}
+
+bool nvmGetI16(nvm_size_t key, int16_t *value, bool canDefault) {
+	NVM_GET(key, value, int16_t);
+}
+
+bool nvmGetUI16(nvm_size_t key, uint16_t *value, bool canDefault) {
+	NVM_GET(key, value, uint16_t);
+}
+
+bool nvmGetI32(nvm_size_t key, int32_t *value, bool canDefault) {
+	NVM_GET(key, value, int32_t);
+}
+
+bool nvmGetUI32(nvm_size_t key, uint32_t *value, bool canDefault) {
+	NVM_GET(key, value, uint32_t);
+}
+
+bool nvmGetI64(nvm_size_t key, int64_t *value, bool canDefault) {
+	NVM_GET(key, value, int64_t);
+}
+
+bool nvmGetUI64(nvm_size_t key, uint64_t *value, bool canDefault) {
+	NVM_GET(key, value, uint64_t);
+}
+
+bool nvmGetFloat(nvm_size_t key, float *value, bool canDefault) {return false;}
+
+bool nvmGetDouble(nvm_size_t key, double *value, bool canDefault) {return false;}
+
+#endif

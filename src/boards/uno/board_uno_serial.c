@@ -95,7 +95,7 @@ void uartTransmit(uint8_t value) {
  * @param message flash message to print
  * @param messageSize size of message to print
  */
-void copyMessage(memCharString *message, uint8_t messageSize) {
+void printMessage(memCharString *message, uint8_t messageSize) {
 	for (uint8_t i = 0; i < messageSize; i++) {
 		hardPrintChar((char)pgm_read_byte_near(message + i));
 	}
@@ -114,7 +114,7 @@ void hardPrintBegin(uint32_t baud) {
 }
 
 void hardPrintMemCharArray(memCharString* value) {
-	copyMessage(value, strlen_P(value));
+	printMessage(value, strlen_P(value));
 }
 
 void hardPrintCharArray(const char* value) {
@@ -212,7 +212,7 @@ void hardPrintDouble(double value) {}
 void hardPrintDoublePlaces(double value, uint8_t places) {}
 
 void hardPrintMemCharArrayln(memCharString* value) {
-	copyMessage(value, strlen_P(value));
+	printMessage(value, strlen_P(value));
 	uartTransmit('\n');
 }
 
