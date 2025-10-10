@@ -158,7 +158,7 @@ void keyToChar(nvm_size_t key, char* keyStr) {
 	keyStr[NVM_MAX_SIZE_BYTES] = END_OF_CHAR;
 }
 
-#define SET_NVS(key, setter) \
+#define SET_NVS(key, setter, value) \
 	if (!nvmBegan) { \
 		return false; \
 	} \
@@ -188,44 +188,77 @@ bool nvmWriteCharArray(nvm_size_t key, char* value, uint8_t maxLength) {}
 bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {}
 
 bool nvmWriteBool(nvm_size_t key, bool value) {
-	SET_NVS(key, nvs_set_u8);
+	SET_NVS(key, nvs_set_u8, value);
 }
 
 bool nvmWriteI8(nvm_size_t key, int8_t value) {
-	SET_NVS(key, nvs_set_i8);
+	SET_NVS(key, nvs_set_i8, value);
 }
 
 bool nvmWriteUI8(nvm_size_t key, uint8_t value) {
-	SET_NVS(key, nvs_set_u8);
+	SET_NVS(key, nvs_set_u8, value);
 }
 
 bool nvmWriteI16(nvm_size_t key, int16_t value) {
-	SET_NVS(key, nvs_set_i16);
+	SET_NVS(key, nvs_set_i16, value);
 }
 
 bool nvmWriteUI16(nvm_size_t key, uint16_t value) {
-	SET_NVS(key, nvs_set_u16);
+	SET_NVS(key, nvs_set_u16, value);
 }
 
 bool nvmWriteI32(nvm_size_t key, int32_t value) {
-	SET_NVS(key, nvs_set_i32);
+	SET_NVS(key, nvs_set_i32, value);
 }
 
 bool nvmWriteUI32(nvm_size_t key, uint32_t value) {
-	SET_NVS(key, nvs_set_u32);
+	SET_NVS(key, nvs_set_u32, value);
 }
 
 bool nvmWriteI64(nvm_size_t key, int64_t value) {
-	SET_NVS(key, nvs_set_i64);
+	SET_NVS(key, nvs_set_i64, value);
 }
 
 bool nvmWriteUI64(nvm_size_t key, uint64_t value) {
-	SET_NVS(key, nvs_set_u64);
+	SET_NVS(key, nvs_set_u64, value);
 }
 
-bool nvmWriteFloat(nvm_size_t key, float value) {}
+bool nvmWriteFloat(nvm_size_t key, float value) {
 
-bool nvmWriteDouble(nvm_size_t key, double value) {}
+	if (sizeof(float) == sizeof(uint16_t)) {
+		uint16_t newVal;
+		memcpy(&newVal, &value, sizeof(float));
+		return nvmWriteUI16(key, newVal);
+	}
+	else if (sizeof(float) == sizeof(uint32_t)) {
+		uint32_t newVal;
+		memcpy(&newVal, &value, sizeof(float));
+		return nvmWriteUI32(key, newVal);
+	}
+	else if (sizeof(float) == sizeof(uint64_t)) {
+		uint64_t newVal;
+		memcpy(&newVal, &value, sizeof(float));
+		return nvmWriteUI64(key, newVal);
+	}
+}
+
+bool nvmWriteDouble(nvm_size_t key, double value) {
+	if (sizeof(double) == sizeof(uint16_t)) {
+		uint16_t newVal;
+		memcpy(&newVal, &value, sizeof(double));
+		return nvmWriteUI16(key, newVal);
+	}
+	else if (sizeof(double) == sizeof(uint32_t)) {
+		uint32_t newVal;
+		memcpy(&newVal, &value, sizeof(double));
+		return nvmWriteUI32(key, newVal);
+	}
+	else if (sizeof(double) == sizeof(uint64_t)) {
+		uint64_t newVal;
+		memcpy(&newVal, &value, sizeof(double));
+		return nvmWriteUI64(key, newVal);
+	}
+}
 
 bool nvmGetBool(nvm_size_t key, bool *value, bool canDefault) {
 	GET_NVS(key, nvs_get_u8, (uint8_t*)value);
@@ -263,8 +296,60 @@ bool nvmGetUI64(nvm_size_t key, uint64_t *value, bool canDefault) {
 	GET_NVS(key, nvs_get_u64, value);
 }
 
-bool nvmGetFloat(nvm_size_t key, float *value, bool canDefault) {}
+bool nvmGetFloat(nvm_size_t key, float *value, bool canDefault) {
+	if (sizeof(float) == sizeof(uint16_t)) {
+		uint16_t newVal;
+		bool result = nvmGetUI16(key, &newVal, true);
+		if (!result) {
+			return false;
+		}
+		memcpy(value, &newVal, sizeof(float));
+	}
+	else if (sizeof(float) == sizeof(uint32_t)) {
+		uint32_t newVal;
+		bool result = nvmGetUI32(key, &newVal, true);
+		if (!result) {
+			return false;
+		}
+		memcpy(value, &newVal, sizeof(float));
+	}
+	else if (sizeof(float) == sizeof(uint64_t)) {
+		uint64_t newVal;
+		bool result = nvmGetUI64(key, &newVal, true);
+		if (!result) {
+			return false;
+		}
+		memcpy(value, &newVal, sizeof(float));
+	}
+	return true;
+}
 
-bool nvmGetDouble(nvm_size_t key, double *value, bool canDefault) {}
+bool nvmGetDouble(nvm_size_t key, double *value, bool canDefault) {
+	if (sizeof(double) == sizeof(uint16_t)) {
+		uint16_t newVal;
+		bool result = nvmGetUI16(key, &newVal, true);
+		if (!result) {
+			return false;
+		}
+		memcpy(value, &newVal, sizeof(double));
+	}
+	else if (sizeof(double) == sizeof(uint32_t)) {
+		uint32_t newVal;
+		bool result = nvmGetUI32(key, &newVal, true);
+		if (!result) {
+			return false;
+		}
+		memcpy(value, &newVal, sizeof(double));
+	}
+	else if (sizeof(double) == sizeof(uint64_t)) {
+		uint64_t newVal;
+		bool result = nvmGetUI64(key, &newVal, true);
+		if (!result) {
+			return false;
+		}
+		memcpy(value, &newVal, sizeof(double));
+	}
+	return true;
+}
 
 #endif
