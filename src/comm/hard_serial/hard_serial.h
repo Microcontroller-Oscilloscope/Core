@@ -23,12 +23,23 @@
 #define DEFAULT_DOUBLE_PLACES 4
 #define ASCII0 48 // ASCII code for printing 0
 #define INT64_SIGN 0b1000000000000000000000000000000000000000000000000000000000000000 // sign for int64
+#define END_OF_CHAR '\0'
+#define CHAR_LEN_ERROR UINT8_MAX
 
 #include "../../compile_flags/compile_flags.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * Gets size of char array
+ * 
+ * @param value char array pointer
+ * 
+ * @return size of array
+ */
+uint8_t charArraySize(const char* value);
 
 /**
  * Sets up Serial communication

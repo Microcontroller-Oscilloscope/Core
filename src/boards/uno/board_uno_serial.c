@@ -42,24 +42,9 @@ void hardPrintBegin(uint32_t baud) {}
 	#warning BAUD_RATE will be slightly off set value. Consider setting a value divisible into 1,000,000. function: (1,000,000 / BAUD_RATE)
 #endif
 
-#define END_OF_CHAR '\0'
-#define CHAR_LEN_ERROR UINT8_MAX
-
 #define INT8_MAX_DIGITS 3 // max number of digits for int8
 #define INT16_MAX_DIGITS 5 // max number of digits for int16
 #define INT32_MAX_DIGITS 10 // max number of digits for int32
-
-uint8_t charArraySize(const char* value) {
-
-	uint8_t max = CHAR_LEN_ERROR - 1;
-	for (uint8_t i = 0U; i < max; i++) {
-		if (!(value[i] ^ END_OF_CHAR)) {
-			return i;
-		}
-	}
-
-	return CHAR_LEN_ERROR;
-}
 
 /**
  * Converts to n power of input datatypes

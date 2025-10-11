@@ -23,6 +23,8 @@
 #include "../status/debug.h"
 #include "../comm/hard_serial/hard_serial.h"
 
+#include <stddef.h>
+
 #ifndef NO_CHAR_ARRAY_SUPPORT
 
 	memCharString noNull[] = {"Can't use null pointer"};
@@ -54,25 +56,6 @@
 			return false;
 		}
 		return true;
-	}
-
-	uint8_t charArraySize(char* value) {
-
-		if (!validCharPointer(value)) {
-			return 0U;
-		}
-
-		for (uint8_t i = 0U; i < CHAR_LEN_ERROR - 1; i++) {
-			if (value[i] == END_OF_CHAR) {
-				return i + 1U;
-			}
-		}
-
-		#ifdef __NVM_DEBUG__
-			printNVM();
-			hardPrintMemCharArrayln(lengthToSmall);
-		#endif
-		return CHAR_LEN_ERROR;
 	}
 
 #endif

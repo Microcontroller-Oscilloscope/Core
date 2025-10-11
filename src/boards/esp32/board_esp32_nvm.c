@@ -22,6 +22,7 @@
 
 #include "../../board_common.h"
 #include "../../nvm/generic_nvm.h"
+#include "../../comm/hard_serial/hard_serial.h"
 
 #include <nvs.h>
 #include <nvs_flash.h>

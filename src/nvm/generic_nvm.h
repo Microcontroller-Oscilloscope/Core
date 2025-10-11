@@ -91,15 +91,6 @@ extern "C" {
 	 */
 	bool validCharPointer(char* value);
 
-	/**
-	 * Gets the size of a char array within 254 including '\0'
-	 * 
-	 * @param value array to test
-	 * 
-	 * @return size of array or error
-	 */
-	uint8_t charArraySize(char* value);
-
 #endif
 
 #ifdef __NVM_DEBUG__
