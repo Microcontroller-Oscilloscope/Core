@@ -18,7 +18,13 @@
 
 #include "hard_serial.h"
 
+#include "../../nvm/generic_nvm.h"
+
 uint8_t charArraySize(const char* value) {
+
+	if (!validCharPointer(value)) {
+		return 0U;
+	}
 
 	uint8_t max = CHAR_LEN_ERROR - 1;
 	for (uint8_t i = 0U; i < max; i++) {

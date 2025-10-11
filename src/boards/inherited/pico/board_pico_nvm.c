@@ -126,10 +126,53 @@ enum NVMDefaultCode nvmSetDefaults(void) {
 }
 
 bool nvmWriteCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
-	return false;
+
+	if (!nvmBegan) {
+		return false;
+	}
+
+	uint8_t valueLen = charArraySize(value);
+	if (valueLen == 0) {
+		return false;
+	}
+	else if (valueLen > maxLength) {
+		return false;
+	}
+	else if (valueLen == CHAR_LEN_ERROR) {
+		return false;
+	}
+
+	chainLock = true;
+
+	for (uint8_t i = 0; i < valueLen; i++) {
+		nvmWriteI8(key + i, value[i]);
+	}
+
+	chainLock = false;
+	return true;
 }
 
 bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
+	if (!nvmBegan) {
+		return false;
+	}
+
+	if (!validCharPointer(value)) {
+		return false;
+	}
+	if (maxLength == 0U) {
+		return false;
+	}
+
+	for (uint8_t i = 0; i < maxLength; i++) {
+		int8_t letter;
+		nvmGetI8(key + i, &letter, CAN_DEFAULT);
+		value[i] = letter;
+		if (letter == END_OF_CHAR) {
+			return true;
+		}
+	}
+
 	return false;
 }
 

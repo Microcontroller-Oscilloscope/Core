@@ -89,7 +89,7 @@ extern "C" {
 	 * 
 	 * @return if array isn't null
 	 */
-	bool validCharPointer(char* value);
+	bool validCharPointer(const char* value);
 
 #endif
 

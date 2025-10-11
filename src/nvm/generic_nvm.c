@@ -47,7 +47,7 @@
 		return true;
 	}
 
-	bool validCharPointer(char* value) {
+	bool validCharPointer(const char* value) {
 		if (value == NULL) {
 			#ifdef __NVM_DEBUG__
 				printNVM();
