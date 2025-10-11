@@ -129,9 +129,49 @@ bool nvmWriteUI64(nvm_size_t key, uint64_t value) {
 	NVM_WRITE(key, value, uint64_t);
 }
 
-bool nvmWriteFloat(nvm_size_t key, float value) {return false;}
+bool nvmWriteFloat(nvm_size_t key, float value) {
+	if (!nvmBegan) {
+		return false;
+	}
 
-bool nvmWriteDouble(nvm_size_t key, double value) {return false;}
+	if (sizeof(float) == 4) {
+		uint32_t intVal;
+		memcpy(&intVal, &value, sizeof(uint32_t));
+		nvmWriteUI32(key, intVal);
+	}
+	else if (sizeof(float) == 8) {
+		uint64_t intVal;
+		memcpy(&intVal, &value, sizeof(uint64_t));
+		nvmWriteUI64(key, intVal);
+	}
+	else {
+		return false;
+	}
+
+	return true;
+}
+
+bool nvmWriteDouble(nvm_size_t key, double value) {
+	if (!nvmBegan) {
+		return false;
+	}
+
+	if (sizeof(double) == 4) {
+		uint32_t intVal;
+		memcpy(&intVal, &value, sizeof(uint32_t));
+		nvmWriteUI32(key, intVal);
+	}
+	else if (sizeof(double) == 8) {
+		uint64_t intVal;
+		memcpy(&intVal, &value, sizeof(uint64_t));
+		nvmWriteUI64(key, intVal);
+	}
+	else {
+		return false;
+	}
+
+	return true;
+}
 
 void nvmGet(uint8_t addr, uint8_t *var) {
 	eeprom_busy_wait();
@@ -183,8 +223,48 @@ bool nvmGetUI64(nvm_size_t key, uint64_t *value, bool canDefault) {
 	NVM_GET(key, value, uint64_t);
 }
 
-bool nvmGetFloat(nvm_size_t key, float *value, bool canDefault) {return false;}
+bool nvmGetFloat(nvm_size_t key, float *value, bool canDefault) {
+	if (!nvmBegan) {
+		return false;
+	}
 
-bool nvmGetDouble(nvm_size_t key, double *value, bool canDefault) {return false;}
+	if (sizeof(float) == 4) {
+		uint32_t intVal;
+		nvmGetUI32(key, &intVal, true);
+		memcpy(value, &intVal, sizeof(uint32_t));
+	}
+	else if (sizeof(float) == 8) {
+		uint64_t intVal;
+		nvmGetUI64(key, &intVal, true);
+		memcpy(value, &intVal, sizeof(uint64_t));
+	}
+	else {
+		return false;
+	}
+
+	return true;
+}
+
+bool nvmGetDouble(nvm_size_t key, double *value, bool canDefault) {
+	if (!nvmBegan) {
+		return false;
+	}
+
+	if (sizeof(double) == 4) {
+		uint32_t intVal;
+		nvmGetUI32(key, &intVal, true);
+		memcpy(value, &intVal, sizeof(uint32_t));
+	}
+	else if (sizeof(double) == 8) {
+		uint64_t intVal;
+		nvmGetUI64(key, &intVal, true);
+		memcpy(value, &intVal, sizeof(uint64_t));
+	}
+	else {
+		return false;
+	}
+
+	return true;
+}
 
 #endif
