@@ -77,6 +77,24 @@ void hardPinMode(pin_t pin, enum pinModeState mode);
  */
 void hardDigitalWrite(pin_t pin, enum digitalState value);
 
+/**
+ * Starts a thread safe operation
+ * 
+ * @warning MUST call 'endThreadSafety'
+ * 
+ * @return if threads were locked and weren't already locked
+ */
+bool startThreadSafety(void);
+
+/**
+ * Ends a thread safe operation
+ * 
+ * @note intended to be called after 'startThreadSafety'
+ * 
+ * @return if threads were unlocked and weren't already unlocked
+ */
+bool endThreadSafety(void);
+
 #ifdef __cplusplus
 }
 #endif

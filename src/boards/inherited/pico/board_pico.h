@@ -49,6 +49,10 @@
 		#define SERIAL_PRINTF // uses printf as serial
 	#endif
 
+	#ifndef NVM_INTERNAL
+		#define NVM_INTERNAL // uses internal nvm functions
+	#endif
+
 	/****************************
 	 * NVM Config
 	****************************/
