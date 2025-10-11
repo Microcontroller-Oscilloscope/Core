@@ -42,13 +42,22 @@ enum NVMStartCode nvmInit(nvm_size_t setNVMSize) {
 		return NVM_INVALID_SIZE;
 	}
 
+	startThreadSafety();
+
 	if (nvs_flash_init() != ESP_OK) {
+		endThreadSafety();
 		return NVM_FAILED;
 	}
 
+	endThreadSafety();
+	startThreadSafety();
+
 	if (nvs_open(OSC_NAME_SPACE, NVS_READWRITE, &handler) != ESP_OK) {
+		endThreadSafety();
 		return NVM_FAILED;
 	}
+
+	endThreadSafety();
 
 	nvmBegan = true;
 
@@ -80,7 +89,9 @@ bool nvmStop(void) {
 		return false;
 	}
 
+	startThreadSafety();
 	nvs_flash_deinit();
+	endThreadSafety();
 	nvmBegan = false;
 
 	return true;
@@ -96,12 +107,19 @@ bool nvmStop(void) {
  */
 bool nvmClear(void) {
 
+	startThreadSafety();
 	if (nvs_flash_erase() != ESP_OK) {
+		endThreadSafety();
 		return false;
 	}
+	endThreadSafety();
+
+	startThreadSafety();
 	if (nvs_flash_init() != ESP_OK) {
+		endThreadSafety();
 		return false;
 	}
+	endThreadSafety();
 
 	return true;
 }

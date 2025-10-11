@@ -27,9 +27,6 @@
 
 #ifndef NO_CHAR_ARRAY_SUPPORT
 
-	memCharString noNull[] = {"Can't use null pointer"};
-	memCharString lengthToSmall[] = {"Max length not long enough"};
-
 	bool sameString(char* first, char* second) {
 		uint8_t firstSize = charArraySize(first);
 		uint8_t secondSize = charArraySize(second);
@@ -47,18 +44,20 @@
 		return true;
 	}
 
-	bool validCharPointer(const char* value) {
-		if (value == NULL) {
-			#ifdef __NVM_DEBUG__
-				printNVM();
-				hardPrintMemCharArrayln(noNull);
-			#endif
-			return false;
-		}
-		return true;
-	}
-
 #endif
+
+memCharString noNull[] = {"Can't use null pointer"};
+
+bool validCharPointer(const char* value) {
+	if (value == NULL) {
+		#ifdef __NVM_DEBUG__
+			printNVM();
+			hardPrintMemCharArrayln(noNull);
+		#endif
+		return false;
+	}
+	return true;
+}
 
 #ifdef __NVM_DEBUG__
 

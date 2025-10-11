@@ -82,16 +82,16 @@ extern "C" {
 	 */
 	bool sameString(char* first, char* second);
 
-	/**
-	 * Tests if char array is a null pointer
-	 * 
-	 * @param value array to test
-	 * 
-	 * @return if array isn't null
-	 */
-	bool validCharPointer(const char* value);
-
 #endif
+
+/**
+ * Tests if char array is a null pointer
+ * 
+ * @param value array to test
+ * 
+ * @return if array isn't null
+ */
+bool validCharPointer(const char* value);
 
 #ifdef __NVM_DEBUG__
 
