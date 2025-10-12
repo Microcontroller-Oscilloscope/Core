@@ -231,49 +231,52 @@ void nvmGet(uint8_t addr, uint8_t *var) {
 	__EEGET(*var, addr);
 }
 
-#define NVM_GET(key, value, type) \
+#define NVM_GET(key, value, type, canDefault, defaultValue) \
 	if (!nvmBegan) { \
 		return false; \
 	} \
 	for (uint8_t i = 0; i < sizeof(type); i++) { \
 		nvmGet(key + i, (uint8_t*)value + i); \
 	} \
+	if (!canDefault && *value == defaultValue) { \
+		return false; \
+	} \
 	return true;
 
 bool nvmGetBool(nvm_size_t key, bool *value, bool canDefault) {
-	NVM_GET(key, value, bool);
+	NVM_GET(key, value, bool, canDefault, DEFAULT_BOOL);
 }
 
 bool nvmGetI8(nvm_size_t key, int8_t *value, bool canDefault) {
-	NVM_GET(key, value, int8_t);
+	NVM_GET(key, value, int8_t, canDefault, (int8_t)DEFAULT_INT);
 }
 
 bool nvmGetUI8(nvm_size_t key, uint8_t *value, bool canDefault) {
-	NVM_GET(key, value, uint8_t);
+	NVM_GET(key, value, uint8_t, canDefault, (uint8_t)DEFAULT_INT);
 }
 
 bool nvmGetI16(nvm_size_t key, int16_t *value, bool canDefault) {
-	NVM_GET(key, value, int16_t);
+	NVM_GET(key, value, int16_t, canDefault, (int16_t)DEFAULT_INT);
 }
 
 bool nvmGetUI16(nvm_size_t key, uint16_t *value, bool canDefault) {
-	NVM_GET(key, value, uint16_t);
+	NVM_GET(key, value, uint16_t, canDefault, (uint16_t)DEFAULT_INT);
 }
 
 bool nvmGetI32(nvm_size_t key, int32_t *value, bool canDefault) {
-	NVM_GET(key, value, int32_t);
+	NVM_GET(key, value, int32_t, canDefault, (int32_t)DEFAULT_INT);
 }
 
 bool nvmGetUI32(nvm_size_t key, uint32_t *value, bool canDefault) {
-	NVM_GET(key, value, uint32_t);
+	NVM_GET(key, value, uint32_t, canDefault, (uint32_t)DEFAULT_INT);
 }
 
 bool nvmGetI64(nvm_size_t key, int64_t *value, bool canDefault) {
-	NVM_GET(key, value, int64_t);
+	NVM_GET(key, value, int64_t, canDefault, (int64_t)DEFAULT_INT);
 }
 
 bool nvmGetUI64(nvm_size_t key, uint64_t *value, bool canDefault) {
-	NVM_GET(key, value, uint64_t);
+	NVM_GET(key, value, uint64_t, canDefault, (uint64_t)DEFAULT_INT);
 }
 
 bool nvmGetFloat(nvm_size_t key, float *value, bool canDefault) {

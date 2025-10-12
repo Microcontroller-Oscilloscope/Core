@@ -189,7 +189,7 @@ bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 	nvmCommit(); \
 	return true;
 
-#define GET_NVM(key, value, type) \
+#define GET_NVM(key, value, type, canDefault, defaultValue) \
 	*value = 0; \
 	if (!nvmBegan) { \
 		return false; \
@@ -199,6 +199,9 @@ bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 	} \
 	for (uint8_t i = 0; i < sizeof(*value); i++) { \
 		*value |= ((type)memoryNVM[key + i]) << ((sizeof(*value) - i - 1) * 8); \
+	} \
+	if (!canDefault && *value == defaultValue) { \
+		return false; \
 	} \
 	return true; \
 
@@ -275,39 +278,39 @@ bool nvmWriteDouble(nvm_size_t key, double value) {
 }
 
 bool nvmGetBool(nvm_size_t key, bool *value, bool canDefault) {
-	GET_NVM(key, value, bool);
+	GET_NVM(key, value, bool, canDefault, DEFAULT_BOOL);
 }
 
 bool nvmGetI8(nvm_size_t key, int8_t *value, bool canDefault) {
-	GET_NVM(key, value, int8_t);
+	GET_NVM(key, value, int8_t, canDefault, (int8_t)DEFAULT_INT);
 }
 
 bool nvmGetUI8(nvm_size_t key, uint8_t *value, bool canDefault) {
-	GET_NVM(key, value, uint8_t);
+	GET_NVM(key, value, uint8_t, canDefault, (uint8_t)DEFAULT_INT);
 }
 
 bool nvmGetI16(nvm_size_t key, int16_t *value, bool canDefault) {
-	GET_NVM(key, value, int16_t);
+	GET_NVM(key, value, int16_t, canDefault, (int16_t)DEFAULT_INT);
 }
 
 bool nvmGetUI16(nvm_size_t key, uint16_t *value, bool canDefault) {
-	GET_NVM(key, value, uint16_t);
+	GET_NVM(key, value, uint16_t, canDefault, (uint16_t)DEFAULT_INT);
 }
 
 bool nvmGetI32(nvm_size_t key, int32_t *value, bool canDefault) {
-	GET_NVM(key, value, int32_t);
+	GET_NVM(key, value, int32_t, canDefault, (int32_t)DEFAULT_INT);
 }
 
 bool nvmGetUI32(nvm_size_t key, uint32_t *value, bool canDefault) {
-	GET_NVM(key, value, uint32_t);
+	GET_NVM(key, value, uint32_t, canDefault, (uint32_t)DEFAULT_INT);
 }
 
 bool nvmGetI64(nvm_size_t key, int64_t *value, bool canDefault) {
-	GET_NVM(key, value, int64_t);
+	GET_NVM(key, value, int64_t, canDefault, (int64_t)DEFAULT_INT);
 }
 
 bool nvmGetUI64(nvm_size_t key, uint64_t *value, bool canDefault) {
-	GET_NVM(key, value, uint64_t);
+	GET_NVM(key, value, uint64_t, canDefault, (uint64_t)DEFAULT_INT);
 }
 
 bool nvmGetFloat(nvm_size_t key, float *value, bool canDefault) {
