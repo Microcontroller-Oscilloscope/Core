@@ -62,11 +62,11 @@ static inline void hardPrintUInt16(uint16_t value) {
 }
 
 static inline void hardPrintInt32(int32_t value) {
-	printf("%ld", value);
+	printf("%d", value);
 }
 
 static inline void hardPrintUInt32(uint32_t value) {
-	printf("%lu", value);
+	printf("%u", value);
 }
 
 static inline void hardPrintInt64(int64_t value) {
@@ -128,11 +128,11 @@ static inline void hardPrintUInt16ln(uint16_t value) {
 }
 
 static inline void hardPrintInt32ln(int32_t value) {
-	printf("%ld\n", value);
+	printf("%d\n", value);
 }
 
 static inline void hardPrintUInt32ln(uint32_t value) {
-	printf("%lu\n", value);
+	printf("%u\n", value);
 }
 
 static inline void hardPrintInt64ln(int64_t value) {

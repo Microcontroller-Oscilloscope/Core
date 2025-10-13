@@ -22,6 +22,8 @@
 
 #include "../../board_common.h"
 
+#include <driver/gpio.h>
+
 bool initBoard() {
 	return true;
 }

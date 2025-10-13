@@ -22,6 +22,9 @@
 
 #include "../../board_common.h"
 
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+
 void hardDelayMS(uint32_t delayAmount) {
 	vTaskDelay(delayAmount / portTICK_PERIOD_MS);
 }

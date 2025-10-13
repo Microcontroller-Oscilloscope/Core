@@ -35,17 +35,23 @@
 	#endif
 
 	#include <esp_attr.h>
-	#include <esp32-hal-gpio.h>
+
+	#ifdef PLATFORMIO
+		#include <esp32-hal-gpio.h>
+	#endif
 
 	/****************************
 	 * Type Defines
 	****************************/
 
-	#include <pgmspace.h>
-
 	typedef const char memCharString;
 
-	#define PROG_FLASH PROGMEM // storage specifier for flash space
+	#ifdef PLATFORMIO
+		#include <pgmspace.h>
+		#define PROG_FLASH PROGMEM // storage specifier for flash space
+	#else
+		#define PROG_FLASH // storage specifier for flash space
+	#endif
 
 	/****************************
 	 * Board Overrides

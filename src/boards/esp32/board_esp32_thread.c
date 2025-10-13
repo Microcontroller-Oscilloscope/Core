@@ -22,6 +22,11 @@
 
 #include "../../board_common.h"
 
+#include <freertos/FreeRTOS.h>
+#include <freertos/portmacro.h>
+#include <freertos/task.h>
+#include <esp_system.h>
+
 static portMUX_TYPE threadSpinLock = portMUX_INITIALIZER_UNLOCKED;
 
 bool startThreadSafety(void) {

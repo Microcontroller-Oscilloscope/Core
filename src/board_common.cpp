@@ -18,42 +18,76 @@
 
 #include "board_common.h"
 
-#include <Arduino.h>
+#ifdef PLATFORMIO
+	#include <Arduino.h>
 
-#ifndef DELAY_INTERNAL
+	#ifndef DELAY_INTERNAL
 
-	extern "C" void hardDelayMS(uint32_t delayAmount) {
-		delay(delayAmount);
-	}
-
-	extern "C" void hardDelayUS(uint32_t delayAmount) {
-		delayMicroseconds(delayAmount);
-	}
-
-#endif
-
-#ifndef IO_INTERNAL
-
-	extern "C" bool initBoard() {
-		return true;
-	}
-
-	extern "C" void hardPinMode(pin_t pin, pinModeState mode) {
-		pinMode(pin, mode);
-
-		if (mode == PIN_MODE_INPUT) {
-			pinMode(pin, INPUT);
+		extern "C" void hardDelayMS(uint32_t delayAmount) {
+			delay(delayAmount);
 		}
-		else if (mode == PIN_MODE_OUTPUT) {
-			pinMode(pin, OUTPUT);
-		}
-		else if (mode == PIN_MODE_INPUT_PULL_UP) {
-			pinMode(pin, INPUT_PULLUP);
-		}
-	}
 
-	extern "C" void hardDigitalWrite(pin_t pin, enum digitalState value) {
-		digitalWrite(pin, value);
-	}
+		extern "C" void hardDelayUS(uint32_t delayAmount) {
+			delayMicroseconds(delayAmount);
+		}
 
+	#endif
+
+	#ifndef IO_INTERNAL
+
+		extern "C" bool initBoard() {
+			return true;
+		}
+
+		extern "C" void hardPinMode(pin_t pin, pinModeState mode) {
+			pinMode(pin, mode);
+
+			if (mode == PIN_MODE_INPUT) {
+				pinMode(pin, INPUT);
+			}
+			else if (mode == PIN_MODE_OUTPUT) {
+				pinMode(pin, OUTPUT);
+			}
+			else if (mode == PIN_MODE_INPUT_PULL_UP) {
+				pinMode(pin, INPUT_PULLUP);
+			}
+		}
+
+		extern "C" void hardDigitalWrite(pin_t pin, enum digitalState value) {
+			digitalWrite(pin, value);
+		}
+
+	#endif
+#else
+	#ifndef DELAY_INTERNAL
+
+		#warning Not using Ardiuno or internal delay functionality. hardDelayMS and hardDelayUS have no effect
+
+		extern "C" void hardDelayMS(uint32_t delayAmount) {
+			
+		}
+
+		extern "C" void hardDelayUS(uint32_t delayAmount) {
+			
+		}
+
+	#endif
+
+	#ifndef IO_INTERNAL
+
+		#warning Not using Ardiuno or internal IO functionality. initBoard, hardPinMode, and hardDigitalWrite have no effect
+
+		extern "C" bool initBoard() {
+			return true;
+		}
+
+		extern "C" void hardPinMode(pin_t pin, pinModeState mode) {
+			
+		}
+
+		extern "C" void hardDigitalWrite(pin_t pin, enum digitalState value) {
+			
+		}
+
+	#endif
 #endif
