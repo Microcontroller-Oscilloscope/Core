@@ -162,7 +162,7 @@
 	 * @note }
 	 * 
 	 * @warning 64-bit counter
-	 * @warning 64-bit scalar
+	 * @warning 16-bit scalar
 	 */
 	#define HARD_TIMER_FUNCTION(id) void IRAM_ATTR CONCATENATE(hardTimerFunction, id) ()
 

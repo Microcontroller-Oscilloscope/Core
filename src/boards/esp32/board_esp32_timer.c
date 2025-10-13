@@ -20,15 +20,29 @@
 
 #ifdef ESP32DEVC
 
-#include <esp32-hal-timer.h>
 #include "../../hard_timer.h"
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_system.h"
+#include "freertos/timers.h"
+#include "driver/timer.h"
 
 #define TIMER_COUNT_ZERO 0U // value for setting timer tick count to 0
 
 uint8_t timersStarted = 0U; // stores timer started state
 
+typedef struct hw_timer_s {
+	uint8_t group;
+	uint8_t num;
+} hard_timer_t;
+
+static hard_timer_t timerGroups[4] = {
+	{0,0}, {1,0},  {0,1},  {1,1}
+};
+
 // hardware timer pointers
-hw_timer_t *timers[] = {
+hard_timer_t *timers[] = {
 	#if NUM_TIMERS >= 1
 		NULL,
 	#endif
@@ -43,7 +57,7 @@ hw_timer_t *timers[] = {
 	#endif
 };
 
-hw_timer_t *nullTimer;
+hard_timer_t *nullTimer;
 
 /**
  * Gets timer based on desired timer
@@ -52,7 +66,7 @@ hw_timer_t *nullTimer;
  * 
  * @return pointer to timer selected
  */
-hw_timer_t** getTimer(hardware_timer_t timer) {
+hard_timer_t** getTimer(hardware_timer_t timer) {
 
 	if (timer >= 0 && timer < NUM_TIMERS) {
 		return &timers[timer];
@@ -84,7 +98,7 @@ void setTimerStarted(hardware_timer_t timer, bool state) {
  * 
  * @return if timer was initialized
  */
-bool timerInitializedInternal(hw_timer_t** timerPtr) {
+bool timerInitializedInternal(hard_timer_t** timerPtr) {
 	if (timerPtr == &nullTimer) {
 		return false;
 	}
@@ -97,7 +111,7 @@ bool timerInitializedInternal(hw_timer_t** timerPtr) {
 }
 
 bool hardTimerInitialized(hardware_timer_t timer) {
-	hw_timer_t** timerPtr = getTimer(timer);
+	hard_timer_t** timerPtr = getTimer(timer);
 	return timerInitializedInternal(timerPtr);
 }
 
@@ -108,33 +122,52 @@ bool hardTimerStarted(hardware_timer_t timer) {
 	return false;
 }
 
+bool IRAM_ATTR timerFunctionWrapper(void *arg) {
+	void (*fn)(void) = arg;
+	fn();
+	return false;
+}
+
 bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar) {
 
-	hw_timer_t** timerPtr = getTimer(timer);
+	hard_timer_t** timerPtr = getTimer(timer);
 	if (timerPtr == &nullTimer) {
 		return false;
 	}
 
 	if (!timerInitializedInternal(timerPtr)) {
-		*timerPtr = timerBegin(timer, scalar, true);
-		timerAttachInterrupt(*timerPtr, function, true);
+
+		timer_config_t config = {
+			.divider = scalar,
+			.counter_dir = true,
+			.counter_en = TIMER_PAUSE,
+			.alarm_en = TIMER_ALARM_DIS,
+			.auto_reload = false,
+        };
+		*timerPtr = &timerGroups[timer];
+
+		timer_init((*timerPtr) -> group, (*timerPtr) -> num, &config);
+		timer_set_counter_value((*timerPtr) -> group, (*timerPtr) -> num, 0);
+		timer_start((*timerPtr) -> group, (*timerPtr) -> num);
+		timer_isr_callback_add((*timerPtr) -> group, (*timerPtr) -> num, timerFunctionWrapper, function, 0);
+
 		return true;
 	}
-
 	return false;
 }
 
 bool deconstructHardTimer(hardware_timer_t timer) {
 
-	hw_timer_t** timerPtr = getTimer(timer);
+	hard_timer_t** timerPtr = getTimer(timer);
 	if (timerPtr == &nullTimer) {
 		return false;
 	}
 
 	if (timerInitializedInternal(timerPtr)) {
+
 		cancelHardTimer(timer);
-		timerDetachInterrupt(*timerPtr);
-		timerEnd(*timerPtr);
+		timer_isr_callback_remove((*timerPtr) -> group, (*timerPtr) -> num);
+		timer_deinit((*timerPtr) -> group, (*timerPtr) -> num);
 		*timerPtr = NULL;
 		return true;
 	}
@@ -144,15 +177,16 @@ bool deconstructHardTimer(hardware_timer_t timer) {
 
 bool cancelHardTimer(hardware_timer_t timer) {
 	
-	hw_timer_t** timerPtr = getTimer(timer);
+	hard_timer_t** timerPtr = getTimer(timer);
 	if (timerPtr == &nullTimer) {
 		return false;
 	}
 
 	if (hardTimerStarted(timer)) {
-		timerAlarmDisable(*timerPtr);
-		timerStop(*timerPtr);
-		timerWrite(*timerPtr, TIMER_COUNT_ZERO);
+
+		timer_set_alarm((*timerPtr) -> group, (*timerPtr) -> num, false);
+		timer_pause((*timerPtr) -> group, (*timerPtr) -> num);
+		timer_set_counter_value((*timerPtr) -> group, (*timerPtr) -> num, TIMER_COUNT_ZERO);
 		setTimerStarted(timer, false);
 		return true;
 	}
@@ -162,15 +196,17 @@ bool cancelHardTimer(hardware_timer_t timer) {
 
 bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks) {
 	
-	hw_timer_t** timerPtr = getTimer(timer);
+	hard_timer_t** timerPtr = getTimer(timer);
 	if (timerPtr == &nullTimer) {
 		return false;
 	}
 
 	if (timerInitializedInternal(timerPtr) && !hardTimerStarted(timer)) {
-		timerAlarmWrite(*timerPtr, timerTicks, true);
-		timerAlarmEnable(*timerPtr);
-		timerStart(*timerPtr);
+
+		timer_set_alarm_value((*timerPtr) -> group, (*timerPtr) -> num, timerTicks);
+		timer_set_auto_reload((*timerPtr) -> group, (*timerPtr) -> num, true);
+		timer_set_alarm((*timerPtr) -> group, (*timerPtr) -> num, true);
+		timer_start((*timerPtr) -> group, (*timerPtr) -> num);
 		setTimerStarted(timer, true);
 		return true;
 	}
