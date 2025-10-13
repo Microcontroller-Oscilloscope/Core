@@ -28,6 +28,13 @@
 
 #ifdef ESP32DEVC
 
+	#if defined(CONFIG_ESPTOOLPY_MONITOR_BAUD) && !defined(PLATFORMIO)
+		#ifdef BAUD_RATE
+			#undef BAUD_RATE
+		#endif
+		#define BAUD_RATE CONFIG_ESPTOOLPY_MONITOR_BAUD
+	#endif
+
 	#include "board_esp32_pins.h"
 
 	#ifndef NUM_IO_PINS

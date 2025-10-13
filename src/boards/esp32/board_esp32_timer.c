@@ -143,7 +143,7 @@ bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, p
 			.counter_en = TIMER_PAUSE,
 			.alarm_en = TIMER_ALARM_DIS,
 			.auto_reload = false,
-        };
+		};
 		*timerPtr = &timerGroups[timer];
 
 		timer_init((*timerPtr) -> group, (*timerPtr) -> num, &config);

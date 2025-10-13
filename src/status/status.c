@@ -22,9 +22,9 @@
 #include "../board_common.h"
 
 // if status LEDs are enabled
-#define STATUS_LED_DEFINED() (defined(STATUS_LED_PIN) || defined(EXTERNAL_STATUS_LED_PIN)) && defined(HARD_TIMER_ID_LED) && !defined(__TEST_CASES__)
+#define STATUS_LED_DEFINED ((defined(STATUS_LED_PIN) || defined(EXTERNAL_STATUS_LED_PIN)) && defined(HARD_TIMER_ID_LED) && !defined(__TEST_CASES__))
 
-#if STATUS_LED_DEFINED()
+#if STATUS_LED_DEFINED
 
 	#define HARD_TIMER_LED HARD_TIMER(HARD_TIMER_LED_INDEX) // hardware timer for status LEDs
 	#define HARD_TIMER_LED_FUNCTION() HARD_TIMER_FUNCTION(HARD_TIMER_LED_INDEX) // starter function for status LED
@@ -57,14 +57,14 @@ void initStatus(void) {
 		hardPinMode(EXTERNAL_STATUS_LED_PIN, PIN_MODE_OUTPUT);
 	#endif
 	
-	#if STATUS_LED_DEFINED()
+	#if STATUS_LED_DEFINED
 		initHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR);
 	#endif
 }
 
 void setStatus(enum STATUS_CODE status) {
 
-	#if STATUS_LED_DEFINED()
+	#if STATUS_LED_DEFINED
 
 		// reset timers and LEDs
 		cancelHardTimer(HARD_TIMER_LED);

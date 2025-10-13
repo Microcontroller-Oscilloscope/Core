@@ -24,8 +24,12 @@
 #include "../../nvm/generic_nvm.h"
 #include "../../comm/hard_serial/hard_serial.h"
 
-#include <nvs.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <esp_system.h>
 #include <nvs_flash.h>
+#include <nvs.h>
+#include <string.h>
 
 #define CHAR_KEY_SIZE NVM_MAX_SIZE_BYTES + 1U
 #define OSC_NAME_SPACE "Osc"
@@ -302,37 +306,66 @@ bool nvmWriteFloat(nvm_size_t key, float value) {
 
 	if (sizeof(float) == sizeof(uint16_t)) {
 		uint16_t newVal;
-		memcpy(&newVal, &value, sizeof(float));
+		for (uint8_t i = 0; i < sizeof(float); i++) {
+			uint8_t *newValPtr = (uint8_t *)(&newVal) + i;
+			uint8_t *valuePtr = (uint8_t *)(&value) + i;
+			memcpy(newValPtr, valuePtr, sizeof(uint8_t));
+		}
 		return nvmWriteUI16(key, newVal);
 	}
 	else if (sizeof(float) == sizeof(uint32_t)) {
 		uint32_t newVal;
-		memcpy(&newVal, &value, sizeof(float));
+		for (uint8_t i = 0; i < sizeof(float); i++) {
+			uint8_t *newValPtr = (uint8_t *)(&newVal) + i;
+			uint8_t *valuePtr = (uint8_t *)(&value) + i;
+			memcpy(newValPtr, valuePtr, sizeof(uint8_t));
+		}
 		return nvmWriteUI32(key, newVal);
 	}
 	else if (sizeof(float) == sizeof(uint64_t)) {
 		uint64_t newVal;
-		memcpy(&newVal, &value, sizeof(float));
+		for (uint8_t i = 0; i < sizeof(float); i++) {
+			uint8_t *newValPtr = (uint8_t *)(&newVal) + i;
+			uint8_t *valuePtr = (uint8_t *)(&value) + i;
+			memcpy(newValPtr, valuePtr, sizeof(uint8_t));
+		}
 		return nvmWriteUI64(key, newVal);
 	}
+
+	return false;
 }
 
 bool nvmWriteDouble(nvm_size_t key, double value) {
+
 	if (sizeof(double) == sizeof(uint16_t)) {
 		uint16_t newVal;
-		memcpy(&newVal, &value, sizeof(double));
+		for (uint8_t i = 0; i < sizeof(double); i++) {
+			uint8_t *newValPtr = (uint8_t *)(&newVal) + i;
+			uint8_t *valuePtr = (uint8_t *)(&value) + i;
+			memcpy(newValPtr, valuePtr, sizeof(uint8_t));
+		}
 		return nvmWriteUI16(key, newVal);
 	}
 	else if (sizeof(double) == sizeof(uint32_t)) {
 		uint32_t newVal;
-		memcpy(&newVal, &value, sizeof(double));
+		for (uint8_t i = 0; i < sizeof(double); i++) {
+			uint8_t *newValPtr = (uint8_t *)(&newVal) + i;
+			uint8_t *valuePtr = (uint8_t *)(&value) + i;
+			memcpy(newValPtr, valuePtr, sizeof(uint8_t));
+		}
 		return nvmWriteUI32(key, newVal);
 	}
 	else if (sizeof(double) == sizeof(uint64_t)) {
 		uint64_t newVal;
-		memcpy(&newVal, &value, sizeof(double));
+		for (uint8_t i = 0; i < sizeof(double); i++) {
+			uint8_t *newValPtr = (uint8_t *)(&newVal) + i;
+			uint8_t *valuePtr = (uint8_t *)(&value) + i;
+			memcpy(newValPtr, valuePtr, sizeof(uint8_t));
+		}
 		return nvmWriteUI64(key, newVal);
 	}
+
+	return false;
 }
 
 bool nvmGetBool(nvm_size_t key, bool *value, bool canDefault) {
@@ -372,13 +405,19 @@ bool nvmGetUI64(nvm_size_t key, uint64_t *value, bool canDefault) {
 }
 
 bool nvmGetFloat(nvm_size_t key, float *value, bool canDefault) {
+
 	if (sizeof(float) == sizeof(uint16_t)) {
 		uint16_t newVal;
 		bool result = nvmGetUI16(key, &newVal, true);
 		if (!result) {
 			return false;
 		}
-		memcpy(value, &newVal, sizeof(float));
+		for (uint8_t i = 0; i < sizeof(float); i++) {
+			uint8_t *newValPtr = (uint8_t *)(&newVal) + i;
+			uint8_t *valuePtr = (uint8_t *)(value) + i;
+			memcpy(valuePtr, newValPtr, sizeof(uint8_t));
+		}
+		return true;
 	}
 	else if (sizeof(float) == sizeof(uint32_t)) {
 		uint32_t newVal;
@@ -386,7 +425,12 @@ bool nvmGetFloat(nvm_size_t key, float *value, bool canDefault) {
 		if (!result) {
 			return false;
 		}
-		memcpy(value, &newVal, sizeof(float));
+		for (uint8_t i = 0; i < sizeof(float); i++) {
+			uint8_t *newValPtr = (uint8_t *)(&newVal) + i;
+			uint8_t *valuePtr = (uint8_t *)(value) + i;
+			memcpy(valuePtr, newValPtr, sizeof(uint8_t));
+		}
+		return true;
 	}
 	else if (sizeof(float) == sizeof(uint64_t)) {
 		uint64_t newVal;
@@ -394,19 +438,31 @@ bool nvmGetFloat(nvm_size_t key, float *value, bool canDefault) {
 		if (!result) {
 			return false;
 		}
-		memcpy(value, &newVal, sizeof(float));
+		for (uint8_t i = 0; i < sizeof(float); i++) {
+			uint8_t *newValPtr = (uint8_t *)(&newVal) + i;
+			uint8_t *valuePtr = (uint8_t *)(value) + i;
+			memcpy(valuePtr, newValPtr, sizeof(uint8_t));
+		}
+		return true;
 	}
-	return true;
+
+	return false;
 }
 
 bool nvmGetDouble(nvm_size_t key, double *value, bool canDefault) {
+
 	if (sizeof(double) == sizeof(uint16_t)) {
 		uint16_t newVal;
 		bool result = nvmGetUI16(key, &newVal, true);
 		if (!result) {
 			return false;
 		}
-		memcpy(value, &newVal, sizeof(double));
+		for (uint8_t i = 0; i < sizeof(double); i++) {
+			uint8_t *newValPtr = (uint8_t *)(&newVal) + i;
+			uint8_t *valuePtr = (uint8_t *)(value) + i;
+			memcpy(valuePtr, newValPtr, sizeof(uint8_t));
+		}
+		return true;
 	}
 	else if (sizeof(double) == sizeof(uint32_t)) {
 		uint32_t newVal;
@@ -414,7 +470,12 @@ bool nvmGetDouble(nvm_size_t key, double *value, bool canDefault) {
 		if (!result) {
 			return false;
 		}
-		memcpy(value, &newVal, sizeof(double));
+		for (uint8_t i = 0; i < sizeof(double); i++) {
+			uint8_t *newValPtr = (uint8_t *)(&newVal) + i;
+			uint8_t *valuePtr = (uint8_t *)(value) + i;
+			memcpy(valuePtr, newValPtr, sizeof(uint8_t));
+		}
+		return true;
 	}
 	else if (sizeof(double) == sizeof(uint64_t)) {
 		uint64_t newVal;
@@ -422,9 +483,15 @@ bool nvmGetDouble(nvm_size_t key, double *value, bool canDefault) {
 		if (!result) {
 			return false;
 		}
-		memcpy(value, &newVal, sizeof(double));
+		for (uint8_t i = 0; i < sizeof(double); i++) {
+			uint8_t *newValPtr = (uint8_t *)(&newVal) + i;
+			uint8_t *valuePtr = (uint8_t *)(value) + i;
+			memcpy(valuePtr, newValPtr, sizeof(uint8_t));
+		}
+		return true;
 	}
-	return true;
+
+	return false;
 }
 
 #endif
