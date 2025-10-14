@@ -56,8 +56,6 @@
 	#ifdef PLATFORMIO
 		#include <pgmspace.h>
 		#define PROG_FLASH PROGMEM // storage specifier for flash space
-	#else
-		#define PROG_FLASH // storage specifier for flash space
 	#endif
 
 	/****************************
@@ -187,7 +185,7 @@
 	 * Test Timer Config
 	****************************/
 
-	#ifdef __TEST_CASES__
+	//#ifdef __TEST_CASES__
 
 		// slow testing flags
 		#define HARD_TIMER_TEST_INDEX 0 // hardware timer index for testing
@@ -202,7 +200,7 @@
 		#define HARD_TIMER_FAST_TEST_DELAY 5 // target timer ticks for data collected
 		#define HARD_TIMER_FAST_TEST_COUNT_BUFFER 1 // amount timer can be off of goal
 
-	#endif
+	//#endif
 
 #endif
 #endif

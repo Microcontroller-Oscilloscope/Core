@@ -35,9 +35,19 @@
 #define OSC_NAME_SPACE "Osc"
 
 bool nvmBegan = false;
+bool threadLock = false;
 nvs_handle_t handler;
 
+#define THREAD_LOCK() \
+	if (threadLock) { \
+		return false; \
+	} \
+	threadLock = true;
+
+#define THREAD_UNLOCK() threadLock = false;
+
 enum NVMStartCode nvmInit(nvm_size_t setNVMSize) {
+
 	if (nvmBegan) {
 		return NVM_STARTED;
 	}
@@ -46,24 +56,20 @@ enum NVMStartCode nvmInit(nvm_size_t setNVMSize) {
 		return NVM_INVALID_SIZE;
 	}
 
-	startThreadSafety();
+	THREAD_LOCK();
 
 	if (nvs_flash_init() != ESP_OK) {
-		endThreadSafety();
+		THREAD_UNLOCK();
 		return NVM_FAILED;
 	}
-
-	endThreadSafety();
-	startThreadSafety();
 
 	if (nvs_open(OSC_NAME_SPACE, NVS_READWRITE, &handler) != ESP_OK) {
-		endThreadSafety();
+		THREAD_UNLOCK();
 		return NVM_FAILED;
 	}
 
-	endThreadSafety();
-
 	nvmBegan = true;
+	THREAD_UNLOCK();
 
 	return NVM_OK;
 }
@@ -93,9 +99,7 @@ bool nvmStop(void) {
 		return false;
 	}
 
-	startThreadSafety();
 	nvs_flash_deinit();
-	endThreadSafety();
 	nvmBegan = false;
 
 	return true;
@@ -111,45 +115,44 @@ bool nvmStop(void) {
  */
 bool nvmClear(void) {
 
-	startThreadSafety();
 	if (nvs_flash_erase() != ESP_OK) {
-		endThreadSafety();
 		return false;
 	}
-	endThreadSafety();
-
-	startThreadSafety();
-	if (nvs_flash_init() != ESP_OK) {
-		endThreadSafety();
-		return false;
-	}
-	endThreadSafety();
 
 	return true;
 }
 
 enum NVMDefaultCode nvmSetDefaults(void) {
+
+	THREAD_LOCK();
+
 	// ensures NVM_SIZE isn't too big for microcontroller
 	nvm_size_t nvmMaxValue;
 	if (nvmMaxSize(&nvmMaxValue)) {
 		if (NVM_SIZE > nvmMaxValue) {
+			THREAD_UNLOCK();
 			return NVM_DEFAULT_SIZE_TOO_BIG;
 		}
 	}
 	else {
+		THREAD_UNLOCK();
 		// if nvm not started or unable to get size
 		return NVM_DEFAULT_FAIL_MAX_SIZE;
 	}
 
 	// ensures clear works
 	if (!nvmClear()) {
+		THREAD_UNLOCK();
 		return NVM_DEFAULT_FAIL_CLEAR;
 	}
 
 	// stops nvm
 	if (!nvmStop()) {
+		THREAD_UNLOCK();
 		return NVM_DEFAULT_FAIL_STOP;
 	}
+
+	THREAD_UNLOCK();
 
 	// restarts nvm for operations
 	enum NVMStartCode startCode = nvmInit(NVM_SIZE);
@@ -163,8 +166,10 @@ enum NVMDefaultCode nvmSetDefaults(void) {
 		return code;
 	}
 
+	code = nvmSetEnvDefaults();
+
 	//writes platform values
-	return nvmSetEnvDefaults();
+	return code;
 }
 
 /**
@@ -185,28 +190,36 @@ void keyToChar(nvm_size_t key, char* keyStr) {
 	if (!nvmBegan) { \
 		return false; \
 	} \
+	THREAD_LOCK(); \
 	char keyStr[CHAR_KEY_SIZE]; \
 	keyToChar(key, keyStr); \
 	if (setter(handler, keyStr, value) != ESP_OK) { \
+		THREAD_UNLOCK(); \
 		return false; \
 	} \
 	if (nvs_commit(handler) != ESP_OK) { \
+		THREAD_UNLOCK(); \
 		return false; \
 	} \
+	THREAD_UNLOCK(); \
 	return true;
 
 #define GET_NVS(key, getter, value, canDefault, defaultValue) \
 	if (!nvmBegan) { \
 		return false; \
 	} \
+	THREAD_LOCK(); \
 	char keyStr[CHAR_KEY_SIZE]; \
 	keyToChar(key, keyStr); \
 	if (getter(handler, keyStr, value) != ESP_OK) { \
+		THREAD_UNLOCK(); \
 		return false; \
 	} \
 	if (!canDefault && *value == defaultValue) { \
+		THREAD_UNLOCK(); \
 		return false; \
 	} \
+	THREAD_UNLOCK(); \
 	return true;
 
 bool nvmWriteCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
@@ -225,15 +238,21 @@ bool nvmWriteCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 		return false;
 	}
 
+	THREAD_LOCK();
+
 	char keyStr[CHAR_KEY_SIZE];
 	keyToChar(key, keyStr);
 	
 	if (nvs_set_str(handler, keyStr, value) != ESP_OK) {
+		THREAD_UNLOCK();
 		return false;
 	}
 	if (nvs_commit(handler) != ESP_OK) {
+		THREAD_UNLOCK();
 		return false;
 	}
+
+	THREAD_UNLOCK();
 
 	return true;
 }
@@ -248,20 +267,27 @@ bool nvmGetCharArray(nvm_size_t key, char* value, uint8_t maxLength) {
 	if (maxLength == 0U) {
 		return false;
 	}
+
+	THREAD_LOCK();
 	
 	char keyStr[CHAR_KEY_SIZE];
 	keyToChar(key, keyStr);
 
 	size_t strSize = 0;
 	if (nvs_get_str(handler, keyStr, NULL, &strSize) != ESP_OK) {
+		THREAD_UNLOCK();
 		return false;
 	}
 	if (strSize > maxLength) {
+		THREAD_UNLOCK();
 		return false;
 	}
 	if (nvs_get_str(handler, keyStr, value, &strSize) != ESP_OK) {
+		THREAD_UNLOCK();
 		return false;
 	}
+
+	THREAD_UNLOCK();
 
 	return true;
 }
@@ -304,7 +330,7 @@ bool nvmWriteUI64(nvm_size_t key, uint64_t value) {
 
 bool nvmWriteFloat(nvm_size_t key, float value) {
 
-	if (sizeof(float) == sizeof(uint16_t)) {
+	/*if (sizeof(float) == sizeof(uint16_t)) {
 		uint16_t newVal;
 		for (uint8_t i = 0; i < sizeof(float); i++) {
 			uint8_t *newValPtr = (uint8_t *)(&newVal) + i;
@@ -330,6 +356,17 @@ bool nvmWriteFloat(nvm_size_t key, float value) {
 			memcpy(newValPtr, valuePtr, sizeof(uint8_t));
 		}
 		return nvmWriteUI64(key, newVal);
+	}*/
+
+	if (sizeof(float) == sizeof(uint32_t)) {
+		uint32_t newVal;
+		memcpy(&newVal, &value, sizeof(float));
+		return nvmWriteUI32(key, newVal);
+	}
+	else if (sizeof(float) == sizeof(uint64_t)) {
+		uint64_t newVal;
+		memcpy(&newVal, &value, sizeof(float));
+		return nvmWriteUI64(key, newVal);
 	}
 
 	return false;
@@ -337,7 +374,7 @@ bool nvmWriteFloat(nvm_size_t key, float value) {
 
 bool nvmWriteDouble(nvm_size_t key, double value) {
 
-	if (sizeof(double) == sizeof(uint16_t)) {
+	/*if (sizeof(double) == sizeof(uint16_t)) {
 		uint16_t newVal;
 		for (uint8_t i = 0; i < sizeof(double); i++) {
 			uint8_t *newValPtr = (uint8_t *)(&newVal) + i;
@@ -362,6 +399,17 @@ bool nvmWriteDouble(nvm_size_t key, double value) {
 			uint8_t *valuePtr = (uint8_t *)(&value) + i;
 			memcpy(newValPtr, valuePtr, sizeof(uint8_t));
 		}
+		return nvmWriteUI64(key, newVal);
+	}*/
+
+	if (sizeof(double) == sizeof(uint32_t)) {
+		uint32_t newVal;
+		memcpy(&newVal, &value, sizeof(double));
+		return nvmWriteUI32(key, newVal);
+	}
+	else if (sizeof(double) == sizeof(uint64_t)) {
+		uint64_t newVal;
+		memcpy(&newVal, &value, sizeof(double));
 		return nvmWriteUI64(key, newVal);
 	}
 
@@ -406,7 +454,7 @@ bool nvmGetUI64(nvm_size_t key, uint64_t *value, bool canDefault) {
 
 bool nvmGetFloat(nvm_size_t key, float *value, bool canDefault) {
 
-	if (sizeof(float) == sizeof(uint16_t)) {
+	/*if (sizeof(float) == sizeof(uint16_t)) {
 		uint16_t newVal;
 		bool result = nvmGetUI16(key, &newVal, true);
 		if (!result) {
@@ -444,6 +492,25 @@ bool nvmGetFloat(nvm_size_t key, float *value, bool canDefault) {
 			memcpy(valuePtr, newValPtr, sizeof(uint8_t));
 		}
 		return true;
+	}*/
+
+	if (sizeof(float) == sizeof(uint32_t)) {
+		uint32_t newVal;
+		bool result = nvmGetUI32(key, &newVal, true);
+		if (!result) {
+			return false;
+		}
+		memcpy(value, &newVal, sizeof(float));
+		return true;
+	}
+	else if (sizeof(float) == sizeof(uint64_t)) {
+		uint64_t newVal;
+		bool result = nvmGetUI64(key, &newVal, true);
+		if (!result) {
+			return false;
+		}
+		memcpy(value, &newVal, sizeof(float));
+		return true;
 	}
 
 	return false;
@@ -451,7 +518,7 @@ bool nvmGetFloat(nvm_size_t key, float *value, bool canDefault) {
 
 bool nvmGetDouble(nvm_size_t key, double *value, bool canDefault) {
 
-	if (sizeof(double) == sizeof(uint16_t)) {
+	/*if (sizeof(double) == sizeof(uint16_t)) {
 		uint16_t newVal;
 		bool result = nvmGetUI16(key, &newVal, true);
 		if (!result) {
@@ -488,6 +555,25 @@ bool nvmGetDouble(nvm_size_t key, double *value, bool canDefault) {
 			uint8_t *valuePtr = (uint8_t *)(value) + i;
 			memcpy(valuePtr, newValPtr, sizeof(uint8_t));
 		}
+		return true;
+	}*/
+
+	if (sizeof(double) == sizeof(uint32_t)) {
+		uint32_t newVal;
+		bool result = nvmGetUI32(key, &newVal, true);
+		if (!result) {
+			return false;
+		}
+		memcpy(value, &newVal, sizeof(double));
+		return true;
+	}
+	else if (sizeof(double) == sizeof(uint64_t)) {
+		uint64_t newVal;
+		bool result = nvmGetUI64(key, &newVal, true);
+		if (!result) {
+			return false;
+		}
+		memcpy(value, &newVal, sizeof(double));
 		return true;
 	}
 
