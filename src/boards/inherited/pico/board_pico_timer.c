@@ -41,7 +41,6 @@ struct repeating_timer nullTimer;
 	#error TOO MANY TIMERS! Reduce NUM_TIMERS to 64 or less
 #endif
 
-storage_t timersInitialized = 0U; // stores timer initialization state
 storage_t timersStarted = 0U; // stores timer started state
 
 /**
@@ -56,23 +55,6 @@ struct repeating_timer* getTimer(hardware_timer_t timer) {
 		return &timers[timer];
 	}
 	return &nullTimer;
-}
-
-/**
- * Sets timer initialization state
- * 
- * @param timer timer to set
- * @param state whether or not timer is initialized
- */
-void setTimerInitialized(hardware_timer_t timer, bool state) {
-	if (timer >= 0 && timer < NUM_TIMERS) {
-		if (state) {
-			timersInitialized |= (1 << timer);
-		}
-		else {
-			timersInitialized &= (~(1 << timer));
-		}
-	}
 }
 
 /**
@@ -92,42 +74,10 @@ void setTimerStarted(hardware_timer_t timer, bool state) {
 	}
 }
 
-bool hardTimerInitialized(hardware_timer_t timer) {
-	if (timer >= 0 && timer < NUM_TIMERS) {
-		return !!((1 << timer) & timersInitialized);
-	}
-	return false;
-}
-
 bool hardTimerStarted(hardware_timer_t timer) {
 	if (timer >= 0 && timer < NUM_TIMERS) {
 		return !!((1 << timer) & timersStarted);
 	}
-	return false;
-}
-
-bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar) {
-	if (!hardTimerInitialized(timer)) {
-		setTimerInitialized(timer, true);
-		return true;
-	}
-	return false;
-}
-
-bool deconstructHardTimer(hardware_timer_t timer) {
-
-	struct repeating_timer* timerPtr = getTimer(timer);
-	if (timerPtr == &nullTimer) {
-		return false;
-	}
-
-	if (hardTimerInitialized(timer)) {
-		cancel_repeating_timer(timerPtr);
-		setTimerStarted(timer, false);
-		setTimerInitialized(timer, false);
-		return true;
-	}
-
 	return false;
 }
 
@@ -154,7 +104,7 @@ bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
 		return false;
 	}
 
-	if (!hardTimerStarted(timer) && hardTimerInitialized(timer)) {
+	if (!hardTimerStarted(timer)) {
 		if (scalar == SCALAR_MS) {
 			if (add_repeating_timer_ms(-timerTicks, function, NULL, timerPtr)) {
 				setTimerStarted(timer, true);
