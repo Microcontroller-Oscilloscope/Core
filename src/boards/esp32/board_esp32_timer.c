@@ -22,15 +22,15 @@
 
 #include "../../hard_timer.h"
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "esp_system.h"
-#include "freertos/timers.h"
-#include "driver/timer.h"
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <esp_system.h>
+#include <freertos/timers.h>
+#include <driver/timer.h>
 
 #define TIMER_COUNT_ZERO 0U // value for setting timer tick count to 0
-
-uint8_t timersStarted = 0U; // stores timer started state
+#define SCALAR_MAX UINT16_MAX // max value for timer scalar
+#define FREQ_MAX 5000000 // max frequency user set timer can be
 
 typedef struct hw_timer_s {
 	uint8_t group;
@@ -75,30 +75,13 @@ hard_timer_t** getTimer(hardware_timer_t timer) {
 }
 
 /**
- * Sets timer started state
- * 
- * @param timer timer to set
- * @param state whether or not timer is started
- */
-void setTimerStarted(hardware_timer_t timer, bool state) {
-	if (timer >= 0 && timer < NUM_TIMERS) {
-		if (state) {
-			timersStarted |= (1 << timer);
-		}
-		else {
-			timersStarted &= (~(1 << timer));
-		}
-	}
-}
-
-/**
- * Gets if timer was initialized
+ * Gets if timer was started
  * 
  * @param timerPtr timer to test
  * 
- * @return if timer was initialized
+ * @return if timer was started
  */
-bool timerInitializedInternal(hard_timer_t** timerPtr) {
+bool timerStartedInternal(hard_timer_t** timerPtr) {
 	if (timerPtr == &nullTimer) {
 		return false;
 	}
@@ -110,69 +93,57 @@ bool timerInitializedInternal(hard_timer_t** timerPtr) {
 	return false;
 }
 
-bool hardTimerInitialized(hardware_timer_t timer) {
-	hard_timer_t** timerPtr = getTimer(timer);
-	return timerInitializedInternal(timerPtr);
-}
-
-bool hardTimerStarted(hardware_timer_t timer) {
-	if (timer >= 0 && timer < NUM_TIMERS) {
-		return !!((1 << timer) & timersStarted);
-	}
-	return false;
-}
-
+/**
+ * function wrapper for callback function
+ * 
+ * @param args arguments to pass
+ * 
+ * @return false, don't yeild at end
+ */
 bool IRAM_ATTR timerFunctionWrapper(void *arg) {
 	void (*fn)(void) = arg;
 	fn();
 	return false;
 }
 
-bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar) {
-
-	hard_timer_t** timerPtr = getTimer(timer);
-	if (timerPtr == &nullTimer) {
-		return false;
+enum HardTimerStatusReturn getHardTimerStats(uint32_t *freq, hardware_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks) {
+	if (*freq > FREQ_MAX) {
+		return HARD_TIMER_FREQ_OUT_OF_RANGE;
 	}
 
-	if (!timerInitializedInternal(timerPtr)) {
+	enum HardTimerStatusReturn status = HARD_TIMER_OK;
 
-		timer_config_t config = {
-			.divider = scalar,
-			.counter_dir = true,
-			.counter_en = TIMER_PAUSE,
-			.alarm_en = TIMER_ALARM_DIS,
-			.auto_reload = false,
-		};
-		*timerPtr = &timerGroups[timer];
-
-		timer_init((*timerPtr) -> group, (*timerPtr) -> num, &config);
-		timer_set_counter_value((*timerPtr) -> group, (*timerPtr) -> num, 0);
-		timer_start((*timerPtr) -> group, (*timerPtr) -> num);
-		timer_isr_callback_add((*timerPtr) -> group, (*timerPtr) -> num, timerFunctionWrapper, function, 0);
-
-		return true;
+	// freq doesn't divide evenly into APB_CLK
+	if (APB_CLK_FREQ % *freq != 0) {
+		status = HARD_TIMER_SLIGHTLY_OFF;
 	}
-	return false;
+
+	// scalar * timerTicks = APB_CLK / freq
+	uint32_t target = APB_CLK_FREQ / *freq;
+
+	if (target <= SCALAR_MAX) {
+		// scalar within max value
+		*scalar = (prescalar_t)target;
+		*timerTicks = 1;
+	}
+	else {
+		// scalar not within max value
+		*scalar = 1;
+		*timerTicks = (timertick_t)target;
+
+		while (*timerTicks % 2 == 0 && *scalar * 2 <= SCALAR_MAX) {
+			*timerTicks /= 2;
+			*scalar *= 2;
+		}
+	}
+
+	*freq = APB_CLK_FREQ / (*scalar * *timerTicks);
+	return status;
 }
 
-bool deconstructHardTimer(hardware_timer_t timer) {
-
+bool hardTimerStarted(hardware_timer_t timer) {
 	hard_timer_t** timerPtr = getTimer(timer);
-	if (timerPtr == &nullTimer) {
-		return false;
-	}
-
-	if (timerInitializedInternal(timerPtr)) {
-
-		cancelHardTimer(timer);
-		timer_isr_callback_remove((*timerPtr) -> group, (*timerPtr) -> num);
-		timer_deinit((*timerPtr) -> group, (*timerPtr) -> num);
-		*timerPtr = NULL;
-		return true;
-	}
-	
-	return false;
+	return timerStartedInternal(timerPtr);
 }
 
 bool cancelHardTimer(hardware_timer_t timer) {
@@ -184,10 +155,16 @@ bool cancelHardTimer(hardware_timer_t timer) {
 
 	if (hardTimerStarted(timer)) {
 
+		// cancels timer
 		timer_set_alarm((*timerPtr) -> group, (*timerPtr) -> num, false);
 		timer_pause((*timerPtr) -> group, (*timerPtr) -> num);
 		timer_set_counter_value((*timerPtr) -> group, (*timerPtr) -> num, TIMER_COUNT_ZERO);
-		setTimerStarted(timer, false);
+
+		// deconstructs timer
+		timer_isr_callback_remove((*timerPtr) -> group, (*timerPtr) -> num);
+		timer_deinit((*timerPtr) -> group, (*timerPtr) -> num);
+		*timerPtr = NULL;
+
 		return true;
 	}
 
@@ -201,13 +178,28 @@ bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
 		return false;
 	}
 
-	if (timerInitializedInternal(timerPtr) && !hardTimerStarted(timer)) {
+	if (!timerStartedInternal(timerPtr)) {
 
+		// init timer
+		timer_config_t config = {
+			.divider = scalar,
+			.counter_dir = true,
+			.counter_en = TIMER_PAUSE,
+			.alarm_en = TIMER_ALARM_DIS,
+			.auto_reload = false,
+		};
+		*timerPtr = &timerGroups[timer];
+		
+		timer_init((*timerPtr) -> group, (*timerPtr) -> num, &config);
+		timer_set_counter_value((*timerPtr) -> group, (*timerPtr) -> num, 0);
+		timer_start((*timerPtr) -> group, (*timerPtr) -> num);
+		timer_isr_callback_add((*timerPtr) -> group, (*timerPtr) -> num, timerFunctionWrapper, function, 0);
+
+		// run timer
 		timer_set_alarm_value((*timerPtr) -> group, (*timerPtr) -> num, timerTicks);
 		timer_set_auto_reload((*timerPtr) -> group, (*timerPtr) -> num, true);
 		timer_set_alarm((*timerPtr) -> group, (*timerPtr) -> num, true);
 		timer_start((*timerPtr) -> group, (*timerPtr) -> num);
-		setTimerStarted(timer, true);
 		return true;
 	}
 

@@ -31,6 +31,9 @@ enum STATUS_CODE {
 #define CONNECTING_DELAY 1000 // LED blink delay for connecting in ms
 #define CRIT_ERROR_DELAY 100 // LED blink delay for critical errors in ms
 
+#define CONNECTING_FREQ 1
+#define CRIT_ERROR_FREQ 10
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -94,26 +94,6 @@ extern "C" {
 #endif
 
 /**
- * Initializes hardware timer
- * 
- * @param timer timer to initialize
- * @param function function to call back
- * @param scalar scalar for function call
- * 
- * @return if timer was successfully initialized
- */
-bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar);
-
-/**
- * De-initializes hardware timer
- * 
- * @param timer timer to initialize
- * 
- * @return if timer was successfully de-initialized
- */
-bool deconstructHardTimer(hardware_timer_t timer);
-
-/**
  * Stops hardware timer from executing
  * 
  * @param timer timer to stop
@@ -135,15 +115,6 @@ bool cancelHardTimer(hardware_timer_t timer);
 bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks);
 
 /**
- * Gets if selected timer was initialized
- * 
- * @param timer timer to check
- * 
- * @return if timer was initialized
- */
-bool hardTimerInitialized(hardware_timer_t timer);
-
-/**
  * Gets if selected timer was started
  * 
  * @param timer timer to check
@@ -151,6 +122,28 @@ bool hardTimerInitialized(hardware_timer_t timer);
  * @return if timer was started
  */
 bool hardTimerStarted(hardware_timer_t timer);
+
+// codes when getting hard timer stats
+enum HardTimerStatusReturn {
+	HARD_TIMER_OK, // hard timer stats retrieved
+	HARD_TIMER_FREQ_OUT_OF_RANGE, // target frequency was unobtainable
+	HARD_TIMER_SLIGHTLY_OFF, // retrieved values that aren't completely accurate
+	HARD_TIMER_FAIL, // failed to get timer values
+};
+
+/**
+ * Gets hard timer stats for target frequency
+ * 
+ * @param freq pointer to desired frequency in Hz
+ * @param timer pointer to timer ID
+ * @param scalar pointer to scalar value
+ * @param timerTicks pointer to desired tick count
+ * 
+ * @return result of getting timer stats
+ * 
+ * @note freq value is changed to actual freq if values are slightly off
+ */
+enum HardTimerStatusReturn getHardTimerStats(uint32_t *freq, hardware_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks);
 
 #ifdef __cplusplus
 }

@@ -155,9 +155,9 @@
 	 * 
 	 * APB_CLK = 80,000,000Hz
 	 * 
-	 * T_DER = desired time (s)
+	 * freq = desired frequency (Hz)
 	 * 
-	 * T_DER = timerTicks * (scalar / APB_CLK)
+	 * freq = APB_CLK / (scalar * timerTicks)
 	 * 
 	 * @param id numeric value to append to function
 	 * 

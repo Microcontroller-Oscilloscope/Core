@@ -58,7 +58,14 @@ void initStatus(void) {
 	#endif
 	
 	#if STATUS_LED_DEFINED
-		initHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR);
+		/*prescalar_t scalar;
+		timertick_t timerTicks;
+		uint32_t freq = 1;
+		hardware_timer_t timer;
+		getHardTimerStats(&freq, &timer, &scalar, &timerTicks);*/
+
+		//initHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR);
+		//initHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, scalar);
 	#endif
 }
 
@@ -77,6 +84,12 @@ void setStatus(enum STATUS_CODE status) {
 		#endif
 
 		ledToggle = false;
+
+		/*prescalar_t scalar;
+		timertick_t timerTicks;
+		uint32_t freq;
+		hardware_timer_t timer;
+		getHardTimerStats(&freq, &timer, &scalar, &timerTicks);*/
 
 		// sets LEDs
 		if (status == BOARD_OK) {
