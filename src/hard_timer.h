@@ -16,66 +16,6 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/**
- * All timer paths
- * 
- * base: configuration when timer hasn't been touched since startup
- * init: initHardTimer function
- * deconstruct: deconstructHardTimer function
- * cancel: cancelHardTimer function
- * set: setHardTimer function
- * 
- * Valid paths:
- * 
- * base/deconstruct -> init
- * init/cancel -> deconstruct
- * init/cancel -> set
- * set -> cancel
- * set -> deconstruct
- * 
- * Invalid paths:
- * 
- * base/deconstruct -> deconstruct
- * base/deconstruct -> cancel
- * base/deconstruct -> set
- * 
- * init/cancel -> init
- * init/cancel -> cancel
- * 
- * set -> set
- * set -> init
- */
-
-/**
- * All timer paths
- * 
- * (x, y): x(init), y(start)
- * 
- * (0,0): deconstruct, base
- * (1,0): init, set
- * (1,1): set
- * (0,1): NOT POSSIBLE
- * 
- * Valid paths:
- * (0,0) <-> (1,0) <-> (1,1)
- * (0,0) <- (1,1)
- * 		OR
- * (0,0) -> (1,0)
- * (1,0) -> (0,0)
- * (1,0) -> (1,1)
- * (1,1) -> (0,0)
- * (1,1) -> (1,0)
- * 
- * Invalid paths:
- * 
- * (0,0) -> (0,0)
- * (0,0) -> (1,0)
- * 
- * (1,0) -> (1,0)
- * 
- * (1,1) -> (1,1)
- */
-
 #ifndef HARD_TIMER_H
 #define HARD_TIMER_H
 
