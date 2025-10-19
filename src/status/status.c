@@ -85,11 +85,10 @@ void setStatus(enum STATUS_CODE status) {
 
 		ledToggle = false;
 
-		/*prescalar_t scalar;
+		prescalar_t scalar;
 		timertick_t timerTicks;
-		uint32_t freq;
 		hardware_timer_t timer;
-		getHardTimerStats(&freq, &timer, &scalar, &timerTicks);*/
+		uint32_t freq;
 
 		// sets LEDs
 		if (status == BOARD_OK) {
@@ -101,10 +100,16 @@ void setStatus(enum STATUS_CODE status) {
 			#endif
 		}
 		else if (status == BOARD_CONNECTING) {
-			setHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR, HARD_TIMER_LED_TICK_MULTIPLIER * CONNECTING_DELAY);
+			//setHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR, HARD_TIMER_LED_TICK_MULTIPLIER * CONNECTING_DELAY);
+			freq = CONNECTING_FREQ;
+			getHardTimerStats(&freq, &timer, &scalar, &timerTicks);
+			setHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, scalar, timerTicks);
 		}
 		else if (status == BOARD_CRIT_ERROR) {
-			setHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR, HARD_TIMER_LED_TICK_MULTIPLIER * CRIT_ERROR_DELAY);
+			//setHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR, HARD_TIMER_LED_TICK_MULTIPLIER * CRIT_ERROR_DELAY);
+			freq = CRIT_ERROR_FREQ;
+			getHardTimerStats(&freq, &timer, &scalar, &timerTicks);
+			setHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, scalar, timerTicks);
 		}
 
 	#else
