@@ -38,6 +38,8 @@ extern "C" {
  * @param value char array pointer
  * 
  * @return size of array
+ * 
+ * @note includes termination character
  */
 uint8_t charArraySize(const char* value);
 

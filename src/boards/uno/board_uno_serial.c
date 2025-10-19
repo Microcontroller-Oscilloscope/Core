@@ -104,7 +104,7 @@ void hardPrintMemCharArray(memCharString* value) {
 
 void hardPrintCharArray(const char* value) {
 	uint8_t size = charArraySize(value);
-	for (uint8_t i = 0; i < size; i++) {
+	for (uint8_t i = 0; i < size - 1; i++) {
 		uartTransmit(value[i]);
 	}
 }
@@ -203,7 +203,7 @@ void hardPrintMemCharArrayln(memCharString* value) {
 
 void hardPrintCharArrayln(const char* value) {
 	uint8_t size = charArraySize(value);
-	for (uint8_t i = 0; i < size; i++) {
+	for (uint8_t i = 0; i < size - 1; i++) {
 		uartTransmit(value[i]);
 	}
 	uartTransmit('\n');

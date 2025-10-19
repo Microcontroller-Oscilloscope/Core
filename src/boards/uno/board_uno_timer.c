@@ -25,7 +25,6 @@
 #include "../../hard_timer.h"
 
 uint8_t timerStates = 0U;
-#define START_OFFSET 4 // offset from init to start flags
 
 /****************************
  * Timer 0
@@ -43,8 +42,7 @@ uint8_t timerStates = 0U;
 #define TIMER_0_INTERR_ENABLE (1 << OCIE0A) // flags for timer 0 interrupt
 #define TIMER_0_INCREM_ENABLE (1 << WGM01) // flags for timer 0 increment
 
-#define TIMER_0_INITIALIZED() (!!((1 << 0) & timerStates)) // if timer 0 was initialized
-#define TIMER_0_STARTED() (!!((1 << START_OFFSET) & timerStates)) // if timer 0 was started
+#define TIMER_0_STARTED() (!!(timerStates)) // if timer 0 was started
 
 /**
  * sets scalar for timer 0
@@ -78,8 +76,7 @@ uint8_t timerStates = 0U;
 #define TIMER_1_INTERR_ENABLE (1 << OCIE1A) // flags for timer 1 interrupt
 #define TIMER_1_INCREM_ENABLE (1 << WGM12) // flags for timer 1 increment
 
-#define TIMER_1_INITIALIZED() (!!((1 << 1) & timerStates)) // if timer 0 was initialized
-#define TIMER_1_STARTED() (!!((1 << (1 + START_OFFSET)) & timerStates)) // if timer 0 was started
+#define TIMER_1_STARTED() (!!((1 << 1) & timerStates)) // if timer 1 was started
 
 /**
  * sets scalar for timer 1
@@ -113,8 +110,7 @@ uint8_t timerStates = 0U;
 #define TIMER_2_INTERR_ENABLE (1 << OCIE2A) // flags for timer 2 interrupt
 #define TIMER_2_INCREM_ENABLE (1 << WGM21) // flags for timer 2 increment
 
-#define TIMER_2_INITIALIZED() (!!((1 << 2) & timerStates)) // if timer 0 was initialized
-#define TIMER_2_STARTED() (!!((1 << (2 + START_OFFSET)) & timerStates)) // if timer 0 was started
+#define TIMER_2_STARTED() (!!((1 << 2) & timerStates)) // if timer 2 was started
 
 /**
  * sets scalar for timer 2
@@ -137,23 +133,6 @@ uint8_t timerStates = 0U;
 ****************************/
 
 /**
- * Sets timer initialization state
- * 
- * @param timer timer to set
- * @param state whether or not timer is initialized
- */
-void setTimerInitialized(hardware_timer_t timer, bool state) {
-	if (timer >= 0 && timer < NUM_TIMERS) {
-		if (state) {
-			timerStates |= (1 << timer);
-		}
-		else {
-			timerStates &= (~(1 << timer));
-		}
-	}
-}
-
-/**
  * Sets timer started state
  * 
  * @param timer timer to set
@@ -162,10 +141,10 @@ void setTimerInitialized(hardware_timer_t timer, bool state) {
 void setTimerStarted(hardware_timer_t timer, bool state) {
 	if (timer >= 0 && timer < NUM_TIMERS) {
 		if (state) {
-			timerStates |= (1 << (timer + START_OFFSET));
+			timerStates |= (1 << timer);
 		}
 		else {
-			timerStates &= (~(1 << (timer + START_OFFSET)));
+			timerStates &= (~(1 << timer));
 		}
 	}
 }
@@ -186,67 +165,10 @@ void setTimerStarted(hardware_timer_t timer, bool state) {
  */
 #define TICKS_OUT_OF_BOUNDS(timer, timerTicks) ((timer == HARD_TIMER0 || timer == HARD_TIMER2) && timerTicks >= UINT8_MAX)
 
-bool hardTimerInitialized(hardware_timer_t timer) {
-
-	if (timer >= 0 && timer < NUM_TIMERS) {
-		return !!((1 << timer) & timerStates);
-	}
-
-	return false;
-}
-
 bool hardTimerStarted(hardware_timer_t timer) {
 
 	if (timer >= 0 && timer < NUM_TIMERS) {
-		return !!((1 << (timer + START_OFFSET)) & timerStates);
-	}
-
-	return false;
-}
-
-bool initHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar) {
-
-	if (!hardTimerInitialized(timer)) {
-		setTimerInitialized(timer, true);
-		return true;
-	}
-	return false;
-}
-
-bool deconstructHardTimer(hardware_timer_t timer) {
-
-	if (timer == HARD_TIMER0) {
-		if (TIMER_0_INITIALIZED()) {
-			cli();
-			TIMER_0_SCAL &= ~TIMER_0_SCALAR_ENABLE;
-			TIMER_0_INTERR &= ~TIMER_0_INTERR_ENABLE;
-			sei();
-			setTimerInitialized(timer, false);
-			setTimerStarted(timer, false);
-			return true;
-		}
-	}
-	else if (timer == HARD_TIMER1) {
-		if (TIMER_1_INITIALIZED()) {
-			cli();
-			TIMER_1_SCAL &= ~TIMER_1_SCALAR_ENABLE;
-			TIMER_1_INTERR &= ~TIMER_1_INTERR_ENABLE;
-			sei();
-			setTimerInitialized(timer, false);
-			setTimerStarted(timer, false);
-			return true;
-		}
-	}
-	else if (timer == HARD_TIMER2) {
-		if (TIMER_2_INITIALIZED()) {
-			cli();
-			TIMER_2_SCAL &= ~TIMER_2_SCALAR_ENABLE;
-			TIMER_2_INTERR &= ~TIMER_2_INTERR_ENABLE;
-			sei();
-			setTimerInitialized(timer, false);
-			setTimerStarted(timer, false);
-			return true;
-		}
+		return !!((1 << timer) & timerStates);
 	}
 
 	return false;
@@ -256,6 +178,7 @@ bool cancelHardTimer(hardware_timer_t timer) {
 	if (timer == HARD_TIMER0) {
 		if (TIMER_0_STARTED()) {
 			cli();
+			TIMER_0_SCAL &= ~TIMER_0_SCALAR_ENABLE;
 			TIMER_0_INTERR &= ~TIMER_0_INTERR_ENABLE;
 			sei();
 			setTimerStarted(timer, false);
@@ -265,6 +188,7 @@ bool cancelHardTimer(hardware_timer_t timer) {
 	else if (timer == HARD_TIMER1) {
 		if (TIMER_1_STARTED()) {
 			cli();
+			TIMER_1_SCAL &= ~TIMER_1_SCALAR_ENABLE;
 			TIMER_1_INTERR &= ~TIMER_1_INTERR_ENABLE;
 			sei();
 			setTimerStarted(timer, false);
@@ -274,6 +198,7 @@ bool cancelHardTimer(hardware_timer_t timer) {
 	else if (timer == HARD_TIMER2) {
 		if (TIMER_2_STARTED()) {
 			cli();
+			TIMER_2_SCAL &= ~TIMER_2_SCALAR_ENABLE;
 			TIMER_2_INTERR &= ~TIMER_2_INTERR_ENABLE;
 			sei();
 			setTimerStarted(timer, false);
@@ -291,7 +216,7 @@ bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
 	}
 
 	if (timer == HARD_TIMER0) {
-		if (!TIMER_0_STARTED() && TIMER_0_INITIALIZED()) {
+		if (!TIMER_0_STARTED()) {
 			cli();
 			TIMER_0_COMP = 0;
 			TIMER_0_WAVEFORM = 0;
@@ -306,7 +231,7 @@ bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
 		}
 	}
 	else if (timer == HARD_TIMER1) {
-		if (!TIMER_1_STARTED() && TIMER_1_INITIALIZED()) {
+		if (!TIMER_1_STARTED()) {
 			cli();
 			TIMER_1_COMP = 0;
 			TIMER_1_WAVEFORM = 0;
@@ -321,7 +246,7 @@ bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
 		}
 	}
 	else if (timer == HARD_TIMER2) {
-		if (!TIMER_2_STARTED() && TIMER_2_INITIALIZED()) {
+		if (!TIMER_2_STARTED()) {
 			cli();
 			TIMER_2_COMP = 0;
 			TIMER_2_WAVEFORM = 0;
