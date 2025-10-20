@@ -23,7 +23,8 @@
 #include <pico/time.h>
 #include "../../../hard_timer.h"
 
-#define NULL_REPEATING_TIMER 0
+#define FREQ_MAX 1000000 // max frequency user set timer can be
+#define THOUSAND 1000
 
 // hardware timers
 struct repeating_timer timers[NUM_TIMERS];
@@ -72,6 +73,39 @@ void setTimerStarted(hardware_timer_t timer, bool state) {
 			timersStarted &= (~(1 << timer));
 		}
 	}
+}
+
+enum HardTimerStatusReturn getHardTimerStats(uint32_t *freq, hardware_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks) {
+	if (*freq > FREQ_MAX) {
+		return HARD_TIMER_FREQ_OUT_OF_RANGE;
+	}
+
+	enum HardTimerStatusReturn status = HARD_TIMER_OK;
+
+	// freq doesn't divide evenly with us
+	if (FREQ_MAX % *freq != 0) {
+		status = HARD_TIMER_SLIGHTLY_OFF;
+	}
+
+	uint32_t target = FREQ_MAX / *freq;
+
+	if (target % THOUSAND == 0 && status == HARD_TIMER_OK) {
+		*scalar = SCALAR_MS;
+		*timerTicks = target / THOUSAND;
+	}
+	else {
+		*scalar = SCALAR_US;
+		*timerTicks = target;
+	}
+
+	if (*scalar == SCALAR_MS) {
+		*freq = FREQ_MAX / *timerTicks * THOUSAND;
+	}
+	else if (*scalar == SCALAR_US) {
+		*freq = FREQ_MAX / *timerTicks;
+	}
+	
+	return status;
 }
 
 bool hardTimerStarted(hardware_timer_t timer) {
