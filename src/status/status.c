@@ -102,14 +102,20 @@ void setStatus(enum STATUS_CODE status) {
 		else if (status == BOARD_CONNECTING) {
 			//setHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR, HARD_TIMER_LED_TICK_MULTIPLIER * CONNECTING_DELAY);
 			freq = CONNECTING_FREQ;
-			getHardTimerStats(&freq, &timer, &scalar, &timerTicks);
-			setHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, scalar, timerTicks);
+			enum HardTimerStatusReturn status = getHardTimerStats(&freq, &timer, &scalar, &timerTicks);
+			
+			if (status != HARD_TIMER_FAIL) {
+				setHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, scalar, timerTicks);
+			}
 		}
 		else if (status == BOARD_CRIT_ERROR) {
 			//setHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR, HARD_TIMER_LED_TICK_MULTIPLIER * CRIT_ERROR_DELAY);
 			freq = CRIT_ERROR_FREQ;
-			getHardTimerStats(&freq, &timer, &scalar, &timerTicks);
-			setHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, scalar, timerTicks);
+			enum HardTimerStatusReturn status = getHardTimerStats(&freq, &timer, &scalar, &timerTicks);
+			
+			if (status != HARD_TIMER_FAIL) {
+				setHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, scalar, timerTicks);
+			}
 		}
 
 	#else

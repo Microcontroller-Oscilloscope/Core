@@ -71,6 +71,8 @@ enum HardTimerStatusReturn {
 	HARD_TIMER_FAIL, // failed to get timer values
 };
 
+typedef uint32_t freq_t; // hard timer frequency variable
+
 /**
  * Gets hard timer stats for target frequency
  * 
@@ -83,7 +85,7 @@ enum HardTimerStatusReturn {
  * 
  * @note freq value is changed to actual freq if values are slightly off
  */
-enum HardTimerStatusReturn getHardTimerStats(uint32_t *freq, hardware_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks);
+enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hardware_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks);
 
 #ifdef __cplusplus
 }

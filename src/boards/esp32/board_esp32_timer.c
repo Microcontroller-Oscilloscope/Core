@@ -106,7 +106,7 @@ bool IRAM_ATTR timerFunctionWrapper(void *arg) {
 	return false;
 }
 
-enum HardTimerStatusReturn getHardTimerStats(uint32_t *freq, hardware_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks) {
+enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hardware_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks) {
 	if (*freq > FREQ_MAX) {
 		return HARD_TIMER_FREQ_OUT_OF_RANGE;
 	}
@@ -119,7 +119,7 @@ enum HardTimerStatusReturn getHardTimerStats(uint32_t *freq, hardware_timer_t *t
 	}
 
 	// scalar * timerTicks = APB_CLK / freq
-	uint32_t target = APB_CLK_FREQ / *freq;
+	freq_t target = APB_CLK_FREQ / *freq;
 
 	if (target <= SCALAR_MAX) {
 		// scalar within max value

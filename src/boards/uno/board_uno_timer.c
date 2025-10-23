@@ -26,6 +26,65 @@
 
 uint8_t timerStates = 0U;
 
+#define FREQ_MAX 1000000 // max frequency user set timer can be
+#define FREQ_MIN_8_COUNTER 62 // min frequency for 8 bit counter
+
+const uint16_t scalarMask[] PROGMEM = {
+	1, // SCALAR_1
+	8, // SCALAR_8
+	32, // SCALAR_32
+	64, // SCALAR_64
+	128, // SCALAR_128
+	256, // SCALAR_256
+	1024, // SCALAR_1024
+};
+
+#define SCALAR_MASK_SIZE (sizeof(scalarMask) / sizeof(uint16_t)) // size of scalarMask
+
+/**
+ * Gets scalar mask value from enum
+ * 
+ * @param i scalar enum
+ * 
+ * @return literal int value
+ */
+#define GET_MASK(i) ((uint16_t)pgm_read_word_near(scalarMask + i))
+
+/**
+ * Calculates timer frequency from scalar value and timer tick value
+ * 
+ * @param calcScalar scalar enum
+ * @param calcTimerTicks timer ticks to count for
+ * 
+ * @return calculated frequency
+ * 
+ * @warning rounds to nearest int
+ */
+#define CALC_FREQ(calcScalar, calcTimerTicks) (F_CPU / ((freq_t)GET_MASK(calcScalar) * (calcTimerTicks + 1)))
+
+/**
+ * Calculates timer ticks from scalar value and frequency
+ * 
+ * @param calcScalar scalar enum
+ * @param calcFreq frequency to get ticks for
+ * 
+ * @return calculated timer ticks
+ * 
+ * @warning rounds to nearest int
+ */
+#define CALC_TICKS(calcScalar, calcFreq) ((F_CPU / (GET_MASK(calcScalar) * calcFreq)) - 1)
+
+/**
+ * Calculates positive value
+ * 
+ * @param value value to test
+ * 
+ * @return positive value
+ * 
+ * @warning doesn't convert if value is max negative value
+ */
+#define abs(value) (value > 0? value : -value)
+
 /****************************
  * Timer 0
 ****************************/
@@ -164,6 +223,203 @@ void setTimerStarted(hardware_timer_t timer, bool state) {
  * @param timerTicks timertick_t timerTicks referenced
  */
 #define TICKS_OUT_OF_BOUNDS(timer, timerTicks) ((timer == HARD_TIMER0 || timer == HARD_TIMER2) && timerTicks >= UINT8_MAX)
+
+/**
+ * Tests if given scalar and timer ticks equal a given frequency
+ * 
+ * @param freq target frequency
+ * @param scalar scalar value
+ * @param ticks timer tick count
+ * 
+ * @return if parameters generate frequency
+ */
+bool sameFreq(freq_t freq, prescalar_t scalar, timertick_t ticks) {
+
+	if (F_CPU % ((freq_t)GET_MASK(scalar) * (ticks + 1)) != 0) {
+		return false;
+	}
+	if (CALC_FREQ(scalar, ticks) != freq) {
+		return false;
+	}
+	return true;
+}
+
+/**
+ * Gets stats for any timer
+ * 
+ * @param freq pointer to target frequency
+ * @param timer timer to test for
+ * @param scalar pointer to scalar value
+ * @param timerTicks pointer to timer tick count
+ */
+void getStats(freq_t *freq, hardware_timer_t timer, prescalar_t *scalar, timertick_t *timerTicks) {
+
+	*scalar = SCALAR_1;
+	*timerTicks = 0;
+	freq_t closestFreq = 0;
+
+	for (uint8_t i = SCALAR_MASK_SIZE - 1; i < SCALAR_MASK_SIZE; i--) {
+
+		// ignore invalid scalars
+		if ((i == SCALAR_32 || i == SCALAR_128) && timer != HARD_TIMER2) {
+			continue;
+		}
+
+		// ignore invalid ticks
+		if (CALC_TICKS(i, *freq) > UINT16_MAX || (CALC_TICKS(i, *freq) > UINT8_MAX && timer != HARD_TIMER1)) {
+			continue;
+		}
+		timertick_t calcTicks = CALC_TICKS(i, *freq);
+
+		// frequency is exact value
+		if (sameFreq(*freq, i, calcTicks)) {
+			*scalar = i;
+			*timerTicks = calcTicks;
+			return;
+		}
+
+		// test if newly calculated frequency is closer
+		if (abs(*freq - closestFreq) > abs(*freq - CALC_FREQ(i, calcTicks)) || closestFreq == 0) {
+			*scalar = (prescalar_t)i;
+			*timerTicks = calcTicks;
+			closestFreq = CALC_FREQ(i, calcTicks);
+		}
+	}
+}
+
+enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hardware_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks) {
+	
+	if (*freq > FREQ_MAX) {
+		return HARD_TIMER_FREQ_OUT_OF_RANGE;
+	}
+
+	if (*freq < FREQ_MIN_8_COUNTER) {
+		// calculates slow frequencies for timer 1
+
+		if (hardTimerStarted(HARD_TIMER1)) {
+			// slow timer unavailable
+			return HARD_TIMER_FAIL;
+		}
+
+		getStats(&(*freq), HARD_TIMER1, &(*scalar), &(*timerTicks));
+
+		*timer = HARD_TIMER1;
+
+		if (sameFreq(*freq, *scalar, *timerTicks)) {
+			return HARD_TIMER_OK;
+		}
+		else {
+			return HARD_TIMER_SLIGHTLY_OFF;
+		}
+	}
+	else {
+		/**
+		 * calculates frequencies for remaining timers
+		 * 
+		 * first checks timer 0 since its configuration is valid for all timers
+		 * then checks timer 1 since it can do slower frequencies than the others
+		 * finally checks timer 2 since it can be more accurate
+		 */
+
+		enum HardTimerStatusReturn status = HARD_TIMER_FAIL;
+
+		prescalar_t tempScalar = SCALAR_1;
+		timertick_t tempTicks = 0;
+		freq_t tempFreq = *freq;
+
+		// gets timer 0
+		if (!hardTimerStarted(HARD_TIMER0)) {
+			getStats(&tempFreq, HARD_TIMER0, scalar, timerTicks);
+
+			if (sameFreq(tempFreq, *scalar, *timerTicks)) {
+				status = HARD_TIMER_OK;
+			}
+			else {
+				status = HARD_TIMER_SLIGHTLY_OFF;
+			}
+
+			*timer = HARD_TIMER0;
+		}
+
+		// gets timer 1
+		if (!hardTimerStarted(HARD_TIMER1)) {
+
+			if (*timerTicks != 0) {
+				// timer 0 in use
+				getStats(&tempFreq, HARD_TIMER1, scalar, timerTicks);
+				*timer = HARD_TIMER1;
+
+				if (sameFreq(tempFreq, *scalar, *timerTicks)) {
+					status = HARD_TIMER_OK;
+				}
+				else {
+					status = HARD_TIMER_SLIGHTLY_OFF;
+				}
+			}
+			else {
+				// timer 0 available
+				freq_t calcFreq;
+				getStats(&calcFreq, HARD_TIMER1, &tempScalar, &tempTicks);
+
+				if (abs(*freq - tempFreq) > abs(*freq - calcFreq)) {
+					tempFreq = calcFreq;
+					*timer = HARD_TIMER1;
+					*scalar = tempScalar;
+					*timerTicks = tempTicks;
+
+					if (sameFreq(*freq, *scalar, *timerTicks)) {
+						status = HARD_TIMER_OK;
+					}
+					else {
+						status = HARD_TIMER_SLIGHTLY_OFF;
+					}
+				}
+			}
+		}
+
+		// gets timer 2
+		if (!hardTimerStarted(HARD_TIMER2)) {
+
+			if (*timerTicks != 0) {
+				// timer 0 and 1 in use
+				getStats(&tempFreq, HARD_TIMER2, scalar, timerTicks);
+				*timer = HARD_TIMER2;
+
+				if (sameFreq(tempFreq, *scalar, *timerTicks)) {
+					status = HARD_TIMER_OK;
+				}
+				else {
+					status = HARD_TIMER_SLIGHTLY_OFF;
+				}
+			}
+			else {
+				// timer 0 and/or 1 available
+				freq_t calcFreq;
+				getStats(&calcFreq, HARD_TIMER2, &tempScalar, &tempTicks);
+
+				if (abs(*freq - tempFreq) > abs(*freq - calcFreq)) {
+					tempFreq = calcFreq;
+					*timer = HARD_TIMER2;
+					*scalar = tempScalar;
+					*timerTicks = tempTicks;
+
+					if (sameFreq(*freq, *scalar, *timerTicks)) {
+						status = HARD_TIMER_OK;
+					}
+					else {
+						status = HARD_TIMER_SLIGHTLY_OFF;
+					}
+				}
+			}
+		}
+
+		*freq = tempFreq;
+
+		return status;
+	}
+
+	return HARD_TIMER_FAIL;
+}
 
 bool hardTimerStarted(hardware_timer_t timer) {
 

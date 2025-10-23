@@ -75,7 +75,7 @@ void setTimerStarted(hardware_timer_t timer, bool state) {
 	}
 }
 
-enum HardTimerStatusReturn getHardTimerStats(uint32_t *freq, hardware_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks) {
+enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hardware_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks) {
 	if (*freq > FREQ_MAX) {
 		return HARD_TIMER_FREQ_OUT_OF_RANGE;
 	}
@@ -87,7 +87,7 @@ enum HardTimerStatusReturn getHardTimerStats(uint32_t *freq, hardware_timer_t *t
 		status = HARD_TIMER_SLIGHTLY_OFF;
 	}
 
-	uint32_t target = FREQ_MAX / *freq;
+	freq_t target = FREQ_MAX / *freq;
 
 	if (target % THOUSAND == 0 && status == HARD_TIMER_OK) {
 		*scalar = SCALAR_MS;
