@@ -30,7 +30,6 @@
 
 #define TIMER_COUNT_ZERO 0U // value for setting timer tick count to 0
 #define SCALAR_MAX UINT16_MAX // max value for timer scalar
-#define FREQ_MAX 5000000 // max frequency user set timer can be
 
 typedef struct hw_timer_s {
 	uint8_t group;
@@ -106,6 +105,15 @@ bool IRAM_ATTR timerFunctionWrapper(void *arg) {
 	return false;
 }
 
+hardware_timer_t getNextTimer(void) {
+	for (uint8_t i = 0; i < NUM_TIMERS; i++) {
+		if (!hardTimerStarted(i)) {
+			return (hardware_timer_t)i;
+		}
+	}
+	return HARD_TIMER_INVALID;
+}
+
 enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hardware_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks) {
 	if (*freq > FREQ_MAX) {
 		return HARD_TIMER_FREQ_OUT_OF_RANGE;
@@ -138,6 +146,7 @@ enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hardware_timer_t *tim
 	}
 
 	*freq = APB_CLK_FREQ / (*scalar * *timerTicks);
+	*timer = getNextTimer();
 	return status;
 }
 

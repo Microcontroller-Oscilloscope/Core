@@ -29,6 +29,61 @@
 	#define HARD_TIMER_ID_LED // status LED enable
 #endif
 
+// available hardware timers
+#define HARD_TIMER(id) CONCATENATE(HARD_TIMER, id) // timer #id
+
+typedef enum { // hardware timer type
+	HARD_TIMER_INVALID = -1, // invalid counter
+	#if NUM_TIMERS >= 1
+		HARD_TIMER(0),
+	#endif
+	#if NUM_TIMERS >= 2
+		HARD_TIMER(1),
+	#endif
+	#if NUM_TIMERS >= 3
+		HARD_TIMER(2),
+	#endif
+	#if NUM_TIMERS >= 4
+		HARD_TIMER(3),
+	#endif
+	#if NUM_TIMERS >= 5
+		HARD_TIMER(4),
+	#endif
+	#if NUM_TIMERS >= 6
+		HARD_TIMER(5),
+	#endif
+	#if NUM_TIMERS >= 7
+		HARD_TIMER(6),
+	#endif
+	#if NUM_TIMERS >= 8
+		HARD_TIMER(7),
+	#endif
+	#if NUM_TIMERS >= 9
+		HARD_TIMER(8),
+	#endif
+	#if NUM_TIMERS >= 10
+		HARD_TIMER(9),
+	#endif
+	#if NUM_TIMERS >= 11
+		HARD_TIMER(10),
+	#endif
+	#if NUM_TIMERS >= 12
+		HARD_TIMER(11),
+	#endif
+	#if NUM_TIMERS >= 13
+		HARD_TIMER(12),
+	#endif
+	#if NUM_TIMERS >= 14
+		HARD_TIMER(13),
+	#endif
+	#if NUM_TIMERS >= 15
+		HARD_TIMER(14),
+	#endif
+	#if NUM_TIMERS >= 16
+		HARD_TIMER(15),
+	#endif
+} hardware_timer_t; // hardware timer type
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -89,14 +144,6 @@ enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hardware_timer_t *tim
 
 #ifdef __cplusplus
 }
-#endif
-
-#if NUM_TIMERS > NUM_TIMERS_AVAILABLE
-	#error NUM_TIMERS too large
-#endif
-
-#if NUM_TIMERS_AVAILABLE > 0 && NUM_TIMERS <= 0
-	#error NUM_TIMERS too small
 #endif
 
 #endif

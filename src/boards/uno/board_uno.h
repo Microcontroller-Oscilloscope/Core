@@ -108,28 +108,12 @@
 	 * Only 3 hardware timers available
 	****************************/
 
-	#define NUM_TIMERS_AVAILABLE 3 // amount of hardware timers available
+	#define FREQ_MAX 1000000 // max frequency user set timer can be
+
 	#ifndef NUM_TIMERS
 		#define NUM_TIMERS 3 // amount of hardware timers to use
 	#endif
 
-	// available hardware timers
-	#define HARD_TIMER(id) CONCATENATE(HARD_TIMER, id) // timer #id
-
-	typedef enum {
-
-		#if NUM_TIMERS >= 1
-			HARD_TIMER(0), // 8 bit counter
-		#endif
-		#if NUM_TIMERS >= 2
-			HARD_TIMER(1), // 16 bit counter
-		#endif
-		#if NUM_TIMERS >= 3
-			HARD_TIMER(2), // 8 bit counter
-		#endif
-	} hardware_timer_t; // hardware timer type
-
-	// available pre scalars
 	typedef enum {
 		SCALAR_1, // timer prescalar of 1, timers 0-2
 		SCALAR_8, // timer prescalar of 8, timers 0-2
@@ -140,25 +124,14 @@
 		SCALAR_1024, // timer prescalar of 1024, timers 0-2
 	} prescalar_t; // pre scalar type
 
-	// other timer definitions
 	typedef uint16_t timertick_t; // timer tick type
-	typedef void (*hard_timer_function_ptr_t) (void); // timer callback function pointer
+	typedef void (*hard_timer_function_ptr_t) (void*); // timer callback function pointer
 
-	// timer references
-
-	/**
-	 * Timer #id function reference
-	 * 
-	 * @param id timer id to select
-	 */
-	#define HARD_TIMER_REFERENCE(id) VOID_FUNCTION_NAME
-
-	// timer functions
-
-	#include <avr/interrupt.h>
+	typedef void hard_timer_return_t; // return type of timer function
+	typedef void* hard_timer_param_t; // parameter type of timer function
 
 	/**
-	 * Selects timer function from given id
+	 * Returns from timer function
 	 * 
 	 * F_CPU = 16,000,000
 	 * 
@@ -167,27 +140,16 @@
 	 * timerTicks = [F_CPU / (scalar * F_DER)] - 1
 	 * F_DER = F_CPU / [scalar * (timerTicks + 1)]
 	 * 
-	 * @param id timer id to select
-	 * 
-	 * @note HARD_TIMER_FUNCTION({id}) {
+	 * @note hard_timer_return_t RUN_IN_RAM({function_name}) {function_name}(hard_timer_param_t emptyParams) {
 	 * @note 	{contents}
 	 * @note 	HARD_TIMER_END();
 	 * @note }
 	 * 
+	 * @warning emptyParams doesn't include any user input parameters
 	 * @warning 8-bit counter for timer 0,2 and 16-bit for timer 1
 	 * @warning scalars: 1, 8, 64, 256, 1024. timer 2 additional scalars: 32, 128
 	 */
-	#define HARD_TIMER_FUNCTION(id) ISR (CONCATENATE3(TIMER, id, _COMPA_vect))
-
-	#define HARD_TIMER_END() // end of function for timers
-
-	/****************************
-	 * LED Timer Config
-	****************************/
-
-	#define HARD_TIMER_LED_INDEX 1 // hardware timer index for status LEDs
-	#define HARD_TIMER_LED_SCALAR SCALAR_1024 // pre scalar for LED timer
-	#define HARD_TIMER_LED_TICK_MULTIPLIER (F_CPU / 1000000L) // multiplier for timer ticks
+	#define HARD_TIMER_END()
 
 	/****************************
 	 * Test Timer Config

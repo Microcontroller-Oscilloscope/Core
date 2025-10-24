@@ -26,16 +26,17 @@
 
 #if STATUS_LED_DEFINED
 
-	#define HARD_TIMER_LED HARD_TIMER(HARD_TIMER_LED_INDEX) // hardware timer for status LEDs
-	#define HARD_TIMER_LED_FUNCTION() HARD_TIMER_FUNCTION(HARD_TIMER_LED_INDEX) // starter function for status LED
-	#define HARD_TIMER_LED_REFERENCE HARD_TIMER_REFERENCE(HARD_TIMER_LED_INDEX) // reference for status LED function
-
 	bool ledToggle = false; // LED toggle state
+	hardware_timer_t ledTimer = HARD_TIMER_INVALID; // LED timer reference
 
 	/**
 	 * Blinks LEDs on and off
+	 * 
+	 * @param emptyParams empty parameter set
+	 * 
+	 * @return hard_timer_return_t: return type for timers
 	 */
-	HARD_TIMER_LED_FUNCTION() {
+	hard_timer_return_t RUN_IN_RAM(ledFunction) ledFunction(hard_timer_param_t emptyParams) {
 		ledToggle = !ledToggle;
 		#ifdef STATUS_LED_PIN
 			hardDigitalWrite(STATUS_LED_PIN, ledToggle);
@@ -56,17 +57,6 @@ void initStatus(void) {
 	#ifdef EXTERNAL_STATUS_LED_PIN
 		hardPinMode(EXTERNAL_STATUS_LED_PIN, PIN_MODE_OUTPUT);
 	#endif
-	
-	#if STATUS_LED_DEFINED
-		/*prescalar_t scalar;
-		timertick_t timerTicks;
-		uint32_t freq = 1;
-		hardware_timer_t timer;
-		getHardTimerStats(&freq, &timer, &scalar, &timerTicks);*/
-
-		//initHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR);
-		//initHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, scalar);
-	#endif
 }
 
 void setStatus(enum STATUS_CODE status) {
@@ -74,7 +64,7 @@ void setStatus(enum STATUS_CODE status) {
 	#if STATUS_LED_DEFINED
 
 		// reset timers and LEDs
-		cancelHardTimer(HARD_TIMER_LED);
+		cancelHardTimer(ledTimer);
 
 		#ifdef STATUS_LED_PIN
 			hardDigitalWrite(STATUS_LED_PIN, DIGITAL_LOW);
@@ -85,11 +75,6 @@ void setStatus(enum STATUS_CODE status) {
 
 		ledToggle = false;
 
-		prescalar_t scalar;
-		timertick_t timerTicks;
-		hardware_timer_t timer;
-		uint32_t freq;
-
 		// sets LEDs
 		if (status == BOARD_OK) {
 			#ifdef STATUS_LED_PIN
@@ -99,22 +84,21 @@ void setStatus(enum STATUS_CODE status) {
 				hardDigitalWrite(EXTERNAL_STATUS_LED_PIN, DIGITAL_HIGH);
 			#endif
 		}
-		else if (status == BOARD_CONNECTING) {
-			//setHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR, HARD_TIMER_LED_TICK_MULTIPLIER * CONNECTING_DELAY);
-			freq = CONNECTING_FREQ;
-			enum HardTimerStatusReturn status = getHardTimerStats(&freq, &timer, &scalar, &timerTicks);
-			
-			if (status != HARD_TIMER_FAIL) {
-				setHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, scalar, timerTicks);
+		else if (status == BOARD_CONNECTING || status == BOARD_CRIT_ERROR) {
+
+			prescalar_t scalar;
+			timertick_t timerTicks;
+			uint32_t freq;
+
+			if (status == BOARD_CONNECTING) {
+				freq = CONNECTING_FREQ;
 			}
-		}
-		else if (status == BOARD_CRIT_ERROR) {
-			//setHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, HARD_TIMER_LED_SCALAR, HARD_TIMER_LED_TICK_MULTIPLIER * CRIT_ERROR_DELAY);
-			freq = CRIT_ERROR_FREQ;
-			enum HardTimerStatusReturn status = getHardTimerStats(&freq, &timer, &scalar, &timerTicks);
-			
-			if (status != HARD_TIMER_FAIL) {
-				setHardTimer(HARD_TIMER_LED, &HARD_TIMER_LED_REFERENCE, scalar, timerTicks);
+			else if (status == BOARD_CRIT_ERROR) {
+				freq = CRIT_ERROR_FREQ;
+			}
+
+			if (getHardTimerStats(&freq, &ledTimer, &scalar, &timerTicks) != HARD_TIMER_FAIL) {
+				setHardTimer(ledTimer, &ledFunction, scalar, timerTicks);
 			}
 		}
 
@@ -126,6 +110,14 @@ void setStatus(enum STATUS_CODE status) {
 			#endif
 			#ifdef EXTERNAL_STATUS_LED_PIN
 				hardDigitalWrite(EXTERNAL_STATUS_LED_PIN, DIGITAL_HIGH);
+			#endif
+		}
+		else {
+			#ifdef STATUS_LED_PIN
+				hardDigitalWrite(STATUS_LED_PIN, DIGITAL_LOW);
+			#endif
+			#ifdef EXTERNAL_STATUS_LED_PIN
+				hardDigitalWrite(EXTERNAL_STATUS_LED_PIN, DIGITAL_LOW);
 			#endif
 		}
 

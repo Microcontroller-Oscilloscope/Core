@@ -79,6 +79,7 @@ void nothing();
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 /****************************
  * Changes Flags When Testing

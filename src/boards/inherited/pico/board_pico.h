@@ -70,114 +70,45 @@
 	 * Only 16 hardware alarm timers available
 	****************************/
 
-	#include <pico/time.h>
+	#define FREQ_MAX 1000000 // max frequency user set timer can be
 
-	#define NUM_TIMERS_AVAILABLE 16 // amount of hardware timers available
 	#ifndef NUM_TIMERS
 		#define NUM_TIMERS 16 // amount of hardware timers to use
 	#endif
 
-	// available hardware timers
-	#define HARD_TIMER(id) CONCATENATE(HARD_TIMER, id) // timer #id
-
-	typedef enum { // hardware timer type
-		#if NUM_TIMERS >= 1
-			HARD_TIMER(0), // 64 bit counter
-		#endif
-		#if NUM_TIMERS >= 2
-			HARD_TIMER(1), // 64 bit counter
-		#endif
-		#if NUM_TIMERS >= 3
-			HARD_TIMER(2), // 64 bit counter
-		#endif
-		#if NUM_TIMERS >= 4
-			HARD_TIMER(3), // 64 bit counter
-		#endif
-		#if NUM_TIMERS >= 5
-			HARD_TIMER(4), // 64 bit counter
-		#endif
-		#if NUM_TIMERS >= 6
-			HARD_TIMER(5), // 64 bit counter
-		#endif
-		#if NUM_TIMERS >= 7
-			HARD_TIMER(6), // 64 bit counter
-		#endif
-		#if NUM_TIMERS >= 8
-			HARD_TIMER(7), // 64 bit counter
-		#endif
-		#if NUM_TIMERS >= 9
-			HARD_TIMER(8), // 64 bit counter
-		#endif
-		#if NUM_TIMERS >= 10
-			HARD_TIMER(9), // 64 bit counter
-		#endif
-		#if NUM_TIMERS >= 11
-			HARD_TIMER(10), // 64 bit counter
-		#endif
-		#if NUM_TIMERS >= 12
-			HARD_TIMER(11), // 64 bit counter
-		#endif
-		#if NUM_TIMERS >= 13
-			HARD_TIMER(12), // 64 bit counter
-		#endif
-		#if NUM_TIMERS >= 14
-			HARD_TIMER(13), // 64 bit counter
-		#endif
-		#if NUM_TIMERS >= 15
-			HARD_TIMER(14), // 64 bit counter
-		#endif
-		#if NUM_TIMERS >= 16
-			HARD_TIMER(15), // 64 bit counter
-		#endif
-	} hardware_timer_t; // hardware timer type
-
-	// available pre scalars
 	typedef enum {
 		SCALAR_MS, // timer prescalar for milli seconds
 		SCALAR_US, // timer prescalar micro seconds
 	} prescalar_t; // pre scalar type
 
-	// other timer definitions
 	typedef int64_t timertick_t; // timer tick type
 	typedef bool (*hard_timer_function_ptr_t) (struct repeating_timer*); // timer callback function pointer
-
-	// timer references
+	
+	typedef bool hard_timer_return_t; // return type of timer function
+	typedef struct repeating_timer* hard_timer_param_t; // parameter type of timer function
 
 	/**
-	 * Timer #id function reference
+	 * Sets function to run in RAM if possible
 	 * 
-	 * @param id timer id to select
+	 * @param function function name
+	 * 
+	 * @note {return_type} RUN_IN_RAM({function_name}) {function_name} ({params}) {{content}}
 	 */
-	#define HARD_TIMER_REFERENCE(id) CONCATENATE(hardTimerFunction, id)
-
-	// timer functions
+	#define RUN_IN_RAM(function) __not_in_flash(__STRING( function ))
 
 	/**
-	 * Starter function for timer #id
+	 * Returns from timer function
 	 * 
-	 * @param id numeric value to append to function
-	 * 
-	 * @note HARD_TIMER_FUNCTION({id}) {
+	 * @note hard_timer_return_t RUN_IN_RAM({function_name}) {function_name}(hard_timer_param_t emptyParams) {
 	 * @note 	{contents}
 	 * @note 	HARD_TIMER_END();
 	 * @note }
 	 * 
+	 * @warning emptyParams doesn't include any user input parameters
 	 * @warning timerTicks: time in ms or us
 	 * @warning scalar: SCALAR_MS (millis) or SCALAR_US (micros)
 	 */
-	#define HARD_TIMER_FUNCTION(id) bool CONCATENATE(hardTimerFunction, id)(struct repeating_timer *t)
-
-	#define HARD_TIMER_END() return true // end of function for timers
-
-	#define HARD_TIMER_TICK_MULTIPLIER 1 // multiplier for all timers
-
-	/****************************
-	 * LED Timer Config
-	****************************/
-
-	#define HARD_TIMER_LED_INDEX 0 // hardware timer index for status LEDs
-	#define HARD_TIMER_LED_SCALAR SCALAR_MS // pre scalar for LED timer
-	#define HARD_TIMER_LED_TICK_MULTIPLIER HARD_TIMER_TICK_MULTIPLIER // multiplier for led timer ticks
+	#define HARD_TIMER_END() return true
 
 	/****************************
 	 * Test Timer Config

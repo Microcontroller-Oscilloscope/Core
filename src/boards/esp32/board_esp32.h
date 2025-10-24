@@ -109,49 +109,31 @@
 	 * Only 4 hardware timers available
 	****************************/
 
-	#define NUM_TIMERS_AVAILABLE 4 // amount of hardware timers available
+	#define FREQ_MAX 5000000 // max frequency user set timer can be
+
 	#ifndef NUM_TIMERS
 		#define NUM_TIMERS 4 // amount of hardware timers to use
 	#endif
 
-	// available hardware timers
-	#define HARD_TIMER(id) CONCATENATE(HARD_TIMER, id) // timer #id
-
-	typedef enum { // hardware timer type
-		#if NUM_TIMERS >= 1
-			HARD_TIMER(0), // 64 bit counter
-		#endif
-		#if NUM_TIMERS >= 2
-			HARD_TIMER(1), // 64 bit counter
-		#endif
-		#if NUM_TIMERS >= 3
-			HARD_TIMER(2), // 64 bit counter
-		#endif
-		#if NUM_TIMERS >= 4
-			HARD_TIMER(3), // 64 bit counter
-		#endif
-	} hardware_timer_t; // hardware timer type
-
-	// available pre scalars
 	typedef uint16_t prescalar_t; // pre scalar type
 
-	// other timer definitions
 	typedef uint64_t timertick_t; // timer tick type
-	typedef void (*hard_timer_function_ptr_t) (void); // timer callback function pointer
+	typedef void (*hard_timer_function_ptr_t) (void*); // timer callback function pointer
 
-	// timer references
+	typedef void hard_timer_return_t; // return type of timer function
+	typedef void* hard_timer_param_t; // parameter type of timer function
 
 	/**
-	 * Timer #id function reference
+	 * Sets function to run in RAM if possible
 	 * 
-	 * @param id timer id to select
+	 * @param function function name
+	 * 
+	 * @note {return_type} RUN_IN_RAM({function_name}) {function_name} ({params}) {{content}}
 	 */
-	#define HARD_TIMER_REFERENCE(id) CONCATENATE(hardTimerFunction, id)
-
-	// timer functions
+	#define RUN_IN_RAM(function) IRAM_ATTR
 
 	/**
-	 * Starter function for timer #id
+	 * Returns from timer function
 	 * 
 	 * APB_CLK = 80,000,000Hz
 	 * 
@@ -159,27 +141,16 @@
 	 * 
 	 * freq = APB_CLK / (scalar * timerTicks)
 	 * 
-	 * @param id numeric value to append to function
-	 * 
-	 * @note HARD_TIMER_FUNCTION({id}) {
+	 * @note hard_timer_return_t RUN_IN_RAM({function_name}) {function_name}(hard_timer_param_t emptyParams) {
 	 * @note 	{contents}
 	 * @note 	HARD_TIMER_END();
 	 * @note }
 	 * 
+	 * @warning emptyParams doesn't include any user input parameters
 	 * @warning 64-bit counter
 	 * @warning 16-bit scalar
 	 */
-	#define HARD_TIMER_FUNCTION(id) void IRAM_ATTR CONCATENATE(hardTimerFunction, id) ()
-
-	#define HARD_TIMER_END() // end of function for timers
-
-	/****************************
-	 * LED Timer Config
-	****************************/
-	
-	#define HARD_TIMER_LED_INDEX 0 // hardware timer index for status LEDs
-	#define HARD_TIMER_LED_SCALAR 80 // pre scalar for LED timer
-	#define HARD_TIMER_LED_TICK_MULTIPLIER 1000 // multiplier for timer ticks
+	#define HARD_TIMER_END()
 
 	/****************************
 	 * Test Timer Config

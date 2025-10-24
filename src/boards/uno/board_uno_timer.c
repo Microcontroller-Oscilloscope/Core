@@ -119,6 +119,12 @@ const uint16_t scalarMask[] PROGMEM = {
 		TIMER_0_SCAL |= (1 << CS02); \
 	}
 
+volatile void(*timer0Ptr)() = NULL;
+
+ISR(TIMER0_COMPA_vect) {
+	((void(*)())timer0Ptr)();
+}
+
 /****************************
  * Timer 1
 ****************************/
@@ -153,6 +159,12 @@ const uint16_t scalarMask[] PROGMEM = {
 		TIMER_1_SCAL |= (1 << CS12); \
 	}
 
+volatile void(*timer1Ptr)() = NULL;
+
+ISR(TIMER1_COMPA_vect) {
+	((void(*)())timer1Ptr)();
+}
+
 /****************************
  * Timer 2
 ****************************/
@@ -186,6 +198,12 @@ const uint16_t scalarMask[] PROGMEM = {
 	if (scalar == SCALAR_64 || scalar == SCALAR_128 || scalar == SCALAR_256 || scalar == SCALAR_1024) { \
 		TIMER_2_SCAL |= (1 << CS22); \
 	}
+
+volatile void(*timer2Ptr)() = NULL;
+
+ISR(TIMER2_COMPA_vect) {
+	((void(*)())timer2Ptr)();
+}
 
 /****************************
  * Timer Functions
@@ -438,6 +456,7 @@ bool cancelHardTimer(hardware_timer_t timer) {
 			TIMER_0_INTERR &= ~TIMER_0_INTERR_ENABLE;
 			sei();
 			setTimerStarted(timer, false);
+			timer0Ptr = NULL;
 			return true;
 		}
 	}
@@ -448,6 +467,7 @@ bool cancelHardTimer(hardware_timer_t timer) {
 			TIMER_1_INTERR &= ~TIMER_1_INTERR_ENABLE;
 			sei();
 			setTimerStarted(timer, false);
+			timer1Ptr = NULL;
 			return true;
 		}
 	}
@@ -458,6 +478,7 @@ bool cancelHardTimer(hardware_timer_t timer) {
 			TIMER_2_INTERR &= ~TIMER_2_INTERR_ENABLE;
 			sei();
 			setTimerStarted(timer, false);
+			timer2Ptr = NULL;
 			return true;
 		}
 	}
@@ -473,6 +494,7 @@ bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
 
 	if (timer == HARD_TIMER0) {
 		if (!TIMER_0_STARTED()) {
+			timer0Ptr = function;
 			cli();
 			TIMER_0_COMP = 0;
 			TIMER_0_WAVEFORM = 0;
@@ -488,6 +510,7 @@ bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
 	}
 	else if (timer == HARD_TIMER1) {
 		if (!TIMER_1_STARTED()) {
+			timer1Ptr = function;
 			cli();
 			TIMER_1_COMP = 0;
 			TIMER_1_WAVEFORM = 0;
@@ -503,6 +526,7 @@ bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
 	}
 	else if (timer == HARD_TIMER2) {
 		if (!TIMER_2_STARTED()) {
+			timer2Ptr = function;
 			cli();
 			TIMER_2_COMP = 0;
 			TIMER_2_WAVEFORM = 0;

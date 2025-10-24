@@ -34,6 +34,17 @@
 	#define EMPTY_PROG_FLASH
 #endif
 
+#ifndef RUN_IN_RAM
+	/**
+	 * Sets function to run in RAM if possible
+	 * 
+	 * @param function function name
+	 * 
+	 * @note {return_type} RUN_IN_RAM({function_name}) {function_name} ({params}) {{content}}
+	 */
+	#define RUN_IN_RAM(function)
+#endif
+
 /****************************
  * Checks Required Flags
 ****************************/
