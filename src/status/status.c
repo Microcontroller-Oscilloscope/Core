@@ -26,7 +26,7 @@
 
 #if STATUS_LED_DEFINED
 
-	bool ledToggle = false; // LED toggle state
+	volatile bool ledToggle = false; // LED toggle state
 	hardware_timer_t ledTimer = HARD_TIMER_INVALID; // LED timer reference
 
 	/**
@@ -57,6 +57,12 @@ void initStatus(void) {
 	#ifdef EXTERNAL_STATUS_LED_PIN
 		hardPinMode(EXTERNAL_STATUS_LED_PIN, PIN_MODE_OUTPUT);
 	#endif
+
+	#if STATUS_LED_DEFINED
+		struct hardTimerPriority priority;
+		priority.slowestTimer = true;
+		ledTimer = claimTimer(&priority);
+	#endif
 }
 
 void setStatus(enum STATUS_CODE status) {
@@ -77,6 +83,7 @@ void setStatus(enum STATUS_CODE status) {
 
 		// sets LEDs
 		if (status == BOARD_OK) {
+			unclaimTimer(ledTimer);
 			#ifdef STATUS_LED_PIN
 				hardDigitalWrite(STATUS_LED_PIN, DIGITAL_HIGH);
 			#endif
@@ -85,6 +92,12 @@ void setStatus(enum STATUS_CODE status) {
 			#endif
 		}
 		else if (status == BOARD_CONNECTING || status == BOARD_CRIT_ERROR) {
+
+			if (!isTimerClaimed(ledTimer)) {
+				struct hardTimerPriority priority;
+				priority.slowestTimer = true;
+				ledTimer = claimTimer(&priority);
+			}
 
 			prescalar_t scalar;
 			timertick_t timerTicks;

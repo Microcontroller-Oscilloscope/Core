@@ -24,7 +24,7 @@
 #include <avr/interrupt.h>
 #include "../../hard_timer.h"
 
-uint8_t timerStates = 0U;
+uint8_t timerStates = 0U; // started states and claimed states
 
 #define FREQ_MAX 1000000 // max frequency user set timer can be
 #define FREQ_MIN_8_COUNTER 62 // min frequency for 8 bit counter
@@ -227,20 +227,21 @@ void setTimerStarted(hardware_timer_t timer, bool state) {
 }
 
 /**
- * Detects if scalar value is out of bounds
+ * Sets timer claimed state
  * 
- * @param timer hardware_timer_t timer referenced
- * @param scalar prescalar_t scalar referenced
+ * @param timer timer to set
+ * @param state whether or not timer is claimed
  */
-#define SCALAR_OUT_OF_BOUNDS(timer, scalar) ((timer == HARD_TIMER0 || timer == HARD_TIMER1) && (scalar == SCALAR_32 || scalar == SCALAR_128))
-
-/**
- * Detects if timer ticks value is out of bounds
- * 
- * @param timer hardware_timer_t timer referenced
- * @param timerTicks timertick_t timerTicks referenced
- */
-#define TICKS_OUT_OF_BOUNDS(timer, timerTicks) ((timer == HARD_TIMER0 || timer == HARD_TIMER2) && timerTicks >= UINT8_MAX)
+void setTimerClaimed(hardware_timer_t timer, bool state) {
+	if (timer >= 0 && timer < NUM_TIMERS) {
+		if (state) {
+			timerStates |= (1 << (timer + 3));
+		}
+		else {
+			timerStates &= (~(1 << (timer + 3)));
+		}
+	}
+}
 
 /**
  * Tests if given scalar and timer ticks equal a given frequency
@@ -305,10 +306,75 @@ void getStats(freq_t *freq, hardware_timer_t timer, prescalar_t *scalar, timerti
 	}
 }
 
+bool isTimerClaimed(hardware_timer_t timer) {
+	if (timer >= 0 && timer < NUM_TIMERS) {
+		if ((!!((1 << (3 + timer)) & timerStates))) {
+			return true;
+		}
+	}
+	return false;
+}
+
+hardware_timer_t claimTimer(struct hardTimerPriority *priority) {
+
+	// checks priorities
+	if (priority -> slowestTimer) {
+		if (!isTimerClaimed(HARD_TIMER1)) {
+			setTimerClaimed(HARD_TIMER1, true);
+			return HARD_TIMER1;
+		}
+	}
+	if (priority -> mostAccurateTimer) {
+		if (!isTimerClaimed(HARD_TIMER2)) {
+			setTimerClaimed(HARD_TIMER2, true);
+			return HARD_TIMER2;
+		}
+	}
+
+	// uses default order if no priority matched
+	if (isTimerClaimed(HARD_TIMER0)) {
+		setTimerClaimed(HARD_TIMER0, true);
+		return HARD_TIMER0;
+	}
+	if (isTimerClaimed(HARD_TIMER1)) {
+		setTimerClaimed(HARD_TIMER1, true);
+		return HARD_TIMER1;
+	}
+	if (isTimerClaimed(HARD_TIMER2)) {
+		setTimerClaimed(HARD_TIMER2, true);
+		return HARD_TIMER2;
+	}
+
+	return HARD_TIMER_INVALID;
+}
+
+bool unclaimTimer(hardware_timer_t timer) {
+	if (isTimerClaimed(timer)) {
+		setTimerClaimed(timer, false);
+		return true;
+	}
+	return false;
+}
+
 enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hardware_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks) {
 	
 	if (*freq > FREQ_MAX) {
 		return HARD_TIMER_FREQ_OUT_OF_RANGE;
+	}
+
+	if (isTimerClaimed(*timer)) {
+		if (hardTimerStarted(*timer)) {
+			return HARD_TIMER_FAIL;
+		}
+
+		getStats(&(*freq), *timer, &(*scalar), &(*timerTicks));
+
+		if (sameFreq(*freq, *scalar, *timerTicks)) {
+			return HARD_TIMER_OK;
+		}
+		else {
+			return HARD_TIMER_SLIGHTLY_OFF;
+		}
 	}
 
 	if (*freq < FREQ_MIN_8_COUNTER) {
@@ -488,7 +554,10 @@ bool cancelHardTimer(hardware_timer_t timer) {
 
 bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks) {
 
-	if (TICKS_OUT_OF_BOUNDS(timer, timerTicks) || SCALAR_OUT_OF_BOUNDS(timer, scalar)) {
+	if (
+		((timer == HARD_TIMER0 || timer == HARD_TIMER2) && timerTicks >= UINT8_MAX) || // tests ticks out of bounds
+		((timer == HARD_TIMER0 || timer == HARD_TIMER1) && (scalar == SCALAR_32 || scalar == SCALAR_128)) // tests scalar out of bounds
+	) {
 		return false;
 	}
 

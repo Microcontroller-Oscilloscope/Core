@@ -84,9 +84,60 @@ typedef enum { // hardware timer type
 	#endif
 } hardware_timer_t; // hardware timer type
 
+// codes when getting hard timer stats
+enum HardTimerStatusReturn {
+	HARD_TIMER_OK, // hard timer stats retrieved
+	HARD_TIMER_FREQ_OUT_OF_RANGE, // target frequency was unobtainable
+	HARD_TIMER_SLIGHTLY_OFF, // retrieved values that aren't completely accurate
+	HARD_TIMER_FAIL, // failed to get timer values
+};
+
+typedef uint32_t freq_t; // hard timer frequency variable
+typedef uint8_t timer_priority_t; // hard timer execute priority variable
+
+// hardware timer priority for claiming timers
+struct hardTimerPriority {
+	bool slowestTimer: 1; // whether to use slowest timer or not
+	bool mostAccurateTimer: 1; // whether to use most accurate timer or not
+};
+
+// timer stats for setting hardware timer
+struct hardTimerStats {
+	timertick_t timerTicks; // timer tick value
+	prescalar_t scalar; // scalar value
+	timer_priority_t priority; // priority to execute timer with
+};
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * Claims a timer based on functional priorities
+ * 
+ * @param priority priority of timer to get
+ * 
+ * @return timer claimed
+ */
+hardware_timer_t claimTimer(struct hardTimerPriority *priority);
+
+/**
+ * Releases claim on a timer
+ * 
+ * @param timer timer to release
+ * 
+ * @return if unclaim was successful
+ */
+bool unclaimTimer(hardware_timer_t timer);
+
+/**
+ * Tests if timer is claimed already or not
+ * 
+ * @param timer timer to check
+ * 
+ * @return if timer is claimed or not
+ */
+bool isTimerClaimed(hardware_timer_t timer);
 
 /**
  * Stops hardware timer from executing
@@ -117,16 +168,6 @@ bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
  * @return if timer was started
  */
 bool hardTimerStarted(hardware_timer_t timer);
-
-// codes when getting hard timer stats
-enum HardTimerStatusReturn {
-	HARD_TIMER_OK, // hard timer stats retrieved
-	HARD_TIMER_FREQ_OUT_OF_RANGE, // target frequency was unobtainable
-	HARD_TIMER_SLIGHTLY_OFF, // retrieved values that aren't completely accurate
-	HARD_TIMER_FAIL, // failed to get timer values
-};
-
-typedef uint32_t freq_t; // hard timer frequency variable
 
 /**
  * Gets hard timer stats for target frequency
