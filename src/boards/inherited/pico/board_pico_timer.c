@@ -27,7 +27,6 @@
 
 // hardware timers
 struct repeating_timer timers[NUM_TIMERS];
-struct repeating_timer nullTimer;
 
 #if NUM_TIMERS <= 8
 	typedef uint8_t storage_t; // storage type for timer states
@@ -42,6 +41,7 @@ struct repeating_timer nullTimer;
 #endif
 
 storage_t timersStarted = 0U; // stores timer started state
+storage_t timersClaimed = 0U; // stores timer claimed state
 
 /**
  * Gets timer based on desired timer
@@ -54,7 +54,7 @@ struct repeating_timer* getTimer(hard_timer_t timer) {
 	if (timer >= 0 && timer < NUM_TIMERS) {
 		return &timers[timer];
 	}
-	return &nullTimer;
+	return NULL;
 }
 
 /**
@@ -74,13 +74,68 @@ void setTimerStarted(hard_timer_t timer, bool state) {
 	}
 }
 
+/**
+ * Sets timer claimed state
+ * 
+ * @param timer timer to set
+ * @param state whether or not timer is claimed
+ */
+void setTimerClaimed(hard_timer_t timer, bool state) {
+	if (timer >= 0 && timer < NUM_TIMERS) {
+		if (state) {
+			timersClaimed |= (1 << (timer));
+		}
+		else {
+			timersClaimed &= (~(1 << (timer)));
+		}
+	}
+}
+
+/**
+ * Gets next unstarted and unclaimed timer
+ * 
+ * @return available timer
+ */
 hard_timer_t getNextTimer(void) {
 	for (uint8_t i = 0; i < NUM_TIMERS; i++) {
-		if (!hardTimerStarted(i)) {
+		if (!hardTimerStarted(i) && !isTimerClaimed(i)) {
 			return (hard_timer_t)i;
 		}
 	}
 	return HARD_TIMER_INVALID;
+}
+
+hard_timer_t claimTimer(struct hardTimerPriority *priority) {
+	hard_timer_t timer = getNextTimer();
+
+	struct repeating_timer* timerPtr = getTimer(timer);
+	if (timerPtr == NULL) {
+		return HARD_TIMER_INVALID;
+	}
+	setTimerClaimed(timer, true);
+	return timer;
+}
+
+bool unclaimTimer(hard_timer_t timer) {
+	if (isTimerClaimed(timer)) {
+
+		struct repeating_timer* timerPtr = getTimer(timer);
+		if (timerPtr == NULL) {
+			return false;
+		}
+		setTimerClaimed(timer, false);
+		return true;
+	}
+	return false;
+}
+
+bool isTimerClaimed(hard_timer_t timer) {
+	struct repeating_timer* timerPtr = getTimer(timer);
+	if (timerPtr == NULL) {
+		return false;
+	}
+
+	return !!(timersClaimed & (1 << (timer)));
 }
 
 enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks) {
@@ -128,7 +183,7 @@ bool hardTimerStarted(hard_timer_t timer) {
 bool cancelHardTimer(hard_timer_t timer) {
 
 	struct repeating_timer* timerPtr = getTimer(timer);
-	if (timerPtr == &nullTimer) {
+	if (timerPtr == NULL) {
 		return false;
 	}
 
@@ -144,7 +199,7 @@ bool cancelHardTimer(hard_timer_t timer) {
 bool setHardTimer(hard_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks) {
 	
 	struct repeating_timer* timerPtr = getTimer(timer);
-	if (timerPtr == &nullTimer) {
+	if (timerPtr == NULL) {
 		return false;
 	}
 
