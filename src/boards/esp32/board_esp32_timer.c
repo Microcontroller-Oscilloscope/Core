@@ -255,17 +255,17 @@ bool cancelHardTimer(hard_timer_t timer) {
 	return false;
 }
 
-bool setHardTimer(hard_timer_t timer, freq_t *freq, hard_timer_function_ptr_t function, timer_priority_t priority) {
+bool setHardTimer(hard_timer_t *timer, freq_t *freq, hard_timer_function_ptr_t function, timer_priority_t priority) {
 	
 	prescalar_t scalar;
 	timertick_t timerTicks;
 
-	enum HardTimerStatusReturn result = getHardTimerStats(freq, &timer, &scalar, &timerTicks);
+	enum HardTimerStatusReturn result = getHardTimerStats(freq, timer, &scalar, &timerTicks);
 	if (result == HARD_TIMER_FAIL) {
 		return false;
 	}
 
-	hard_timer_group_t** timerPtr = getTimer(timer);
+	hard_timer_group_t** timerPtr = getTimer(*timer);
 	if (timerPtr == NULL) {
 		return false;
 	}
@@ -280,7 +280,7 @@ bool setHardTimer(hard_timer_t timer, freq_t *freq, hard_timer_function_ptr_t fu
 			.alarm_en = TIMER_ALARM_DIS,
 			.auto_reload = false,
 		};
-		*timerPtr = &timerGroups[timer];
+		*timerPtr = &timerGroups[*timer];
 		
 		timer_init((*timerPtr) -> group, (*timerPtr) -> num, &config);
 		timer_set_counter_value((*timerPtr) -> group, (*timerPtr) -> num, TIMER_COUNT_ZERO);

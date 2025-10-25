@@ -22,7 +22,7 @@
 #include "../board_common.h"
 
 // if status LEDs are enabled
-#define STATUS_LED_DEFINED ((defined(STATUS_LED_PIN) || defined(EXTERNAL_STATUS_LED_PIN)) && defined(HARD_TIMER_ID_LED) && !defined(__TEST_CASES__))
+#define STATUS_LED_DEFINED ((defined(STATUS_LED_PIN) || defined(EXTERNAL_STATUS_LED_PIN)) && defined(HARD_TIMER_ID_LED))
 
 #define STATUS_LED_PRIORITY 0 // priority of status LED timer interrupt
 
@@ -110,7 +110,7 @@ void setStatus(enum STATUS_CODE status) {
 				freq = CRIT_ERROR_FREQ;
 			}
 
-			setHardTimer(ledTimer, &freq, &ledFunction, STATUS_LED_PRIORITY);
+			setHardTimer(&ledTimer, &freq, &ledFunction, STATUS_LED_PRIORITY);
 		}
 
 	#else

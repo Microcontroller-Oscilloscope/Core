@@ -210,31 +210,31 @@ bool cancelHardTimer(hard_timer_t timer) {
 	return false;
 }
 
-bool setHardTimer(hard_timer_t timer, freq_t *freq, hard_timer_function_ptr_t function, timer_priority_t priority) {
+bool setHardTimer(hard_timer_t *timer, freq_t *freq, hard_timer_function_ptr_t function, timer_priority_t priority) {
 	
 	prescalar_t scalar;
 	timertick_t timerTicks;
 
-	enum HardTimerStatusReturn result = getHardTimerStats(freq, &timer, &scalar, &timerTicks);
+	enum HardTimerStatusReturn result = getHardTimerStats(freq, timer, &scalar, &timerTicks);
 	if (result == HARD_TIMER_FAIL) {
 		return false;
 	}
 
-	struct repeating_timer* timerPtr = getTimer(timer);
+	struct repeating_timer* timerPtr = getTimer(*timer);
 	if (timerPtr == NULL) {
 		return false;
 	}
 
-	if (!hardTimerStarted(timer)) {
+	if (!hardTimerStarted(*timer)) {
 		if (scalar == SCALAR_MS) {
 			if (add_repeating_timer_ms(-timerTicks, function, NULL, timerPtr)) {
-				setTimerStarted(timer, true);
+				setTimerStarted(*timer, true);
 				return true;
 			}
 		}
 		else if (scalar == SCALAR_US) {
 			if (add_repeating_timer_us(-timerTicks, function, NULL, timerPtr)) {
-				setTimerStarted(timer, true);
+				setTimerStarted(*timer, true);
 				return true;
 			}
 		}

@@ -145,14 +145,14 @@ bool cancelHardTimer(hard_timer_t timer);
 /**
  * Starts hardware timer execution
  * 
- * @param timer timer to start
+ * @param timer pointer to timer to start
  * @param freq pointer to desired frequency in Hz
  * @param function pointer to function to call back
  * @param priority priority to run timer at
  * 
  * @return if timer was successfully set
  */
-bool setHardTimer(hard_timer_t timer, freq_t *freq, hard_timer_function_ptr_t function, timer_priority_t priority);
+bool setHardTimer(hard_timer_t *timer, freq_t *freq, hard_timer_function_ptr_t function, timer_priority_t priority);
 
 /**
  * Gets if selected timer was started

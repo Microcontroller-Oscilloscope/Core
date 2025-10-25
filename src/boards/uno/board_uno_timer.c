@@ -564,24 +564,24 @@ bool cancelHardTimer(hard_timer_t timer) {
 	return false;
 }
 
-bool setHardTimer(hard_timer_t timer, freq_t *freq, hard_timer_function_ptr_t function, timer_priority_t priority) {
+bool setHardTimer(hard_timer_t *timer, freq_t *freq, hard_timer_function_ptr_t function, timer_priority_t priority) {
 
 	prescalar_t scalar;
 	timertick_t timerTicks;
 
-	enum HardTimerStatusReturn result = getHardTimerStats(freq, &timer, &scalar, &timerTicks);
+	enum HardTimerStatusReturn result = getHardTimerStats(freq, timer, &scalar, &timerTicks);
 	if (result == HARD_TIMER_FAIL) {
 		return false;
 	}
 
 	if (
-		((timer == HARD_TIMER0 || timer == HARD_TIMER2) && timerTicks >= UINT8_MAX) || // tests ticks out of bounds
-		((timer == HARD_TIMER0 || timer == HARD_TIMER1) && (scalar == SCALAR_32 || scalar == SCALAR_128)) // tests scalar out of bounds
+		((*timer == HARD_TIMER0 || *timer == HARD_TIMER2) && timerTicks >= UINT8_MAX) || // tests ticks out of bounds
+		((*timer == HARD_TIMER0 || *timer == HARD_TIMER1) && (scalar == SCALAR_32 || scalar == SCALAR_128)) // tests scalar out of bounds
 	) {
 		return false;
 	}
 
-	if (timer == HARD_TIMER0) {
+	if (*timer == HARD_TIMER0) {
 		if (!TIMER_0_STARTED()) {
 			timer0Ptr = function;
 			cli();
@@ -593,11 +593,11 @@ bool setHardTimer(hard_timer_t timer, freq_t *freq, hard_timer_function_ptr_t fu
 			TIMER_0_SET_SCALAR(scalar);
 			TIMER_0_INTERR |= TIMER_0_INTERR_ENABLE;
 			sei();
-			setTimerStarted(timer, true);
+			setTimerStarted(*timer, true);
 			return true;
 		}
 	}
-	else if (timer == HARD_TIMER1) {
+	else if (*timer == HARD_TIMER1) {
 		if (!TIMER_1_STARTED()) {
 			timer1Ptr = function;
 			cli();
@@ -609,11 +609,11 @@ bool setHardTimer(hard_timer_t timer, freq_t *freq, hard_timer_function_ptr_t fu
 			TIMER_1_SET_SCALAR(scalar);
 			TIMER_1_INTERR |= TIMER_1_INTERR_ENABLE;
 			sei();
-			setTimerStarted(timer, true);
+			setTimerStarted(*timer, true);
 			return true;
 		}
 	}
-	else if (timer == HARD_TIMER2) {
+	else if (*timer == HARD_TIMER2) {
 		if (!TIMER_2_STARTED()) {
 			timer2Ptr = function;
 			cli();
@@ -625,7 +625,7 @@ bool setHardTimer(hard_timer_t timer, freq_t *freq, hard_timer_function_ptr_t fu
 			TIMER_2_SET_SCALAR(scalar);
 			TIMER_2_INTERR |= TIMER_2_INTERR_ENABLE;
 			sei();
-			setTimerStarted(timer, true);
+			setTimerStarted(*timer, true);
 			return true;
 		}
 	}
