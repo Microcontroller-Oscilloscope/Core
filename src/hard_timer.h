@@ -82,7 +82,7 @@ typedef enum { // hardware timer type
 	#if NUM_TIMERS >= 16
 		HARD_TIMER(15),
 	#endif
-} hardware_timer_t; // hardware timer type
+} hard_timer_t; // hardware timer type
 
 // codes when getting hard timer stats
 enum HardTimerStatusReturn {
@@ -94,6 +94,7 @@ enum HardTimerStatusReturn {
 
 typedef uint32_t freq_t; // hard timer frequency variable
 typedef uint8_t timer_priority_t; // hard timer execute priority variable
+typedef hard_timer_return_t (*hard_timer_function_ptr_t) (hard_timer_param_t); // timer callback function pointer
 
 // hardware timer priority for claiming timers
 struct hardTimerPriority {
@@ -105,7 +106,6 @@ struct hardTimerPriority {
 struct hardTimerStats {
 	timertick_t timerTicks; // timer tick value
 	prescalar_t scalar; // scalar value
-	timer_priority_t priority; // priority to execute timer with
 };
 
 #ifdef __cplusplus
@@ -119,7 +119,7 @@ extern "C" {
  * 
  * @return timer claimed
  */
-hardware_timer_t claimTimer(struct hardTimerPriority *priority);
+hard_timer_t claimTimer(struct hardTimerPriority *priority);
 
 /**
  * Releases claim on a timer
@@ -128,7 +128,7 @@ hardware_timer_t claimTimer(struct hardTimerPriority *priority);
  * 
  * @return if unclaim was successful
  */
-bool unclaimTimer(hardware_timer_t timer);
+bool unclaimTimer(hard_timer_t timer);
 
 /**
  * Tests if timer is claimed already or not
@@ -137,7 +137,7 @@ bool unclaimTimer(hardware_timer_t timer);
  * 
  * @return if timer is claimed or not
  */
-bool isTimerClaimed(hardware_timer_t timer);
+bool isTimerClaimed(hard_timer_t timer);
 
 /**
  * Stops hardware timer from executing
@@ -146,7 +146,7 @@ bool isTimerClaimed(hardware_timer_t timer);
  * 
  * @return if timer was successfully canceled
  */
-bool cancelHardTimer(hardware_timer_t timer);
+bool cancelHardTimer(hard_timer_t timer);
 
 /**
  * Starts hardware timer execution
@@ -158,7 +158,7 @@ bool cancelHardTimer(hardware_timer_t timer);
  * 
  * @return if timer was successfully set
  */
-bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks);
+bool setHardTimer(hard_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks);
 
 /**
  * Gets if selected timer was started
@@ -167,7 +167,7 @@ bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
  * 
  * @return if timer was started
  */
-bool hardTimerStarted(hardware_timer_t timer);
+bool hardTimerStarted(hard_timer_t timer);
 
 /**
  * Gets hard timer stats for target frequency
@@ -181,7 +181,7 @@ bool hardTimerStarted(hardware_timer_t timer);
  * 
  * @note freq value is changed to actual freq if values are slightly off
  */
-enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hardware_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks);
+enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks);
 
 #ifdef __cplusplus
 }

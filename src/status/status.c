@@ -27,7 +27,7 @@
 #if STATUS_LED_DEFINED
 
 	volatile bool ledToggle = false; // LED toggle state
-	hardware_timer_t ledTimer = HARD_TIMER_INVALID; // LED timer reference
+	hard_timer_t ledTimer = HARD_TIMER_INVALID; // LED timer reference
 
 	/**
 	 * Blinks LEDs on and off

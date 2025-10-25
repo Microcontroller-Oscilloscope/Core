@@ -80,10 +80,8 @@
 		SCALAR_MS, // timer prescalar for milli seconds
 		SCALAR_US, // timer prescalar micro seconds
 	} prescalar_t; // pre scalar type
-
 	typedef int64_t timertick_t; // timer tick type
-	typedef bool (*hard_timer_function_ptr_t) (struct repeating_timer*); // timer callback function pointer
-	
+
 	typedef bool hard_timer_return_t; // return type of timer function
 	typedef struct repeating_timer* hard_timer_param_t; // parameter type of timer function
 

@@ -32,16 +32,22 @@
 #define SCALAR_MAX UINT16_MAX // max value for timer scalar
 
 typedef struct hw_timer_s {
-	uint8_t group;
-	uint8_t num;
-} hard_timer_t;
+	uint8_t group; // timer group
+	uint8_t num; // timer number
+} hard_timer_group_t;
 
-static hard_timer_t timerGroups[4] = {
-	{0,0}, {1,0},  {0,1},  {1,1}
+// stores timer groups and numbers
+static hard_timer_group_t timerGroups[4] = {
+	{.group=0, .num=0}, // timer0
+	{.group=1, .num=0}, // timer1
+	{.group=0, .num=1}, // timer2
+	{.group=1, .num=1}, // timer3
 };
 
+uint8_t claimed = 0U; // stores whether timers were claimed or not
+
 // hardware timer pointers
-hard_timer_t *timers[] = {
+hard_timer_group_t *timers[] = {
 	#if NUM_TIMERS >= 1
 		NULL,
 	#endif
@@ -56,8 +62,6 @@ hard_timer_t *timers[] = {
 	#endif
 };
 
-hard_timer_t *nullTimer;
-
 /**
  * Gets timer based on desired timer
  * 
@@ -65,12 +69,12 @@ hard_timer_t *nullTimer;
  * 
  * @return pointer to timer selected
  */
-hard_timer_t** getTimer(hardware_timer_t timer) {
+hard_timer_group_t** getTimer(hard_timer_t timer) {
 
 	if (timer >= 0 && timer < NUM_TIMERS) {
 		return &timers[timer];
 	}
-	return &nullTimer;
+	return NULL;
 }
 
 /**
@@ -80,8 +84,8 @@ hard_timer_t** getTimer(hardware_timer_t timer) {
  * 
  * @return if timer was started
  */
-bool timerStartedInternal(hard_timer_t** timerPtr) {
-	if (timerPtr == &nullTimer) {
+bool timerStartedInternal(hard_timer_group_t** timerPtr) {
+	if (timerPtr == NULL) {
 		return false;
 	}
 
@@ -93,28 +97,71 @@ bool timerStartedInternal(hard_timer_t** timerPtr) {
 }
 
 /**
- * function wrapper for callback function
+ * Gets next unstarted and unclaimed timer
  * 
- * @param args arguments to pass
- * 
- * @return false, don't yeild at end
+ * @return available timer
  */
-bool IRAM_ATTR timerFunctionWrapper(void *arg) {
-	void (*fn)(void) = arg;
-	fn();
-	return false;
-}
-
-hardware_timer_t getNextTimer(void) {
+hard_timer_t getNextTimer(void) {
 	for (uint8_t i = 0; i < NUM_TIMERS; i++) {
-		if (!hardTimerStarted(i)) {
-			return (hardware_timer_t)i;
+		if (!hardTimerStarted(i) && !isTimerClaimed(i)) {
+			return (hard_timer_t)i;
 		}
 	}
 	return HARD_TIMER_INVALID;
 }
 
-enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hardware_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks) {
+/**
+ * Sets timer claimed state
+ * 
+ * @param timer timer to set
+ * @param state whether or not timer is claimed
+ */
+void setTimerClaimed(hard_timer_t timer, bool state) {
+	if (timer >= 0 && timer < NUM_TIMERS) {
+		if (state) {
+			claimed |= (1 << (timer));
+		}
+		else {
+			claimed &= (~(1 << (timer)));
+		}
+	}
+}
+
+hard_timer_t claimTimer(struct hardTimerPriority *priority) {
+	hard_timer_t timer = getNextTimer();
+
+	hard_timer_group_t** timerPtr = getTimer(timer);
+	if (timerPtr == NULL) {
+		return HARD_TIMER_INVALID;
+	}
+	setTimerClaimed(timer, true);
+	return timer;
+}
+
+bool unclaimTimer(hard_timer_t timer) {
+
+	if (isTimerClaimed(timer)) {
+
+		hard_timer_group_t** timerPtr = getTimer(timer);
+		if (timerPtr == NULL) {
+			return false;
+		}
+		setTimerClaimed(timer, false);
+		return true;
+	}
+	return false;
+}
+
+bool isTimerClaimed(hard_timer_t timer) {
+	hard_timer_group_t** timerPtr = getTimer(timer);
+	if (timerPtr == NULL) {
+		return false;
+	}
+
+	return !!(claimed & (1 << (timerGroups[timer].group + timerGroups[timer].num * 2)));
+}
+
+enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks) {
 	if (*freq > FREQ_MAX) {
 		return HARD_TIMER_FREQ_OUT_OF_RANGE;
 	}
@@ -146,19 +193,23 @@ enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hardware_timer_t *tim
 	}
 
 	*freq = APB_CLK_FREQ / (*scalar * *timerTicks);
-	*timer = getNextTimer();
+
+	if (!isTimerClaimed(*timer)) {
+		*timer = getNextTimer();
+	}
+
 	return status;
 }
 
-bool hardTimerStarted(hardware_timer_t timer) {
-	hard_timer_t** timerPtr = getTimer(timer);
+bool hardTimerStarted(hard_timer_t timer) {
+	hard_timer_group_t** timerPtr = getTimer(timer);
 	return timerStartedInternal(timerPtr);
 }
 
-bool cancelHardTimer(hardware_timer_t timer) {
+bool cancelHardTimer(hard_timer_t timer) {
 	
-	hard_timer_t** timerPtr = getTimer(timer);
-	if (timerPtr == &nullTimer) {
+	hard_timer_group_t** timerPtr = getTimer(timer);
+	if (timerPtr == NULL) {
 		return false;
 	}
 
@@ -180,10 +231,10 @@ bool cancelHardTimer(hardware_timer_t timer) {
 	return false;
 }
 
-bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks) {
+bool setHardTimer(hard_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks) {
 	
-	hard_timer_t** timerPtr = getTimer(timer);
-	if (timerPtr == &nullTimer) {
+	hard_timer_group_t** timerPtr = getTimer(timer);
+	if (timerPtr == NULL) {
 		return false;
 	}
 
@@ -202,7 +253,7 @@ bool setHardTimer(hardware_timer_t timer, hard_timer_function_ptr_t function, pr
 		timer_init((*timerPtr) -> group, (*timerPtr) -> num, &config);
 		timer_set_counter_value((*timerPtr) -> group, (*timerPtr) -> num, 0);
 		timer_start((*timerPtr) -> group, (*timerPtr) -> num);
-		timer_isr_callback_add((*timerPtr) -> group, (*timerPtr) -> num, timerFunctionWrapper, function, 0);
+		timer_isr_callback_add((*timerPtr) -> group, (*timerPtr) -> num, function, NULL, 0);
 
 		// run timer
 		timer_set_alarm_value((*timerPtr) -> group, (*timerPtr) -> num, timerTicks);

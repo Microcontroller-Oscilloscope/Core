@@ -116,11 +116,9 @@
 	#endif
 
 	typedef uint16_t prescalar_t; // pre scalar type
-
 	typedef uint64_t timertick_t; // timer tick type
-	typedef void (*hard_timer_function_ptr_t) (void*); // timer callback function pointer
 
-	typedef void hard_timer_return_t; // return type of timer function
+	typedef bool hard_timer_return_t; // return type of timer function
 	typedef void* hard_timer_param_t; // parameter type of timer function
 
 	/**

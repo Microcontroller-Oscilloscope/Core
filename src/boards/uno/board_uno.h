@@ -123,9 +123,7 @@
 		SCALAR_256, // timer prescalar of 256, timers 0-2
 		SCALAR_1024, // timer prescalar of 1024, timers 0-2
 	} prescalar_t; // pre scalar type
-
 	typedef uint16_t timertick_t; // timer tick type
-	typedef void (*hard_timer_function_ptr_t) (void*); // timer callback function pointer
 
 	typedef void hard_timer_return_t; // return type of timer function
 	typedef void* hard_timer_param_t; // parameter type of timer function
