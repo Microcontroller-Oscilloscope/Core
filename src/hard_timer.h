@@ -102,12 +102,6 @@ struct hardTimerPriority {
 	bool mostAccurateTimer: 1; // whether to use most accurate timer or not
 };
 
-// timer stats for setting hardware timer
-struct hardTimerStats {
-	timertick_t timerTicks; // timer tick value
-	prescalar_t scalar; // scalar value
-};
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -137,7 +131,7 @@ bool unclaimTimer(hard_timer_t timer);
  * 
  * @return if timer is claimed or not
  */
-bool isTimerClaimed(hard_timer_t timer);
+bool hardTimerClaimed(hard_timer_t timer);
 
 /**
  * Stops hardware timer from executing
@@ -152,13 +146,13 @@ bool cancelHardTimer(hard_timer_t timer);
  * Starts hardware timer execution
  * 
  * @param timer timer to start
- * @param function function to call back
- * @param scalar scalar for function call
- * @param timerTicks timer ticks per cycle
+ * @param freq pointer to desired frequency in Hz
+ * @param function pointer to function to call back
+ * @param priority priority to run timer at
  * 
  * @return if timer was successfully set
  */
-bool setHardTimer(hard_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks);
+bool setHardTimer(hard_timer_t timer, freq_t *freq, hard_timer_function_ptr_t function, timer_priority_t priority);
 
 /**
  * Gets if selected timer was started
@@ -168,20 +162,6 @@ bool setHardTimer(hard_timer_t timer, hard_timer_function_ptr_t function, presca
  * @return if timer was started
  */
 bool hardTimerStarted(hard_timer_t timer);
-
-/**
- * Gets hard timer stats for target frequency
- * 
- * @param freq pointer to desired frequency in Hz
- * @param timer pointer to timer ID
- * @param scalar pointer to scalar value
- * @param timerTicks pointer to desired tick count
- * 
- * @return result of getting timer stats
- * 
- * @note freq value is changed to actual freq if values are slightly off
- */
-enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks);
 
 #ifdef __cplusplus
 }

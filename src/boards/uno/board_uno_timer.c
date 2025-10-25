@@ -306,7 +306,7 @@ void getStats(freq_t *freq, hard_timer_t timer, prescalar_t *scalar, timertick_t
 	}
 }
 
-bool isTimerClaimed(hard_timer_t timer) {
+bool hardTimerClaimed(hard_timer_t timer) {
 	if (timer >= 0 && timer < NUM_TIMERS) {
 		if ((!!((1 << (3 + timer)) & timerStates))) {
 			return true;
@@ -319,28 +319,28 @@ hard_timer_t claimTimer(struct hardTimerPriority *priority) {
 
 	// checks priorities
 	if (priority -> slowestTimer) {
-		if (!isTimerClaimed(HARD_TIMER1)) {
+		if (!hardTimerClaimed(HARD_TIMER1)) {
 			setTimerClaimed(HARD_TIMER1, true);
 			return HARD_TIMER1;
 		}
 	}
 	if (priority -> mostAccurateTimer) {
-		if (!isTimerClaimed(HARD_TIMER2)) {
+		if (!hardTimerClaimed(HARD_TIMER2)) {
 			setTimerClaimed(HARD_TIMER2, true);
 			return HARD_TIMER2;
 		}
 	}
 
 	// uses default order if no priority matched
-	if (isTimerClaimed(HARD_TIMER0)) {
+	if (hardTimerClaimed(HARD_TIMER0)) {
 		setTimerClaimed(HARD_TIMER0, true);
 		return HARD_TIMER0;
 	}
-	if (isTimerClaimed(HARD_TIMER1)) {
+	if (hardTimerClaimed(HARD_TIMER1)) {
 		setTimerClaimed(HARD_TIMER1, true);
 		return HARD_TIMER1;
 	}
-	if (isTimerClaimed(HARD_TIMER2)) {
+	if (hardTimerClaimed(HARD_TIMER2)) {
 		setTimerClaimed(HARD_TIMER2, true);
 		return HARD_TIMER2;
 	}
@@ -349,20 +349,32 @@ hard_timer_t claimTimer(struct hardTimerPriority *priority) {
 }
 
 bool unclaimTimer(hard_timer_t timer) {
-	if (isTimerClaimed(timer)) {
+	if (hardTimerClaimed(timer)) {
 		setTimerClaimed(timer, false);
 		return true;
 	}
 	return false;
 }
 
+/**
+ * Gets hard timer stats for target frequency
+ * 
+ * @param freq pointer to desired frequency in Hz
+ * @param timer pointer to timer ID
+ * @param scalar pointer to scalar value
+ * @param timerTicks pointer to desired tick count
+ * 
+ * @return result of getting timer stats
+ * 
+ * @note freq value is changed to actual freq if values are slightly off
+ */
 enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks) {
 	
 	if (*freq > FREQ_MAX) {
 		return HARD_TIMER_FREQ_OUT_OF_RANGE;
 	}
 
-	if (isTimerClaimed(*timer)) {
+	if (hardTimerClaimed(*timer)) {
 		if (hardTimerStarted(*timer)) {
 			return HARD_TIMER_FAIL;
 		}
@@ -552,7 +564,15 @@ bool cancelHardTimer(hard_timer_t timer) {
 	return false;
 }
 
-bool setHardTimer(hard_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks) {
+bool setHardTimer(hard_timer_t timer, freq_t *freq, hard_timer_function_ptr_t function, timer_priority_t priority) {
+
+	prescalar_t scalar;
+	timertick_t timerTicks;
+
+	enum HardTimerStatusReturn result = getHardTimerStats(freq, &timer, &scalar, &timerTicks);
+	if (result == HARD_TIMER_FAIL) {
+		return false;
+	}
 
 	if (
 		((timer == HARD_TIMER0 || timer == HARD_TIMER2) && timerTicks >= UINT8_MAX) || // tests ticks out of bounds

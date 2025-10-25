@@ -98,7 +98,7 @@ void setTimerClaimed(hard_timer_t timer, bool state) {
  */
 hard_timer_t getNextTimer(void) {
 	for (uint8_t i = 0; i < NUM_TIMERS; i++) {
-		if (!hardTimerStarted(i) && !isTimerClaimed(i)) {
+		if (!hardTimerStarted(i) && !hardTimerClaimed(i)) {
 			return (hard_timer_t)i;
 		}
 	}
@@ -117,7 +117,7 @@ hard_timer_t claimTimer(struct hardTimerPriority *priority) {
 }
 
 bool unclaimTimer(hard_timer_t timer) {
-	if (isTimerClaimed(timer)) {
+	if (hardTimerClaimed(timer)) {
 
 		struct repeating_timer* timerPtr = getTimer(timer);
 		if (timerPtr == NULL) {
@@ -129,7 +129,7 @@ bool unclaimTimer(hard_timer_t timer) {
 	return false;
 }
 
-bool isTimerClaimed(hard_timer_t timer) {
+bool hardTimerClaimed(hard_timer_t timer) {
 	struct repeating_timer* timerPtr = getTimer(timer);
 	if (timerPtr == NULL) {
 		return false;
@@ -138,6 +138,18 @@ bool isTimerClaimed(hard_timer_t timer) {
 	return !!(timersClaimed & (1 << (timer)));
 }
 
+/**
+ * Gets hard timer stats for target frequency
+ * 
+ * @param freq pointer to desired frequency in Hz
+ * @param timer pointer to timer ID
+ * @param scalar pointer to scalar value
+ * @param timerTicks pointer to desired tick count
+ * 
+ * @return result of getting timer stats
+ * 
+ * @note freq value is changed to actual freq if values are slightly off
+ */
 enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks) {
 	if (*freq > FREQ_MAX) {
 		return HARD_TIMER_FREQ_OUT_OF_RANGE;
@@ -168,7 +180,9 @@ enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, 
 		*freq = FREQ_MAX / *timerTicks;
 	}
 
-	*timer = getNextTimer();
+	if (!hardTimerClaimed(*timer) && !hardTimerStarted(*timer)) {
+		*timer = getNextTimer();
+	}
 	
 	return status;
 }
@@ -196,8 +210,16 @@ bool cancelHardTimer(hard_timer_t timer) {
 	return false;
 }
 
-bool setHardTimer(hard_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks) {
+bool setHardTimer(hard_timer_t timer, freq_t *freq, hard_timer_function_ptr_t function, timer_priority_t priority) {
 	
+	prescalar_t scalar;
+	timertick_t timerTicks;
+
+	enum HardTimerStatusReturn result = getHardTimerStats(freq, &timer, &scalar, &timerTicks);
+	if (result == HARD_TIMER_FAIL) {
+		return false;
+	}
+
 	struct repeating_timer* timerPtr = getTimer(timer);
 	if (timerPtr == NULL) {
 		return false;

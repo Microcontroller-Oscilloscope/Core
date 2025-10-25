@@ -27,9 +27,21 @@
 #include <esp_system.h>
 #include <freertos/timers.h>
 #include <driver/timer.h>
+#include <esp_intr_alloc.h>
 
 #define TIMER_COUNT_ZERO 0U // value for setting timer tick count to 0
 #define SCALAR_MAX UINT16_MAX // max value for timer scalar
+
+/**
+ * Scales input priority
+ * 
+ * @param priority of type timer_priority_t
+ * 
+ * @note function can only run up to priority 'ESP_INTR_FLAG_LEVEL3' since functions are in c
+ * 
+ * @return priority flag for 'intr_alloc_flags' when calling 'timer_isr_callback_add'
+ */
+#define SET_PRIORITY(priority) (1 << (priority / (UINT8_MAX / 3)))
 
 typedef struct hw_timer_s {
 	uint8_t group; // timer group
@@ -103,7 +115,7 @@ bool timerStartedInternal(hard_timer_group_t** timerPtr) {
  */
 hard_timer_t getNextTimer(void) {
 	for (uint8_t i = 0; i < NUM_TIMERS; i++) {
-		if (!hardTimerStarted(i) && !isTimerClaimed(i)) {
+		if (!hardTimerStarted(i) && !hardTimerClaimed(i)) {
 			return (hard_timer_t)i;
 		}
 	}
@@ -140,7 +152,7 @@ hard_timer_t claimTimer(struct hardTimerPriority *priority) {
 
 bool unclaimTimer(hard_timer_t timer) {
 
-	if (isTimerClaimed(timer)) {
+	if (hardTimerClaimed(timer)) {
 
 		hard_timer_group_t** timerPtr = getTimer(timer);
 		if (timerPtr == NULL) {
@@ -152,7 +164,7 @@ bool unclaimTimer(hard_timer_t timer) {
 	return false;
 }
 
-bool isTimerClaimed(hard_timer_t timer) {
+bool hardTimerClaimed(hard_timer_t timer) {
 	hard_timer_group_t** timerPtr = getTimer(timer);
 	if (timerPtr == NULL) {
 		return false;
@@ -161,6 +173,18 @@ bool isTimerClaimed(hard_timer_t timer) {
 	return !!(claimed & (1 << (timerGroups[timer].group + timerGroups[timer].num * 2)));
 }
 
+/**
+ * Gets hard timer stats for target frequency
+ * 
+ * @param freq pointer to desired frequency in Hz
+ * @param timer pointer to timer ID
+ * @param scalar pointer to scalar value
+ * @param timerTicks pointer to desired tick count
+ * 
+ * @return result of getting timer stats
+ * 
+ * @note freq value is changed to actual freq if values are slightly off
+ */
 enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks) {
 	if (*freq > FREQ_MAX) {
 		return HARD_TIMER_FREQ_OUT_OF_RANGE;
@@ -194,7 +218,7 @@ enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, 
 
 	*freq = APB_CLK_FREQ / (*scalar * *timerTicks);
 
-	if (!isTimerClaimed(*timer)) {
+	if (!hardTimerClaimed(*timer) && !hardTimerStarted(*timer)) {
 		*timer = getNextTimer();
 	}
 
@@ -231,8 +255,16 @@ bool cancelHardTimer(hard_timer_t timer) {
 	return false;
 }
 
-bool setHardTimer(hard_timer_t timer, hard_timer_function_ptr_t function, prescalar_t scalar, timertick_t timerTicks) {
+bool setHardTimer(hard_timer_t timer, freq_t *freq, hard_timer_function_ptr_t function, timer_priority_t priority) {
 	
+	prescalar_t scalar;
+	timertick_t timerTicks;
+
+	enum HardTimerStatusReturn result = getHardTimerStats(freq, &timer, &scalar, &timerTicks);
+	if (result == HARD_TIMER_FAIL) {
+		return false;
+	}
+
 	hard_timer_group_t** timerPtr = getTimer(timer);
 	if (timerPtr == NULL) {
 		return false;
@@ -251,9 +283,9 @@ bool setHardTimer(hard_timer_t timer, hard_timer_function_ptr_t function, presca
 		*timerPtr = &timerGroups[timer];
 		
 		timer_init((*timerPtr) -> group, (*timerPtr) -> num, &config);
-		timer_set_counter_value((*timerPtr) -> group, (*timerPtr) -> num, 0);
+		timer_set_counter_value((*timerPtr) -> group, (*timerPtr) -> num, TIMER_COUNT_ZERO);
 		timer_start((*timerPtr) -> group, (*timerPtr) -> num);
-		timer_isr_callback_add((*timerPtr) -> group, (*timerPtr) -> num, function, NULL, 0);
+		timer_isr_callback_add((*timerPtr) -> group, (*timerPtr) -> num, function, NULL, SET_PRIORITY(priority));
 
 		// run timer
 		timer_set_alarm_value((*timerPtr) -> group, (*timerPtr) -> num, timerTicks);

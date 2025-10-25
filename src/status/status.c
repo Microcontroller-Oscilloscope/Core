@@ -24,6 +24,8 @@
 // if status LEDs are enabled
 #define STATUS_LED_DEFINED ((defined(STATUS_LED_PIN) || defined(EXTERNAL_STATUS_LED_PIN)) && defined(HARD_TIMER_ID_LED) && !defined(__TEST_CASES__))
 
+#define STATUS_LED_PRIORITY 0 // priority of status LED timer interrupt
+
 #if STATUS_LED_DEFINED
 
 	volatile bool ledToggle = false; // LED toggle state
@@ -93,14 +95,12 @@ void setStatus(enum STATUS_CODE status) {
 		}
 		else if (status == BOARD_CONNECTING || status == BOARD_CRIT_ERROR) {
 
-			if (!isTimerClaimed(ledTimer)) {
+			if (!hardTimerClaimed(ledTimer)) {
 				struct hardTimerPriority priority;
 				priority.slowestTimer = true;
 				ledTimer = claimTimer(&priority);
 			}
 
-			prescalar_t scalar;
-			timertick_t timerTicks;
 			uint32_t freq;
 
 			if (status == BOARD_CONNECTING) {
@@ -110,9 +110,7 @@ void setStatus(enum STATUS_CODE status) {
 				freq = CRIT_ERROR_FREQ;
 			}
 
-			if (getHardTimerStats(&freq, &ledTimer, &scalar, &timerTicks) != HARD_TIMER_FAIL) {
-				setHardTimer(ledTimer, &ledFunction, scalar, timerTicks);
-			}
+			setHardTimer(ledTimer, &freq, &ledFunction, STATUS_LED_PRIORITY);
 		}
 
 	#else
