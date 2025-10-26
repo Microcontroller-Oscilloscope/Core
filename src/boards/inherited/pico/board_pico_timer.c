@@ -147,10 +147,6 @@ bool hardTimerClaimed(hard_timer_t timer) {
  * @note freq value is changed to actual freq if values are slightly off
  */
 enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks) {
-	
-	if (*freq > FREQ_MAX) {
-		return HARD_TIMER_FREQ_OUT_OF_RANGE;
-	}
 
 	enum HardTimerStatusReturn status = HARD_TIMER_OK;
 
@@ -160,15 +156,15 @@ enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, 
 	}
 
 	//target in us
-	freq_t target = FREQ_MAX / *freq;
+	freq_t targetUS = FREQ_MAX / *freq;
 
-	if (target % THOUSAND == 0 && status == HARD_TIMER_OK) {
+	if (targetUS % THOUSAND == 0 && status == HARD_TIMER_OK) {
 		*scalar = SCALAR_MS;
-		*timerTicks = target / THOUSAND;
+		*timerTicks = targetUS / THOUSAND;
 	}
 	else {
 		*scalar = SCALAR_US;
-		*timerTicks = target;
+		*timerTicks = targetUS;
 	}
 
 	if (*scalar == SCALAR_MS) {
@@ -222,10 +218,8 @@ bool setHardTimer(hard_timer_t *timer, freq_t *freq, hard_timer_function_ptr_t f
 
 	prescalar_t scalar;
 	timertick_t timerTicks;
-
-	enum HardTimerStatusReturn result = getHardTimerStats(freq, timer, &scalar, &timerTicks);
 	
-	if (result == HARD_TIMER_FAIL) {
+	if (getHardTimerStats(freq, timer, &scalar, &timerTicks) == HARD_TIMER_FAIL) {
 		return false;
 	}
 

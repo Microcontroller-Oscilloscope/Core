@@ -84,7 +84,6 @@ typedef enum { // hardware timer type
 // codes when getting hard timer stats
 enum HardTimerStatusReturn {
 	HARD_TIMER_OK, // hard timer stats retrieved
-	HARD_TIMER_FREQ_OUT_OF_RANGE, // target frequency was unobtainable
 	HARD_TIMER_SLIGHTLY_OFF, // retrieved values that aren't completely accurate
 	HARD_TIMER_FAIL, // failed to get timer values
 };

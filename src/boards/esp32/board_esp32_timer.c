@@ -35,17 +35,6 @@
 typedef uint16_t prescalar_t; // pre scalar type
 typedef uint64_t timertick_t; // timer tick type
 
-/**
- * Scales input priority
- * 
- * @param priority of type timer_priority_t
- * 
- * @note function can only run up to priority 'ESP_INTR_FLAG_LEVEL3' since functions are in c
- * 
- * @return priority flag for 'intr_alloc_flags' when calling 'timer_isr_callback_add'
- */
-#define SET_PRIORITY(priority) (1 << (priority / (UINT8_MAX / 3)))
-
 typedef struct hw_timer_s {
 	uint8_t group; // timer group
 	uint8_t num; // timer number
@@ -76,6 +65,19 @@ hard_timer_group_t *timers[] = {
 		NULL,
 	#endif
 };
+
+/**
+ * Scales input priority
+ * 
+ * @param priority of type timer_priority_t
+ * 
+ * @note function can only run up to priority 'ESP_INTR_FLAG_LEVEL3' since functions are in c
+ * 
+ * @return priority flag for 'intr_alloc_flags' when calling 'timer_isr_callback_add'
+ */
+int setPriority(timer_priority_t priority) {
+	return (1 << (priority / (UINT8_MAX / 3)));
+}
 
 /**
  * Gets timer based on desired timer
@@ -248,8 +250,7 @@ bool setHardTimer(hard_timer_t *timer, freq_t *freq, hard_timer_function_ptr_t f
 	prescalar_t scalar;
 	timertick_t timerTicks;
 
-	enum HardTimerStatusReturn result = getHardTimerStats(freq, timer, &scalar, &timerTicks);
-	if (result == HARD_TIMER_FAIL) {
+	if (getHardTimerStats(freq, timer, &scalar, &timerTicks) == HARD_TIMER_FAIL) {
 		return false;
 	}
 
@@ -270,7 +271,7 @@ bool setHardTimer(hard_timer_t *timer, freq_t *freq, hard_timer_function_ptr_t f
 		timer_init((*timerPtr) -> group, (*timerPtr) -> num, &config);
 		timer_set_counter_value((*timerPtr) -> group, (*timerPtr) -> num, TIMER_COUNT_ZERO);
 		timer_start((*timerPtr) -> group, (*timerPtr) -> num);
-		timer_isr_callback_add((*timerPtr) -> group, (*timerPtr) -> num, function, NULL, SET_PRIORITY(priority));
+		timer_isr_callback_add((*timerPtr) -> group, (*timerPtr) -> num, function, NULL, setPriority(priority));
 
 		// run timer
 		timer_set_alarm_value((*timerPtr) -> group, (*timerPtr) -> num, timerTicks);
