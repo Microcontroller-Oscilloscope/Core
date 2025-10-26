@@ -32,6 +32,9 @@
 #define TIMER_COUNT_ZERO 0U // value for setting timer tick count to 0
 #define SCALAR_MAX UINT16_MAX // max value for timer scalar
 
+typedef uint16_t prescalar_t; // pre scalar type
+typedef uint64_t timertick_t; // timer tick type
+
 /**
  * Scales input priority
  * 
@@ -83,29 +86,10 @@ hard_timer_group_t *timers[] = {
  */
 hard_timer_group_t** getTimer(hard_timer_t timer) {
 
-	if (timer >= 0 && timer < NUM_TIMERS) {
-		return &timers[timer];
+	if (timer == HARD_TIMER_INVALID) {
+		return NULL;
 	}
-	return NULL;
-}
-
-/**
- * Gets if timer was started
- * 
- * @param timerPtr timer to test
- * 
- * @return if timer was started
- */
-bool timerStartedInternal(hard_timer_group_t** timerPtr) {
-	if (timerPtr == NULL) {
-		return false;
-	}
-
-	if (*timerPtr != NULL) {
-		return true;
-	}
-
-	return false;
+	return &timers[timer];
 }
 
 /**
@@ -129,35 +113,29 @@ hard_timer_t getNextTimer(void) {
  * @param state whether or not timer is claimed
  */
 void setTimerClaimed(hard_timer_t timer, bool state) {
-	if (timer >= 0 && timer < NUM_TIMERS) {
-		if (state) {
-			claimed |= (1 << (timer));
-		}
-		else {
-			claimed &= (~(1 << (timer)));
-		}
+
+	if (timer == HARD_TIMER_INVALID) {
+		return;
+	}
+	if (state) {
+		claimed |= (1 << (timer));
+	}
+	else {
+		claimed &= (~(1 << (timer)));
 	}
 }
 
 hard_timer_t claimTimer(struct hardTimerPriority *priority) {
 	hard_timer_t timer = getNextTimer();
-
-	hard_timer_group_t** timerPtr = getTimer(timer);
-	if (timerPtr == NULL) {
-		return HARD_TIMER_INVALID;
+	if (timer != HARD_TIMER_INVALID) {
+		setTimerClaimed(timer, true);
 	}
-	setTimerClaimed(timer, true);
 	return timer;
 }
 
 bool unclaimTimer(hard_timer_t timer) {
 
 	if (hardTimerClaimed(timer)) {
-
-		hard_timer_group_t** timerPtr = getTimer(timer);
-		if (timerPtr == NULL) {
-			return false;
-		}
 		setTimerClaimed(timer, false);
 		return true;
 	}
@@ -165,11 +143,9 @@ bool unclaimTimer(hard_timer_t timer) {
 }
 
 bool hardTimerClaimed(hard_timer_t timer) {
-	hard_timer_group_t** timerPtr = getTimer(timer);
-	if (timerPtr == NULL) {
+	if (timer == HARD_TIMER_INVALID) {
 		return false;
 	}
-
 	return !!(claimed & (1 << (timerGroups[timer].group + timerGroups[timer].num * 2)));
 }
 
@@ -186,9 +162,6 @@ bool hardTimerClaimed(hard_timer_t timer) {
  * @note freq value is changed to actual freq if values are slightly off
  */
 enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks) {
-	if (*freq > FREQ_MAX) {
-		return HARD_TIMER_FREQ_OUT_OF_RANGE;
-	}
 
 	enum HardTimerStatusReturn status = HARD_TIMER_OK;
 
@@ -222,22 +195,30 @@ enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, 
 		*timer = getNextTimer();
 	}
 
+	if (*timer == HARD_TIMER_INVALID) {
+		return HARD_TIMER_FAIL;
+	}
+
 	return status;
 }
 
 bool hardTimerStarted(hard_timer_t timer) {
 	hard_timer_group_t** timerPtr = getTimer(timer);
-	return timerStartedInternal(timerPtr);
+
+	if (timerPtr == NULL) {
+		return false;
+	}
+	if (*timerPtr != NULL) {
+		return true;
+	}
+	return false;
 }
 
 bool cancelHardTimer(hard_timer_t timer) {
 	
-	hard_timer_group_t** timerPtr = getTimer(timer);
-	if (timerPtr == NULL) {
-		return false;
-	}
-
 	if (hardTimerStarted(timer)) {
+
+		hard_timer_group_t** timerPtr = getTimer(timer);
 
 		// cancels timer
 		timer_set_alarm((*timerPtr) -> group, (*timerPtr) -> num, false);
@@ -257,6 +238,13 @@ bool cancelHardTimer(hard_timer_t timer) {
 
 bool setHardTimer(hard_timer_t *timer, freq_t *freq, hard_timer_function_ptr_t function, timer_priority_t priority) {
 	
+	if (function == NULL || freq == NULL || timer == NULL) {
+		return false;
+	}
+	if (*freq == (freq_t)0 || *freq > FREQ_MAX) {
+		return false;
+	}
+
 	prescalar_t scalar;
 	timertick_t timerTicks;
 
@@ -265,12 +253,9 @@ bool setHardTimer(hard_timer_t *timer, freq_t *freq, hard_timer_function_ptr_t f
 		return false;
 	}
 
-	hard_timer_group_t** timerPtr = getTimer(*timer);
-	if (timerPtr == NULL) {
-		return false;
-	}
+	if (!hardTimerStarted(*timer)) {
 
-	if (!timerStartedInternal(timerPtr)) {
+		hard_timer_group_t** timerPtr = getTimer(*timer);
 
 		// init timer
 		timer_config_t config = {

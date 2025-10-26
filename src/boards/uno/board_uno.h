@@ -114,17 +114,6 @@
 		#define NUM_TIMERS 3 // amount of hardware timers to use
 	#endif
 
-	typedef enum {
-		SCALAR_1, // timer prescalar of 1, timers 0-2
-		SCALAR_8, // timer prescalar of 8, timers 0-2
-		SCALAR_32, // timer prescalar of 32, timer 2
-		SCALAR_64, // timer prescalar of 64, timers 0-2
-		SCALAR_128, // timer prescalar of 128, timer 2
-		SCALAR_256, // timer prescalar of 256, timers 0-2
-		SCALAR_1024, // timer prescalar of 1024, timers 0-2
-	} prescalar_t; // pre scalar type
-	typedef uint16_t timertick_t; // timer tick type
-
 	typedef void hard_timer_return_t; // return type of timer function
 	typedef void* hard_timer_param_t; // parameter type of timer function
 
@@ -154,6 +143,7 @@
 	****************************/
 
 	#define TEST_FAST_FREQ 120000 // target frequency
+	#define TEST_DELAY_RUNNER // enables testDelayRunner function
 
 #endif
 #endif

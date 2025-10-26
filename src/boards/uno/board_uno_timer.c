@@ -24,6 +24,17 @@
 #include <avr/interrupt.h>
 #include "../../hard_timer.h"
 
+typedef enum {
+	SCALAR_1, // timer prescalar of 1, timers 0-2
+	SCALAR_8, // timer prescalar of 8, timers 0-2
+	SCALAR_32, // timer prescalar of 32, timer 2
+	SCALAR_64, // timer prescalar of 64, timers 0-2
+	SCALAR_128, // timer prescalar of 128, timer 2
+	SCALAR_256, // timer prescalar of 256, timers 0-2
+	SCALAR_1024, // timer prescalar of 1024, timers 0-2
+} prescalar_t; // pre scalar type
+typedef uint16_t timertick_t; // timer tick type
+
 uint8_t timerStates = 0U; // started states and claimed states
 
 #define FREQ_MAX 1000000 // max frequency user set timer can be
@@ -101,8 +112,6 @@ const uint16_t scalarMask[] PROGMEM = {
 #define TIMER_0_INTERR_ENABLE (1 << OCIE0A) // flags for timer 0 interrupt
 #define TIMER_0_INCREM_ENABLE (1 << WGM01) // flags for timer 0 increment
 
-#define TIMER_0_STARTED() (!!(timerStates)) // if timer 0 was started
-
 /**
  * sets scalar for timer 0
  * 
@@ -140,8 +149,6 @@ ISR(TIMER0_COMPA_vect) {
 #define TIMER_1_SCALAR_ENABLE ((1 << CS10) | (1 << CS11) | (1 << CS12)) // flags for timer 1 scalar
 #define TIMER_1_INTERR_ENABLE (1 << OCIE1A) // flags for timer 1 interrupt
 #define TIMER_1_INCREM_ENABLE (1 << WGM12) // flags for timer 1 increment
-
-#define TIMER_1_STARTED() (!!((1 << 1) & timerStates)) // if timer 1 was started
 
 /**
  * sets scalar for timer 1
@@ -181,8 +188,6 @@ ISR(TIMER1_COMPA_vect) {
 #define TIMER_2_INTERR_ENABLE (1 << OCIE2A) // flags for timer 2 interrupt
 #define TIMER_2_INCREM_ENABLE (1 << WGM21) // flags for timer 2 increment
 
-#define TIMER_2_STARTED() (!!((1 << 2) & timerStates)) // if timer 2 was started
-
 /**
  * sets scalar for timer 2
  * 
@@ -216,13 +221,15 @@ ISR(TIMER2_COMPA_vect) {
  * @param state whether or not timer is started
  */
 void setTimerStarted(hard_timer_t timer, bool state) {
-	if (timer >= 0 && timer < NUM_TIMERS) {
-		if (state) {
-			timerStates |= (1 << timer);
-		}
-		else {
-			timerStates &= (~(1 << timer));
-		}
+
+	if (timer == HARD_TIMER_INVALID) {
+		return;
+	}
+	if (state) {
+		timerStates |= (1 << timer);
+	}
+	else {
+		timerStates &= (~(1 << timer));
 	}
 }
 
@@ -233,13 +240,15 @@ void setTimerStarted(hard_timer_t timer, bool state) {
  * @param state whether or not timer is claimed
  */
 void setTimerClaimed(hard_timer_t timer, bool state) {
-	if (timer >= 0 && timer < NUM_TIMERS) {
-		if (state) {
-			timerStates |= (1 << (timer + 3));
-		}
-		else {
-			timerStates &= (~(1 << (timer + 3)));
-		}
+
+	if (timer == HARD_TIMER_INVALID) {
+		return;
+	}
+	if (state) {
+		timerStates |= (1 << (timer + 3));
+	}
+	else {
+		timerStates &= (~(1 << (timer + 3)));
 	}
 }
 
@@ -307,42 +316,35 @@ void getStats(freq_t *freq, hard_timer_t timer, prescalar_t *scalar, timertick_t
 }
 
 bool hardTimerClaimed(hard_timer_t timer) {
-	if (timer >= 0 && timer < NUM_TIMERS) {
-		if ((!!((1 << (3 + timer)) & timerStates))) {
-			return true;
-		}
+
+	if (timer == HARD_TIMER_INVALID) {
+		return false;
 	}
-	return false;
+	return (!!((1 << (3 + timer)) & timerStates));
 }
 
 hard_timer_t claimTimer(struct hardTimerPriority *priority) {
 
 	// checks priorities
 	if (priority -> slowestTimer) {
-		if (!hardTimerClaimed(HARD_TIMER1)) {
+		if (!hardTimerClaimed(HARD_TIMER1) && !hardTimerStarted(HARD_TIMER1)) {
 			setTimerClaimed(HARD_TIMER1, true);
 			return HARD_TIMER1;
 		}
 	}
 	if (priority -> mostAccurateTimer) {
-		if (!hardTimerClaimed(HARD_TIMER2)) {
+		if (!hardTimerClaimed(HARD_TIMER2) && !hardTimerStarted(HARD_TIMER2)) {
 			setTimerClaimed(HARD_TIMER2, true);
 			return HARD_TIMER2;
 		}
 	}
 
 	// uses default order if no priority matched
-	if (hardTimerClaimed(HARD_TIMER0)) {
-		setTimerClaimed(HARD_TIMER0, true);
-		return HARD_TIMER0;
-	}
-	if (hardTimerClaimed(HARD_TIMER1)) {
-		setTimerClaimed(HARD_TIMER1, true);
-		return HARD_TIMER1;
-	}
-	if (hardTimerClaimed(HARD_TIMER2)) {
-		setTimerClaimed(HARD_TIMER2, true);
-		return HARD_TIMER2;
+	for (uint8_t i = 0; i < NUM_TIMERS; i++) {
+		if (!hardTimerClaimed(i) && !hardTimerStarted(i)) {
+			setTimerClaimed(i, true);
+			return i;
+		}
 	}
 
 	return HARD_TIMER_INVALID;
@@ -374,12 +376,12 @@ enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, 
 		return HARD_TIMER_FREQ_OUT_OF_RANGE;
 	}
 
+	if (hardTimerStarted(*timer)) {
+		return HARD_TIMER_FAIL;
+	}
 	if (hardTimerClaimed(*timer)) {
-		if (hardTimerStarted(*timer)) {
-			return HARD_TIMER_FAIL;
-		}
 
-		getStats(&(*freq), *timer, &(*scalar), &(*timerTicks));
+		getStats(freq, *timer, scalar, timerTicks);
 
 		if (sameFreq(*freq, *scalar, *timerTicks)) {
 			return HARD_TIMER_OK;
@@ -389,15 +391,15 @@ enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, 
 		}
 	}
 
-	if (*freq < FREQ_MIN_8_COUNTER) {
+	if (*freq < FREQ_MIN_8_COUNTER && (*timer == HARD_TIMER1 || *timer == HARD_TIMER_INVALID)) {
 		// calculates slow frequencies for timer 1
 
-		if (hardTimerStarted(HARD_TIMER1)) {
+		if (hardTimerStarted(HARD_TIMER1) || (*timer == HARD_TIMER_INVALID && hardTimerClaimed(HARD_TIMER1))) {
 			// slow timer unavailable
 			return HARD_TIMER_FAIL;
 		}
 
-		getStats(&(*freq), HARD_TIMER1, &(*scalar), &(*timerTicks));
+		getStats(freq, HARD_TIMER1, scalar, timerTicks);
 
 		*timer = HARD_TIMER1;
 
@@ -511,6 +513,10 @@ enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, 
 
 		*freq = tempFreq;
 
+		if (*timer == HARD_TIMER_INVALID) {
+			return HARD_TIMER_FAIL;
+		}
+
 		return status;
 	}
 
@@ -519,16 +525,15 @@ enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, 
 
 bool hardTimerStarted(hard_timer_t timer) {
 
-	if (timer >= 0 && timer < NUM_TIMERS) {
-		return !!((1 << timer) & timerStates);
+	if (timer == HARD_TIMER_INVALID) {
+		return false;
 	}
-
-	return false;
+	return !!((1 << timer) & timerStates);
 }
 
 bool cancelHardTimer(hard_timer_t timer) {
 	if (timer == HARD_TIMER0) {
-		if (TIMER_0_STARTED()) {
+		if (hardTimerStarted(HARD_TIMER0)) {
 			cli();
 			TIMER_0_SCAL &= ~TIMER_0_SCALAR_ENABLE;
 			TIMER_0_INTERR &= ~TIMER_0_INTERR_ENABLE;
@@ -539,7 +544,7 @@ bool cancelHardTimer(hard_timer_t timer) {
 		}
 	}
 	else if (timer == HARD_TIMER1) {
-		if (TIMER_1_STARTED()) {
+		if (hardTimerStarted(HARD_TIMER1)) {
 			cli();
 			TIMER_1_SCAL &= ~TIMER_1_SCALAR_ENABLE;
 			TIMER_1_INTERR &= ~TIMER_1_INTERR_ENABLE;
@@ -550,7 +555,7 @@ bool cancelHardTimer(hard_timer_t timer) {
 		}
 	}
 	else if (timer == HARD_TIMER2) {
-		if (TIMER_2_STARTED()) {
+		if (hardTimerStarted(HARD_TIMER2)) {
 			cli();
 			TIMER_2_SCAL &= ~TIMER_2_SCALAR_ENABLE;
 			TIMER_2_INTERR &= ~TIMER_2_INTERR_ENABLE;
@@ -565,6 +570,13 @@ bool cancelHardTimer(hard_timer_t timer) {
 }
 
 bool setHardTimer(hard_timer_t *timer, freq_t *freq, hard_timer_function_ptr_t function, timer_priority_t priority) {
+
+	if (function == NULL || freq == NULL || timer == NULL) {
+		return false;
+	}
+	if (*freq == (freq_t)0 || *freq > FREQ_MAX) {
+		return false;
+	}
 
 	prescalar_t scalar;
 	timertick_t timerTicks;
@@ -582,7 +594,7 @@ bool setHardTimer(hard_timer_t *timer, freq_t *freq, hard_timer_function_ptr_t f
 	}
 
 	if (*timer == HARD_TIMER0) {
-		if (!TIMER_0_STARTED()) {
+		if (!hardTimerStarted(HARD_TIMER0)) {
 			timer0Ptr = function;
 			cli();
 			TIMER_0_COMP = 0;
@@ -598,7 +610,7 @@ bool setHardTimer(hard_timer_t *timer, freq_t *freq, hard_timer_function_ptr_t f
 		}
 	}
 	else if (*timer == HARD_TIMER1) {
-		if (!TIMER_1_STARTED()) {
+		if (!hardTimerStarted(HARD_TIMER1)) {
 			timer1Ptr = function;
 			cli();
 			TIMER_1_COMP = 0;
@@ -614,7 +626,7 @@ bool setHardTimer(hard_timer_t *timer, freq_t *freq, hard_timer_function_ptr_t f
 		}
 	}
 	else if (*timer == HARD_TIMER2) {
-		if (!TIMER_2_STARTED()) {
+		if (!hardTimerStarted(HARD_TIMER2)) {
 			timer2Ptr = function;
 			cli();
 			TIMER_2_COMP = 0;

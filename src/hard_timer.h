@@ -29,58 +29,55 @@
 	#define HARD_TIMER_ID_LED // status LED enable
 #endif
 
-// available hardware timers
-#define HARD_TIMER(id) CONCATENATE(HARD_TIMER, id) // timer #id
-
 typedef enum { // hardware timer type
 	HARD_TIMER_INVALID = -1, // invalid counter
 	#if NUM_TIMERS >= 1
-		HARD_TIMER(0),
+		HARD_TIMER0,
 	#endif
 	#if NUM_TIMERS >= 2
-		HARD_TIMER(1),
+		HARD_TIMER1,
 	#endif
 	#if NUM_TIMERS >= 3
-		HARD_TIMER(2),
+		HARD_TIMER2,
 	#endif
 	#if NUM_TIMERS >= 4
-		HARD_TIMER(3),
+		HARD_TIMER3,
 	#endif
 	#if NUM_TIMERS >= 5
-		HARD_TIMER(4),
+		HARD_TIMER4,
 	#endif
 	#if NUM_TIMERS >= 6
-		HARD_TIMER(5),
+		HARD_TIMER5,
 	#endif
 	#if NUM_TIMERS >= 7
-		HARD_TIMER(6),
+		HARD_TIMER6,
 	#endif
 	#if NUM_TIMERS >= 8
-		HARD_TIMER(7),
+		HARD_TIMER7,
 	#endif
 	#if NUM_TIMERS >= 9
-		HARD_TIMER(8),
+		HARD_TIMER8,
 	#endif
 	#if NUM_TIMERS >= 10
-		HARD_TIMER(9),
+		HARD_TIMER9,
 	#endif
 	#if NUM_TIMERS >= 11
-		HARD_TIMER(10),
+		HARD_TIMER10,
 	#endif
 	#if NUM_TIMERS >= 12
-		HARD_TIMER(11),
+		HARD_TIMER11,
 	#endif
 	#if NUM_TIMERS >= 13
-		HARD_TIMER(12),
+		HARD_TIMER12,
 	#endif
 	#if NUM_TIMERS >= 14
-		HARD_TIMER(13),
+		HARD_TIMER13,
 	#endif
 	#if NUM_TIMERS >= 15
-		HARD_TIMER(14),
+		HARD_TIMER14,
 	#endif
 	#if NUM_TIMERS >= 16
-		HARD_TIMER(15),
+		HARD_TIMER15,
 	#endif
 } hard_timer_t; // hardware timer type
 
@@ -95,6 +92,8 @@ enum HardTimerStatusReturn {
 typedef uint32_t freq_t; // hard timer frequency variable
 typedef uint8_t timer_priority_t; // hard timer execute priority variable
 typedef hard_timer_return_t (*hard_timer_function_ptr_t) (hard_timer_param_t); // timer callback function pointer
+
+#define DEFAULT_HARD_TIMER_PRIORITY 0 // default hard timer priority
 
 // hardware timer priority for claiming timers
 struct hardTimerPriority {

@@ -62,21 +62,6 @@
 // default nvm size when flash is used instead of dedicated EEPROM
 #define FLASH_NVM_SIZE 4096
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * Void function for void parameters
- */
-void nothing();
-
-#ifdef __cplusplus
-}
-#endif
-
-#define VOID_FUNCTION_NAME nothing // name of empty void function
-
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>

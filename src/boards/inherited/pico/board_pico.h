@@ -68,19 +68,17 @@
 	 * Timer Config
 	 * 
 	 * Only 16 hardware alarm timers available
+	 * 
+	 * 2 are used for system timing on each core
+	 * 
+	 * Only 14 timers after api usage
 	****************************/
 
 	#define FREQ_MAX 1000000 // max frequency user set timer can be
 
 	#ifndef NUM_TIMERS
-		#define NUM_TIMERS 16 // amount of hardware timers to use
+		#define NUM_TIMERS 14 // amount of hardware timers to use
 	#endif
-
-	typedef enum {
-		SCALAR_MS, // timer prescalar for milli seconds
-		SCALAR_US, // timer prescalar micro seconds
-	} prescalar_t; // pre scalar type
-	typedef int64_t timertick_t; // timer tick type
 
 	typedef bool hard_timer_return_t; // return type of timer function
 	typedef struct repeating_timer* hard_timer_param_t; // parameter type of timer function

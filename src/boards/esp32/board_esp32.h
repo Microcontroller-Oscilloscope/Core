@@ -115,9 +115,6 @@
 		#define NUM_TIMERS 4 // amount of hardware timers to use
 	#endif
 
-	typedef uint16_t prescalar_t; // pre scalar type
-	typedef uint64_t timertick_t; // timer tick type
-
 	typedef bool hard_timer_return_t; // return type of timer function
 	typedef void* hard_timer_param_t; // parameter type of timer function
 
@@ -154,7 +151,7 @@
 	 * Test Timer Config
 	****************************/
 
-	#define TEST_FAST_FREQ 300000 // target frequency
+	#define TEST_FAST_FREQ 290000 // target frequency
 
 #endif
 #endif

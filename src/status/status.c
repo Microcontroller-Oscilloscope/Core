@@ -24,7 +24,7 @@
 // if status LEDs are enabled
 #define STATUS_LED_DEFINED ((defined(STATUS_LED_PIN) || defined(EXTERNAL_STATUS_LED_PIN)) && defined(HARD_TIMER_ID_LED))
 
-#define STATUS_LED_PRIORITY 0 // priority of status LED timer interrupt
+#define STATUS_LED_PRIORITY DEFAULT_HARD_TIMER_PRIORITY // priority of status LED timer interrupt
 
 #if STATUS_LED_DEFINED
 
