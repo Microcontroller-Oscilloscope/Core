@@ -284,6 +284,7 @@ void getStats(freq_t *freq, hard_timer_t timer, prescalar_t *scalar, timertick_t
 
 	*scalar = SCALAR_1;
 	*timerTicks = 0;
+
 	freq_t closestFreq = 0;
 
 	for (uint8_t i = SCALAR_MASK_SIZE - 1; i < SCALAR_MASK_SIZE; i--) {
@@ -323,26 +324,38 @@ bool hardTimerClaimed(hard_timer_t timer) {
 	return (!!((1 << (3 + timer)) & timerStates));
 }
 
+/**
+ * Tests if given timer is available to claim
+ * 
+ * @param timer timer to test
+ * 
+ * @return if timer is available
+ */
+bool availableClaim(hard_timer_t timer) {
+	if (!hardTimerClaimed(timer) && !hardTimerStarted(timer)) {
+		setTimerClaimed(timer, true);
+		return true;
+	}
+	return false;
+}
+
 hard_timer_t claimTimer(struct hardTimerPriority *priority) {
 
 	// checks priorities
 	if (priority -> slowestTimer) {
-		if (!hardTimerClaimed(HARD_TIMER1) && !hardTimerStarted(HARD_TIMER1)) {
-			setTimerClaimed(HARD_TIMER1, true);
+		if (availableClaim(HARD_TIMER1)) {
 			return HARD_TIMER1;
 		}
 	}
 	if (priority -> mostAccurateTimer) {
-		if (!hardTimerClaimed(HARD_TIMER2) && !hardTimerStarted(HARD_TIMER2)) {
-			setTimerClaimed(HARD_TIMER2, true);
+		if (availableClaim(HARD_TIMER2)) {
 			return HARD_TIMER2;
 		}
 	}
 
 	// uses default order if no priority matched
 	for (uint8_t i = 0; i < NUM_TIMERS; i++) {
-		if (!hardTimerClaimed(i) && !hardTimerStarted(i)) {
-			setTimerClaimed(i, true);
+		if (availableClaim(i)) {
 			return i;
 		}
 	}
@@ -371,10 +384,6 @@ bool unclaimTimer(hard_timer_t timer) {
  * @note freq value is changed to actual freq if values are slightly off
  */
 enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks) {
-	
-	if (*freq > FREQ_MAX) {
-		return HARD_TIMER_FREQ_OUT_OF_RANGE;
-	}
 
 	if (hardTimerStarted(*timer)) {
 		return HARD_TIMER_FAIL;
@@ -399,9 +408,8 @@ enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, 
 			return HARD_TIMER_FAIL;
 		}
 
-		getStats(freq, HARD_TIMER1, scalar, timerTicks);
-
 		*timer = HARD_TIMER1;
+		getStats(freq, *timer, scalar, timerTicks);
 
 		if (sameFreq(*freq, *scalar, *timerTicks)) {
 			return HARD_TIMER_OK;
@@ -427,7 +435,9 @@ enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, 
 
 		// gets timer 0
 		if (!hardTimerStarted(HARD_TIMER0)) {
-			getStats(&tempFreq, HARD_TIMER0, scalar, timerTicks);
+			
+			*timer = HARD_TIMER0;
+			getStats(&tempFreq, *timer, scalar, timerTicks);
 
 			if (sameFreq(tempFreq, *scalar, *timerTicks)) {
 				status = HARD_TIMER_OK;
@@ -435,8 +445,6 @@ enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, 
 			else {
 				status = HARD_TIMER_SLIGHTLY_OFF;
 			}
-
-			*timer = HARD_TIMER0;
 		}
 
 		// gets timer 1
@@ -444,8 +452,9 @@ enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, 
 
 			if (*timerTicks != 0) {
 				// timer 0 in use
-				getStats(&tempFreq, HARD_TIMER1, scalar, timerTicks);
+
 				*timer = HARD_TIMER1;
+				getStats(&tempFreq, *timer, scalar, timerTicks);
 
 				if (sameFreq(tempFreq, *scalar, *timerTicks)) {
 					status = HARD_TIMER_OK;
@@ -480,8 +489,9 @@ enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, 
 
 			if (*timerTicks != 0) {
 				// timer 0 and 1 in use
-				getStats(&tempFreq, HARD_TIMER2, scalar, timerTicks);
+
 				*timer = HARD_TIMER2;
+				getStats(&tempFreq, *timer, scalar, timerTicks);
 
 				if (sameFreq(tempFreq, *scalar, *timerTicks)) {
 					status = HARD_TIMER_OK;
@@ -519,8 +529,6 @@ enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, 
 
 		return status;
 	}
-
-	return HARD_TIMER_FAIL;
 }
 
 bool hardTimerStarted(hard_timer_t timer) {
@@ -531,43 +539,53 @@ bool hardTimerStarted(hard_timer_t timer) {
 	return !!((1 << timer) & timerStates);
 }
 
+/**
+ * Cancels hard timer
+ * 
+ * @param num timer id
+ */
+#define CANCEL_HARD_TIMER(num) \
+	cli(); \
+	CONCATENATE3(TIMER_, num, _SCAL) &= ~CONCATENATE3(TIMER_, num, _SCALAR_ENABLE); \
+	CONCATENATE3(TIMER_, num, _INTERR) &= ~CONCATENATE3(TIMER_, num, _INTERR_ENABLE); \
+	sei(); \
+	CONCATENATE3(timer, num, Ptr) = NULL
+
 bool cancelHardTimer(hard_timer_t timer) {
+
+	if (hardTimerStarted(timer)) {
 	if (timer == HARD_TIMER0) {
-		if (hardTimerStarted(HARD_TIMER0)) {
-			cli();
-			TIMER_0_SCAL &= ~TIMER_0_SCALAR_ENABLE;
-			TIMER_0_INTERR &= ~TIMER_0_INTERR_ENABLE;
-			sei();
-			setTimerStarted(timer, false);
-			timer0Ptr = NULL;
-			return true;
-		}
+			CANCEL_HARD_TIMER(0);
 	}
 	else if (timer == HARD_TIMER1) {
-		if (hardTimerStarted(HARD_TIMER1)) {
-			cli();
-			TIMER_1_SCAL &= ~TIMER_1_SCALAR_ENABLE;
-			TIMER_1_INTERR &= ~TIMER_1_INTERR_ENABLE;
-			sei();
-			setTimerStarted(timer, false);
-			timer1Ptr = NULL;
-			return true;
-		}
+			CANCEL_HARD_TIMER(1);
 	}
 	else if (timer == HARD_TIMER2) {
-		if (hardTimerStarted(HARD_TIMER2)) {
-			cli();
-			TIMER_2_SCAL &= ~TIMER_2_SCALAR_ENABLE;
-			TIMER_2_INTERR &= ~TIMER_2_INTERR_ENABLE;
-			sei();
-			setTimerStarted(timer, false);
-			timer2Ptr = NULL;
-			return true;
+			CANCEL_HARD_TIMER(2);
 		}
+			setTimerStarted(timer, false);
+			return true;
 	}
 
 	return false;
 }
+
+/**
+ * Sets hard timer
+ * 
+ * @param num timer number
+ */
+#define SET_HARD_TIMER(num, scalar, timerTicks, function) \
+	CONCATENATE3(timer, num, Ptr) = function; \
+	cli(); \
+	CONCATENATE3(TIMER_, num, _COMP) = 0; \
+	CONCATENATE3(TIMER_, num, _WAVEFORM) = 0; \
+	CONCATENATE3(TIMER_, num, _COUNTER) = 0; \
+	CONCATENATE3(TIMER_, num, _TARGET) = timerTicks; \
+	CONCATENATE3(TIMER_, num, _INCR) |= CONCATENATE3(TIMER_, num, _INCREM_ENABLE); \
+	CONCATENATE3(TIMER_, num, _SET_SCALAR)(scalar); \
+	CONCATENATE3(TIMER_, num, _INTERR) |= CONCATENATE3(TIMER_, num, _INTERR_ENABLE); \
+	sei()
 
 bool setHardTimer(hard_timer_t *timer, freq_t *freq, hard_timer_function_ptr_t function, timer_priority_t priority) {
 
@@ -581,65 +599,30 @@ bool setHardTimer(hard_timer_t *timer, freq_t *freq, hard_timer_function_ptr_t f
 	prescalar_t scalar;
 	timertick_t timerTicks;
 
-	enum HardTimerStatusReturn result = getHardTimerStats(freq, timer, &scalar, &timerTicks);
-	if (result == HARD_TIMER_FAIL) {
+	if (getHardTimerStats(freq, timer, &scalar, &timerTicks) == HARD_TIMER_FAIL) {
 		return false;
 	}
 
 	if (
-		((*timer == HARD_TIMER0 || *timer == HARD_TIMER2) && timerTicks >= UINT8_MAX) || // tests ticks out of bounds
-		((*timer == HARD_TIMER0 || *timer == HARD_TIMER1) && (scalar == SCALAR_32 || scalar == SCALAR_128)) // tests scalar out of bounds
+		(*timer != HARD_TIMER1 && timerTicks >= UINT8_MAX) || // tests ticks out of bounds
+		(*timer != HARD_TIMER2 && (scalar == SCALAR_32 || scalar == SCALAR_128)) // tests scalar out of bounds
 	) {
 		return false;
 	}
 
+	if (!hardTimerStarted(*timer)) {
 	if (*timer == HARD_TIMER0) {
-		if (!hardTimerStarted(HARD_TIMER0)) {
-			timer0Ptr = function;
-			cli();
-			TIMER_0_COMP = 0;
-			TIMER_0_WAVEFORM = 0;
-			TIMER_0_COUNTER = 0;
-			TIMER_0_TARGET = timerTicks;
-			TIMER_0_INCR |= TIMER_0_INCREM_ENABLE;
-			TIMER_0_SET_SCALAR(scalar);
-			TIMER_0_INTERR |= TIMER_0_INTERR_ENABLE;
-			sei();
-			setTimerStarted(*timer, true);
-			return true;
-		}
+			SET_HARD_TIMER(0, scalar, timerTicks, function);
 	}
 	else if (*timer == HARD_TIMER1) {
-		if (!hardTimerStarted(HARD_TIMER1)) {
-			timer1Ptr = function;
-			cli();
-			TIMER_1_COMP = 0;
-			TIMER_1_WAVEFORM = 0;
-			TIMER_1_COUNTER = 0;
-			TIMER_1_TARGET = timerTicks;
-			TIMER_1_INCR |= TIMER_1_INCREM_ENABLE;
-			TIMER_1_SET_SCALAR(scalar);
-			TIMER_1_INTERR |= TIMER_1_INTERR_ENABLE;
-			sei();
-			setTimerStarted(*timer, true);
-			return true;
-		}
+			SET_HARD_TIMER(1, scalar, timerTicks, function);
 	}
 	else if (*timer == HARD_TIMER2) {
-		if (!hardTimerStarted(HARD_TIMER2)) {
-			timer2Ptr = function;
-			cli();
-			TIMER_2_COMP = 0;
-			TIMER_2_WAVEFORM = 0;
-			TIMER_2_COUNTER = 0;
-			TIMER_2_TARGET = timerTicks;
-			TIMER_2_INCR |= TIMER_2_INCREM_ENABLE;
-			TIMER_2_SET_SCALAR(scalar);
-			TIMER_2_INTERR |= TIMER_2_INTERR_ENABLE;
-			sei();
+			SET_HARD_TIMER(2, scalar, timerTicks, function);
+		}
+
 			setTimerStarted(*timer, true);
 			return true;
-		}
 	}
 
 	return false;
