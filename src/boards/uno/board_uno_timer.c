@@ -85,17 +85,6 @@ const uint16_t scalarMask[] PROGMEM = {
  */
 #define CALC_TICKS(calcScalar, calcFreq) ((F_CPU / (GET_MASK(calcScalar) * calcFreq)) - 1)
 
-/**
- * Calculates positive value
- * 
- * @param value value to test
- * 
- * @return positive value
- * 
- * @warning doesn't convert if value is max negative value
- */
-#define abs(value) (value > 0? value : -value)
-
 /****************************
  * Timer 0
 ****************************/
@@ -273,6 +262,23 @@ bool sameFreq(freq_t freq, prescalar_t scalar, timertick_t ticks) {
 }
 
 /**
+ * Gets absolute difference between given frequencies
+ * 
+ * @param targetFreq target freq given
+ * @param calcFreq calculated freq
+ * 
+ * @return absolute difference
+ */
+freq_t freqAbs(freq_t targetFreq, freq_t calcFreq) {
+	if (targetFreq > calcFreq) {
+		return targetFreq - calcFreq;
+	}
+	else {
+		return calcFreq - targetFreq;
+	}
+}
+
+/**
  * Gets stats for any timer
  * 
  * @param freq pointer to target frequency
@@ -295,7 +301,13 @@ void getStats(freq_t *freq, hard_timer_t timer, prescalar_t *scalar, timertick_t
 		}
 
 		// ignore invalid ticks
-		if (CALC_TICKS(i, *freq) > UINT16_MAX || (CALC_TICKS(i, *freq) > UINT8_MAX && timer != HARD_TIMER1)) {
+		if ((timertick_t)(F_CPU / (GET_MASK(i) * *freq)) < 1) {
+			continue;
+		}
+		if (CALC_TICKS(i, *freq) > UINT16_MAX) {
+			continue;
+		}
+		if (CALC_TICKS(i, *freq) > UINT8_MAX && timer != HARD_TIMER1) {
 			continue;
 		}
 		timertick_t calcTicks = CALC_TICKS(i, *freq);
@@ -308,12 +320,13 @@ void getStats(freq_t *freq, hard_timer_t timer, prescalar_t *scalar, timertick_t
 		}
 
 		// test if newly calculated frequency is closer
-		if (abs(*freq - closestFreq) > abs(*freq - CALC_FREQ(i, calcTicks)) || closestFreq == 0) {
+		if (freqAbs(*freq, closestFreq) > freqAbs(*freq, CALC_FREQ(i, calcTicks))) {
 			*scalar = (prescalar_t)i;
 			*timerTicks = calcTicks;
 			closestFreq = CALC_FREQ(i, calcTicks);
 		}
 	}
+	*freq = closestFreq;
 }
 
 bool hardTimerClaimed(hard_timer_t timer) {
@@ -372,6 +385,54 @@ bool unclaimTimer(hard_timer_t timer) {
 }
 
 /**
+ * Sets frequency for first timer to set
+ * 
+ * @warning all parameters are NON POINTERS
+ * 
+ * @param origFreq value of user given target frequency
+ * @param origTimer timer to set
+ * @param newFreq frequency to store calculation and compare against
+ * @param newTimer value to set origTimer to
+ * @param newTicks ticks to store calculation
+ * @param newScalar scalar to store calculation
+ */
+#define SET_FIRST_FREQ(origFreq, origTimer, newFreq, newTimer, newTicks, newScalar) \
+	(origTimer) = (newTimer); \
+	getStats(&(newFreq), (origTimer), &(newScalar), &(newTicks)); \
+	if (sameFreq((origFreq), (newScalar), (newTicks))) { \
+		(origFreq) = (newFreq); \
+		return HARD_TIMER_OK; \
+	}
+
+/**
+ * Sets frequency for next timer to set
+ * 
+ * @warning all parameters are NON POINTERS
+ * 
+ * @param origFreq value of user given target frequency
+ * @param origTimer timer to set
+ * @param origTicks ticks to set
+ * @param origScalar scalar to set
+ * @param newFreq frequency to store calculation and compare against
+ * @param newTimer value to set origTimer to
+ * @param newTicks ticks to store calculation
+ * @param newScalar scalar to store calculation
+ */
+#define SET_NEXT_FREQ(origFreq, origTimer, origTicks, origScalar, newFreq, newTimer, newTicks, newScalar) \
+	freq_t calcFreq = (origFreq); \
+	getStats(&calcFreq, (newTimer), &(newScalar), &(newTicks)); \
+	if (freqAbs((origFreq), (newFreq)) > freqAbs((origFreq), calcFreq)) { \
+		(newFreq) = calcFreq; \
+		(origTimer) = (newTimer); \
+		(origScalar) = (newScalar); \
+		(origTicks) = (newTicks); \
+		if (sameFreq((origFreq), (origScalar), (origTicks))) { \
+			(origFreq) = (newFreq); \
+			return HARD_TIMER_OK; \
+		} \
+	}
+
+/**
  * Gets hard timer stats for target frequency
  * 
  * @param freq pointer to desired frequency in Hz
@@ -385,38 +446,31 @@ bool unclaimTimer(hard_timer_t timer) {
  */
 enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, prescalar_t *scalar, timertick_t *timerTicks) {
 
-	if (hardTimerStarted(*timer)) {
+	// returns started timer early
+	if (hardTimerStarted(*timer) && hardTimerClaimed(*timer)) {
 		return HARD_TIMER_FAIL;
 	}
-	if (hardTimerClaimed(*timer)) {
 
-		getStats(freq, *timer, scalar, timerTicks);
+	// gets stats for current timer
+	if (!hardTimerStarted(*timer) && *timer != HARD_TIMER_INVALID) {
 
-		if (sameFreq(*freq, *scalar, *timerTicks)) {
-			return HARD_TIMER_OK;
-		}
-		else {
-			return HARD_TIMER_SLIGHTLY_OFF;
-		}
+		SET_FIRST_FREQ(*freq, *timer, *freq, *timer, *timerTicks, *scalar);
+		return HARD_TIMER_SLIGHTLY_OFF;
 	}
 
-	if (*freq < FREQ_MIN_8_COUNTER && (*timer == HARD_TIMER1 || *timer == HARD_TIMER_INVALID)) {
+	// gets best available timer
+	*timer = HARD_TIMER_INVALID;
+
+	if (*freq < FREQ_MIN_8_COUNTER) {
 		// calculates slow frequencies for timer 1
 
-		if (hardTimerStarted(HARD_TIMER1) || (*timer == HARD_TIMER_INVALID && hardTimerClaimed(HARD_TIMER1))) {
+		if (hardTimerStarted(HARD_TIMER1) || hardTimerClaimed(HARD_TIMER1)) {
 			// slow timer unavailable
 			return HARD_TIMER_FAIL;
 		}
 
-		*timer = HARD_TIMER1;
-		getStats(freq, *timer, scalar, timerTicks);
-
-		if (sameFreq(*freq, *scalar, *timerTicks)) {
-			return HARD_TIMER_OK;
-		}
-		else {
-			return HARD_TIMER_SLIGHTLY_OFF;
-		}
+		SET_FIRST_FREQ(*freq, *timer, *freq, HARD_TIMER1, *timerTicks, *scalar);
+		return HARD_TIMER_SLIGHTLY_OFF;
 	}
 	else {
 		/**
@@ -427,107 +481,48 @@ enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, 
 		 * finally checks timer 2 since it can be more accurate
 		 */
 
-		enum HardTimerStatusReturn status = HARD_TIMER_FAIL;
-
 		prescalar_t tempScalar = SCALAR_1;
 		timertick_t tempTicks = 0;
 		freq_t tempFreq = *freq;
 
 		// gets timer 0
-		if (!hardTimerStarted(HARD_TIMER0)) {
-			
-			*timer = HARD_TIMER0;
-			getStats(&tempFreq, *timer, scalar, timerTicks);
-
-			if (sameFreq(tempFreq, *scalar, *timerTicks)) {
-				status = HARD_TIMER_OK;
-			}
-			else {
-				status = HARD_TIMER_SLIGHTLY_OFF;
-			}
+		if (!hardTimerStarted(HARD_TIMER0) && !hardTimerClaimed(HARD_TIMER0)) {
+			SET_FIRST_FREQ(*freq, *timer, tempFreq, HARD_TIMER0, *timerTicks, *scalar);
 		}
 
 		// gets timer 1
-		if (!hardTimerStarted(HARD_TIMER1)) {
+		if (!hardTimerStarted(HARD_TIMER1) && !hardTimerClaimed(HARD_TIMER1)) {
 
-			if (*timerTicks != 0) {
-				// timer 0 in use
-
-				*timer = HARD_TIMER1;
-				getStats(&tempFreq, *timer, scalar, timerTicks);
-
-				if (sameFreq(tempFreq, *scalar, *timerTicks)) {
-					status = HARD_TIMER_OK;
-				}
-				else {
-					status = HARD_TIMER_SLIGHTLY_OFF;
-				}
+			if (*timer == HARD_TIMER_INVALID) {
+				// timer 0 unavailable
+				SET_FIRST_FREQ(*freq, *timer, tempFreq, HARD_TIMER1, *timerTicks, *scalar);
 			}
 			else {
 				// timer 0 available
-				freq_t calcFreq;
-				getStats(&calcFreq, HARD_TIMER1, &tempScalar, &tempTicks);
-
-				if (abs(*freq - tempFreq) > abs(*freq - calcFreq)) {
-					tempFreq = calcFreq;
-					*timer = HARD_TIMER1;
-					*scalar = tempScalar;
-					*timerTicks = tempTicks;
-
-					if (sameFreq(*freq, *scalar, *timerTicks)) {
-						status = HARD_TIMER_OK;
-					}
-					else {
-						status = HARD_TIMER_SLIGHTLY_OFF;
-					}
-				}
+				SET_NEXT_FREQ(*freq, *timer, *timerTicks, *scalar, tempFreq, HARD_TIMER1, tempTicks, tempScalar);;
 			}
 		}
 
 		// gets timer 2
-		if (!hardTimerStarted(HARD_TIMER2)) {
+		if (!hardTimerStarted(HARD_TIMER2) && !hardTimerClaimed(HARD_TIMER2)) {
 
-			if (*timerTicks != 0) {
-				// timer 0 and 1 in use
-
-				*timer = HARD_TIMER2;
-				getStats(&tempFreq, *timer, scalar, timerTicks);
-
-				if (sameFreq(tempFreq, *scalar, *timerTicks)) {
-					status = HARD_TIMER_OK;
-				}
-				else {
-					status = HARD_TIMER_SLIGHTLY_OFF;
-				}
+			if (*timer == HARD_TIMER_INVALID) {
+				// timer 0 and 1 unavailable
+				SET_FIRST_FREQ(*freq, *timer, tempFreq, HARD_TIMER2, *timerTicks, *scalar);
 			}
 			else {
 				// timer 0 and/or 1 available
-				freq_t calcFreq;
-				getStats(&calcFreq, HARD_TIMER2, &tempScalar, &tempTicks);
-
-				if (abs(*freq - tempFreq) > abs(*freq - calcFreq)) {
-					tempFreq = calcFreq;
-					*timer = HARD_TIMER2;
-					*scalar = tempScalar;
-					*timerTicks = tempTicks;
-
-					if (sameFreq(*freq, *scalar, *timerTicks)) {
-						status = HARD_TIMER_OK;
-					}
-					else {
-						status = HARD_TIMER_SLIGHTLY_OFF;
-					}
-				}
+				SET_NEXT_FREQ(*freq, *timer, *timerTicks, *scalar, tempFreq, HARD_TIMER2, tempTicks, tempScalar);
 			}
 		}
-
-		*freq = tempFreq;
 
 		if (*timer == HARD_TIMER_INVALID) {
 			return HARD_TIMER_FAIL;
 		}
 
-		return status;
+		*freq = tempFreq;
+
+		return HARD_TIMER_SLIGHTLY_OFF;
 	}
 }
 
@@ -554,17 +549,17 @@ bool hardTimerStarted(hard_timer_t timer) {
 bool cancelHardTimer(hard_timer_t timer) {
 
 	if (hardTimerStarted(timer)) {
-	if (timer == HARD_TIMER0) {
+		if (timer == HARD_TIMER0) {
 			CANCEL_HARD_TIMER(0);
-	}
-	else if (timer == HARD_TIMER1) {
+		}
+		else if (timer == HARD_TIMER1) {
 			CANCEL_HARD_TIMER(1);
-	}
-	else if (timer == HARD_TIMER2) {
+		}
+		else if (timer == HARD_TIMER2) {
 			CANCEL_HARD_TIMER(2);
 		}
-			setTimerStarted(timer, false);
-			return true;
+		setTimerStarted(timer, false);
+		return true;
 	}
 
 	return false;
@@ -611,18 +606,18 @@ bool setHardTimer(hard_timer_t *timer, freq_t *freq, hard_timer_function_ptr_t f
 	}
 
 	if (!hardTimerStarted(*timer)) {
-	if (*timer == HARD_TIMER0) {
+		if (*timer == HARD_TIMER0) {
 			SET_HARD_TIMER(0, scalar, timerTicks, function);
-	}
-	else if (*timer == HARD_TIMER1) {
+		}
+		else if (*timer == HARD_TIMER1) {
 			SET_HARD_TIMER(1, scalar, timerTicks, function);
-	}
-	else if (*timer == HARD_TIMER2) {
+		}
+		else if (*timer == HARD_TIMER2) {
 			SET_HARD_TIMER(2, scalar, timerTicks, function);
 		}
 
-			setTimerStarted(*timer, true);
-			return true;
+		setTimerStarted(*timer, true);
+		return true;
 	}
 
 	return false;

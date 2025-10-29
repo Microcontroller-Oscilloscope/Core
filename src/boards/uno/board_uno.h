@@ -142,7 +142,7 @@
 	 * Test Timer Config
 	****************************/
 
-	#define TEST_FAST_FREQ 120000 // target frequency
+	#define TEST_FAST_FREQ 140000 // target frequency
 	#define TEST_DELAY_RUNNER // enables testDelayRunner function
 
 #endif

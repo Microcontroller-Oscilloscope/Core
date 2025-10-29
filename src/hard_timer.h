@@ -148,6 +148,22 @@ bool cancelHardTimer(hard_timer_t timer);
  * @param function pointer to function to call back
  * @param priority priority to run timer at
  * 
+ * setHardTimer(HARD_TIMER_INVALID, ...):
+ * 
+ *                Claimed:     Unclaimed:
+ * 
+ * Started:           -,           -
+ * 
+ * Not Started:       -,       Best Timer
+ * 
+ * setHardTimer(HARD_TIMER#, ...):
+ * 
+ *                Claimed:     Unclaimed:
+ * 
+ * Started:         Fail,      Best Timer
+ * 
+ * Not Started:  HARD_TIMER#,  HARD_TIMER#
+ * 
  * @return if timer was successfully set
  */
 bool setHardTimer(hard_timer_t *timer, freq_t *freq, hard_timer_function_ptr_t function, timer_priority_t priority);
