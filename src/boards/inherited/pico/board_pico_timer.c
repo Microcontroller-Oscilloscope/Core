@@ -174,7 +174,7 @@ enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, 
 		*freq = FREQ_MAX / *timerTicks;
 	}
 
-	if (!hardTimerClaimed(*timer) && !hardTimerStarted(*timer)) {
+	if ((!hardTimerClaimed(*timer) && hardTimerStarted(*timer)) || *timer == HARD_TIMER_INVALID) {
 		*timer = getNextTimer();
 	}
 	

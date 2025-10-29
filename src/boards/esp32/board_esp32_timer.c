@@ -193,7 +193,7 @@ enum HardTimerStatusReturn getHardTimerStats(freq_t *freq, hard_timer_t *timer, 
 
 	*freq = APB_CLK_FREQ / (*scalar * *timerTicks);
 
-	if (!hardTimerClaimed(*timer) && !hardTimerStarted(*timer)) {
+	if ((!hardTimerClaimed(*timer) && hardTimerStarted(*timer)) || *timer == HARD_TIMER_INVALID) {
 		*timer = getNextTimer();
 	}
 
