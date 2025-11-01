@@ -21,7 +21,7 @@
 #include "compile_flags/compile_flags.h"
 #include "status/status.h"
 #include "compile_flags/compile_warnings.h"
-#include "board_common.h"
+#include "osc_common.h"
 
 void runProgram(void) {
 	hardDelayMS(1000);

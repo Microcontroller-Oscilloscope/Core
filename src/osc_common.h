@@ -1,5 +1,5 @@
 /*
-	board_common.h - common functions for microcontrollers
+	osc_common.h - common functions for microcontrollers
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify

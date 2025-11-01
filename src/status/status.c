@@ -19,7 +19,7 @@
 #include "status.h"
 #include "../compile_flags/compile_flags.h"
 #include "../hard_timer.h"
-#include "../board_common.h"
+#include "../osc_common.h"
 
 // if status LEDs are enabled
 #define STATUS_LED_DEFINED defined(HARD_TIMER_ID_LED)
