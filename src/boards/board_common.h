@@ -24,10 +24,10 @@
 #include "board_pico.h"
 
 // if any supported board is selected
-#define SUPPORTED_PLATFORM() ( \
-	SUPPORTED_AVR() || \
-	SUPPORTED_PICO() || \
-	SUPPORTED_ESP32() \
+#define SUPPORTED_PLATFORM ( \
+	SUPPORTED_AVR || \
+	SUPPORTED_PICO || \
+	SUPPORTED_ESP32 \
 )
 
 #ifndef RUN_IN_RAM

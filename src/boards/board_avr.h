@@ -22,18 +22,18 @@
 #include "board_flags.h"
 
 // if any supported avr board is selected
-#define SUPPORTED_AVR() ( \
+#define SUPPORTED_AVR ( \
 	defined(CUSTOM_AVR) /* user custom avr */ || \
 	defined(__AVR_ATmega328P__) /* also Arduino Uno */ \
 )
 
-#if SUPPORTED_AVR()
+#if SUPPORTED_AVR
 
 	/****************************
 	 * Library Includes
 	****************************/
 
-	#if SUPPORTED_AVR()
+	#if SUPPORTED_AVR
 		#include <avr/pgmspace.h>
 		#define PROG_FLASH PROGMEM // storage specifier for flash space
 	#endif

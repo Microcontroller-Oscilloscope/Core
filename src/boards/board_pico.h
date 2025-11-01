@@ -22,19 +22,25 @@
 #include "board_flags.h"
 
 // if any supported pico board is selected
-#define SUPPORTED_PICO() ( \
+#define SUPPORTED_PICO ( \
 	defined(CUSTOM_PICO) /* user custom pico */ || \
 	defined(RASPBERRYPI_PICO) || \
+	defined(ARDUINO_RASPBERRY_PI_PICO) || \
 	defined(RASPBERRYPI_PICO_W) || \
+	defined(ARDUINO_RASPBERRY_PI_PICO_W) || \
 	defined(RASPBERRYPI_PICO2) || \
-	defined(RASPBERRYPI_PICO2_W) \
+	defined(ARDUINO_RASPBERRY_PI_PICO2) || \
+	defined(RASPBERRYPI_PICO2_W) || \
+	defined(ARDUINO_RASPBERRY_PI_PICO2_W) \
 )
 
-#if SUPPORTED_PICO()
+#if SUPPORTED_PICO
 
 	/****************************
 	 * Library Includes
 	****************************/
+
+	#include <pico.h>
 
 	/****************************
 	 * General Config

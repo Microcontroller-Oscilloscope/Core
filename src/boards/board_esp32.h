@@ -22,12 +22,12 @@
 #include "board_flags.h"
 
 // if any supported esp32 board is selected
-#define SUPPORTED_ESP32() ( \
+#define SUPPORTED_ESP32 ( \
 	defined(CUSTOM_ESP32) /* user custom esp32 */ || \
 	defined(ESP32) \
 )
 
-#if SUPPORTED_ESP32()
+#if SUPPORTED_ESP32
 
 	/****************************
 	 * Library Includes

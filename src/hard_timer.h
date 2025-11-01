@@ -91,7 +91,7 @@ enum HardTimerStatusReturn {
 typedef uint32_t freq_t; // hard timer frequency variable
 typedef uint8_t timer_priority_t; // hard timer execute priority variable
 
-#if SUPPORTED_ESP32()
+#if SUPPORTED_ESP32
 	typedef bool hard_timer_return_t; // return type of timer function
 	typedef void* hard_timer_param_t; // parameter type of timer function
 
@@ -106,7 +106,7 @@ typedef uint8_t timer_priority_t; // hard timer execute priority variable
 	 * @warning emptyParams doesn't include any user input parameters
 	 */
 	#define HARD_TIMER_END() return true
-#elif SUPPORTED_PICO()
+#elif SUPPORTED_PICO
 	typedef bool hard_timer_return_t; // return type of timer function
 	typedef struct repeating_timer* hard_timer_param_t; // parameter type of timer function
 

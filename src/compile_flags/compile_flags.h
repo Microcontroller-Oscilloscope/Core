@@ -43,14 +43,14 @@
 /**
  * Supports 64 bit operations natively
  */
-#if SUPPORTED_PICO() || SUPPORTED_ESP32()
+#if (SUPPORTED_PICO || SUPPORTED_ESP32)
 	#define INT64_SUPPORT
 #endif
 
 /**
  * Supports PROGMEM as pointers
  */
-#if !(SUPPORTED_PICO() || SUPPORTED_ESP32())
+#if !(SUPPORTED_PICO || SUPPORTED_ESP32)
 	#define NO_PROGMEM_COPY_SUPPORT
 #endif
 
