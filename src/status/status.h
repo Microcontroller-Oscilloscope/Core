@@ -28,11 +28,8 @@ enum STATUS_CODE {
 	BOARD_CRIT_ERROR, // board encountered a critical error
 };
 
-#define CONNECTING_DELAY 1000 // LED blink delay for connecting in ms
-#define CRIT_ERROR_DELAY 100 // LED blink delay for critical errors in ms
-
-#define CONNECTING_FREQ 1
-#define CRIT_ERROR_FREQ 10
+#define CONNECTING_FREQ 1 // LED blink frequency for connecting
+#define CRIT_ERROR_FREQ 10 // LED blink frequency for critical errors
 
 #ifdef __cplusplus
 extern "C" {

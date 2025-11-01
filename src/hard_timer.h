@@ -90,6 +90,56 @@ enum HardTimerStatusReturn {
 
 typedef uint32_t freq_t; // hard timer frequency variable
 typedef uint8_t timer_priority_t; // hard timer execute priority variable
+
+#if SUPPORTED_ESP32()
+	typedef bool hard_timer_return_t; // return type of timer function
+	typedef void* hard_timer_param_t; // parameter type of timer function
+
+	/**
+	 * Returns from timer function
+	 * 
+	 * @note hard_timer_return_t RUN_IN_RAM({function_name}) {function_name}(hard_timer_param_t emptyParams) {
+	 * @note 	{contents}
+	 * @note 	HARD_TIMER_END();
+	 * @note }
+	 * 
+	 * @warning emptyParams doesn't include any user input parameters
+	 */
+	#define HARD_TIMER_END() return true
+#elif SUPPORTED_PICO()
+	typedef bool hard_timer_return_t; // return type of timer function
+	typedef struct repeating_timer* hard_timer_param_t; // parameter type of timer function
+
+	/**
+	 * Returns from timer function
+	 * 
+	 * @note hard_timer_return_t RUN_IN_RAM({function_name}) {function_name}(hard_timer_param_t emptyParams) {
+	 * @note 	{contents}
+	 * @note 	HARD_TIMER_END();
+	 * @note }
+	 * 
+	 * @warning emptyParams doesn't include any user input parameters
+	 */
+	#define HARD_TIMER_END() return true
+#else
+	typedef void hard_timer_return_t; // return type of timer function
+	typedef void* hard_timer_param_t; // parameter type of timer function
+#endif
+
+#ifndef HARD_TIMER_END
+	/**
+	 * Returns from timer function
+	 * 
+	 * @note hard_timer_return_t RUN_IN_RAM({function_name}) {function_name}(hard_timer_param_t emptyParams) {
+	 * @note 	{contents}
+	 * @note 	HARD_TIMER_END();
+	 * @note }
+	 * 
+	 * @warning emptyParams doesn't include any user input parameters
+	 */
+	#define HARD_TIMER_END() return
+#endif
+
 typedef hard_timer_return_t (*hard_timer_function_ptr_t) (hard_timer_param_t); // timer callback function pointer
 
 #define DEFAULT_HARD_TIMER_PRIORITY 0 // default hard timer priority
@@ -146,7 +196,7 @@ bool cancelHardTimer(hard_timer_t timer);
  * @param timer pointer to timer to start
  * @param freq pointer to desired frequency in Hz
  * @param function pointer to function to call back
- * @param priority priority to run timer at
+ * @param priority priority to run timer at (0 min, 255 max)
  * 
  * setHardTimer(HARD_TIMER_INVALID, ...):
  * 

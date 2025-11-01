@@ -1,5 +1,5 @@
 /*
-	board_esp32_thread.c - thread configuration for Espressif ESP32
+	board_common.h - configuration flags for all boards
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,37 +16,33 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "../board.h"
+#ifndef BOARD_COMMON_H
+#define BOARD_COMMON_H
 
-#if defined(ESP32DEVC)
+#include "board_avr.h"
+#include "board_esp32.h"
+#include "board_pico.h"
 
-#include "../../board_common.h"
+// if any supported board is selected
+#define SUPPORTED_PLATFORM() ( \
+	SUPPORTED_AVR() || \
+	SUPPORTED_PICO() || \
+	SUPPORTED_ESP32() \
+)
 
-#include <freertos/FreeRTOS.h>
-#include <freertos/portmacro.h>
-#include <freertos/task.h>
-#include <esp_system.h>
+#ifndef RUN_IN_RAM
+	/**
+	 * Sets function to run in RAM if possible
+	 * 
+	 * @param function function name
+	 * 
+	 * @note {return_type} RUN_IN_RAM({function_name}) {function_name} ({params}) {{content}}
+	 */
+	#define RUN_IN_RAM(function)
+#endif
 
-static portMUX_TYPE threadSpinLock = portMUX_INITIALIZER_UNLOCKED;
-
-bool startThreadSafety(void) {
-
-	if (threadSpinLock.count == 0) {
-		taskENTER_CRITICAL(&threadSpinLock);
-		return true;
-	}
-
-	return false;
-}
-
-bool endThreadSafety(void) {
-
-	if (threadSpinLock.count == 1) {
-		taskEXIT_CRITICAL(&threadSpinLock);
-		return true;
-	}
-
-	return false;
-}
+#ifndef PROG_FLASH
+	#define PROG_FLASH // storage specifier for flash space
+#endif
 
 #endif

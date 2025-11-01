@@ -24,7 +24,7 @@
 #define OSC_CORE_MINOR_VERSION 3
 #define OSC_CORE_PATCH_VERSION 0
 
-#include "../boards/board.h"
+#include "../boards/board_common.h"
 
 /****************************
  * Debug Flags
@@ -36,34 +36,6 @@
  */
 //#define DEBUG_INSPECT
 
-/**
- * Debug flag to show undefined nvm methods
- * Only uncomment when debugging
- */
-//#define DEBUG_NVM
-
-/****************************
- * NVM Config
-****************************/
-
-/**
- * Uses EEPROM method for NVM storage
- */
-#if defined(UNOR3) || defined(PICO)
-	#if DEFAULT_NVM
-		#define NVM_EEPROM
-	#endif
-#endif
-
-/**
- * Uses Preferences method for NVM storage
- */
-#if defined(ESP32DEVC)
-	#if DEFAULT_NVM
-		#define NVM_PREF
-	#endif
-#endif
-
 /****************************
  * Variable Support
 ****************************/
@@ -71,44 +43,20 @@
 /**
  * Supports 64 bit operations natively
  */
-#if defined(ESP32DEVC) || defined(PICO)
+#if SUPPORTED_PICO() || SUPPORTED_ESP32()
 	#define INT64_SUPPORT
-#endif
-
-/**
- * Only compiles char array operations to needed platforms
- */
-#if defined(UNOR3)
-	#define NO_CHAR_ARRAY_SUPPORT
 #endif
 
 /**
  * Supports PROGMEM as pointers
  */
-#if defined(UNOR3)
+#if !(SUPPORTED_PICO() || SUPPORTED_ESP32())
 	#define NO_PROGMEM_COPY_SUPPORT
 #endif
 
 /****************************
  * Debug Toggles
 ****************************/
-
-/**
- * Defines flags to show hidden nvm methods
- */
-#ifdef DEBUG_NVM
-
-	#ifndef NVM_EEPROM
-		#define NVM_EEPROM
-	#endif
-	#ifndef NVM_PREF
-		#define NVM_PREF
-	#endif
-	#ifndef DEBUG_INSPECT
-		#define DEBUG_INSPECT
-	#endif
-
-#endif
 
 /**
  * Defines flags to show all hidden methods

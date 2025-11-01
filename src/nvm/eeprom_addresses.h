@@ -19,8 +19,6 @@
 #ifndef EEPROM_ADDRESSES_H
 #define EEPROM_ADDRESSES_H
 
-#include "../compile_flags/compile_flags.h"
-
 #define BYTE1_SIZE 1
 #define BYTE2_SIZE 2
 #define BYTE4_SIZE 4
@@ -103,11 +101,5 @@
 
 // nvm size needed for normal operation
 #define NVM_NORMAL_SIZE NETWORK_END_KEY
-
-#ifndef __TEST_CASES__
-	#if NVM_NORMAL_SIZE > NVM_SIZE
-		#error NVM_SIZE not large enough for normal operations
-	#endif
-#endif
 
 #endif

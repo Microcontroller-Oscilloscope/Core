@@ -1,5 +1,5 @@
 /*
-	generic_nvm.c - methods for Preferences usage
+	nvm.c - methods for generic nvm usage
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "generic_nvm.h"
+#include "nvm.h"
 
 #include "eeprom_addresses.h"
 #include "../osc_err/osc_err.h"
@@ -123,6 +123,11 @@ bool validCharPointer(const char* value) {
 
 memCharString failWriteStr[] = {"nvm failed write"};
 
+/**
+ * Prints debug messages for setting nvm defaults
+ * 
+ * @param message message to print
+ */
 void printDefaultDebug(memCharString *message) {
 	#ifdef __NVM_DEBUG__
 		printNVM();

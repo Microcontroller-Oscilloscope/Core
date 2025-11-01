@@ -18,7 +18,7 @@
 
 #include "hard_serial.h"
 
-#include "../../nvm/generic_nvm.h"
+#include "../../nvm/nvm.h"
 
 uint8_t charArraySize(const char* value) {
 

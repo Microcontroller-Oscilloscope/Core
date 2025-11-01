@@ -21,6 +21,9 @@
 
 #include "compile_flags/compile_flags.h"
 
+// datatype for selecting pin
+typedef uint8_t pin_t;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -45,7 +48,7 @@ enum pinModeState {
  * 
  * @return if init was successful
  */
-bool initBoard();
+bool initBoard(void);
 
 /**
  * Delays microcontroller for milliseconds

@@ -20,6 +20,7 @@
 #define DEBUG_H
 
 #include "compile_flags/compile_flags.h"
+#include "../comm/hard_serial/hard_serial.h"
 
 #ifdef __cplusplus
 extern "C" {

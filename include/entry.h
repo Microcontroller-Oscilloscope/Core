@@ -1,5 +1,5 @@
 /*
-	runner.h - execution point for code
+	entry.h - entry point for code
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,19 +16,17 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef RUNNER_H
-#define RUNNER_H
-
-#include "compile_flags/compile_flags.h"
+#ifndef ENTRY_H
+#define ENTRY_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * Runs Program
+ * Sets up and starts program
  */
-void runProgram(void);
+void startProgram(void);
 
 #ifdef __cplusplus
 }

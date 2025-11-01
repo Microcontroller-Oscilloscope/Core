@@ -1,5 +1,5 @@
 /*
-	board_generic.h - configuration flags for generic board
+	board_flags.h - configuration flags for all boards
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,11 +16,11 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef BOARD_GENERIC_H
-#define BOARD_GENERIC_H
+#ifndef BOARD_FLAGS_H
+#define BOARD_FLAGS_H
 
 /**
- * macro for contatenating flags as numbers
+ * Macro for contatenating flags as numbers
  * 
  * @param a first input
  * @param b second input
@@ -36,7 +36,7 @@
 #define CONCATENATE(a, b) a ## b
 
 /**
- * macro for contatenating 3 flags as numbers
+ * Macro for contatenating 3 flags as numbers
  * 
  * @param a first input
  * @param b second input
@@ -65,6 +65,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stddef.h>
 
 /****************************
  * Changes Flags When Testing
@@ -77,27 +78,15 @@
 #endif
 
 /****************************
- * Checks Optional Flags
+ * Checks Custom Config Flags
 ****************************/
 
 #ifndef WAIT_RUN
 	#define WAIT_RUN 0 // how long to wait for program to run in ms
-#else
-	#if WAIT_RUN < 0
-		#error WAIT_RUN must be whole number 0 or greater in ms
-	#endif
 #endif
 
-/****************************
- * Checks Custom Config Flags
-****************************/
-
-#ifndef DEFAULT_NVM
-	#define DEFAULT_NVM true // whether to use the default nvm methods over custom nvm methods
-#else
-	#if DEFAULT_NVM != true && DEFAULT_NVM != false
-		#error DEFAULT_NVM must be 'true' or 'false'
-	#endif
+#ifndef DEFAULT_BAUD_RATE
+	#define DEFAULT_BAUD_RATE 9600 // default baud rate for microcontrollers
 #endif
 
 #endif

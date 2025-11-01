@@ -21,9 +21,11 @@
 
 #include "../../compile_flags/compile_flags.h"
 
-#if defined(SERIAL_PRINTF) && !defined(SERIAL_INTERNAL)
+#if defined(SERIAL_PRINTF)
 
 #include <stdio.h>
+
+typedef const char memCharString;
 
 #ifdef __cplusplus
 extern "C" {
