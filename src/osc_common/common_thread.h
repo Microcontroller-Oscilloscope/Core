@@ -1,5 +1,5 @@
 /*
-	osc_common.h - common functions for microcontrollers
+	common_thread.h - common thread functions for microcontrollers
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,39 +16,14 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef OSC_COMMON_H
-#define OSC_COMMON_H
+#ifndef COMMON_THREAD_H
+#define COMMON_THREAD_H
 
-#include "compile_flags/compile_flags.h"
-
-// datatype for selecting pin
-typedef uint8_t pin_t;
+#include "../compile_flags/compile_flags.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-// states for digital writes
-enum digitalState {
-	DIGITAL_LOW,
-	DIGITAL_HIGH
-};
-
-// states for pin modes
-enum pinModeState {
-	PIN_MODE_DISABLED,
-	PIN_MODE_OUTPUT,
-	PIN_MODE_INPUT,
-	//PIN_MODE_INPUT_PULL_DOWN,
-	PIN_MODE_INPUT_PULL_UP,
-};
-
-/**
- * Initializes any board specific requirements
- * 
- * @return if init was successful
- */
-bool initBoard(void);
 
 /**
  * Delays microcontroller for milliseconds
@@ -63,22 +38,6 @@ void hardDelayMS(uint32_t delayAmount);
  * @param delayAmount amount to delay
  */
 void hardDelayUS(uint32_t delayAmount);
-
-/**
- * Sets pin mode for board
- * 
- * @param pin pin to configure
- * @param mode mode to operate in
- */
-void hardPinMode(pin_t pin, enum pinModeState mode);
-
-/**
- * Sets digital pin state
- * 
- * @param pin pin to set
- * @param value value to set
- */
-void hardDigitalWrite(pin_t pin, enum digitalState value);
 
 /**
  * Starts a thread safe operation

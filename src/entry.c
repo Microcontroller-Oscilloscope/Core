@@ -22,7 +22,7 @@
 #include "nvm/nvm.h"
 #include "osc_err/osc_err.h"
 #include "status/status.h"
-#include "osc_common.h"
+#include "osc_common/common_thread.h"
 #include "comm/hard_serial/hard_serial.h"
 
 void startProgram(void) {

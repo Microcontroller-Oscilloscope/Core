@@ -19,6 +19,8 @@
 #ifndef ENTRY_H
 #define ENTRY_H
 
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -27,6 +29,18 @@ extern "C" {
  * Sets up and starts program
  */
 void startProgram(void);
+
+/**
+ * Runs Program
+ */
+void runProgram(void);
+
+/**
+ * Initializes any board specific requirements
+ * 
+ * @return if init was successful
+ */
+bool initBoard(void);
 
 #ifdef __cplusplus
 }

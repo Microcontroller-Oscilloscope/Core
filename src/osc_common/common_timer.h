@@ -1,5 +1,5 @@
 /*
-	hard_timer.h - timer definitions for each board
+	common_timer.h - timer definitions for each board
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,8 +16,8 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef HARD_TIMER_H
-#define HARD_TIMER_H
+#ifndef COMMON_TIMER_H
+#define COMMON_TIMER_H
 
 #include "compile_flags/compile_flags.h"
 

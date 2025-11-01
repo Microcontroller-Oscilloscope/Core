@@ -16,12 +16,12 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "runner.h"
+#include "entry.h"
 
 #include "compile_flags/compile_flags.h"
 #include "status/status.h"
 #include "compile_flags/compile_warnings.h"
-#include "osc_common.h"
+#include "osc_common/common_thread.h"
 
 void runProgram(void) {
 	hardDelayMS(1000);

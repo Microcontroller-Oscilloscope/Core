@@ -20,7 +20,7 @@
 
 #include "../status/debug.h"
 #include "../comm/hard_serial/hard_serial.h"
-#include "../osc_common.h"
+#include "osc_common/common_thread.h"
 
 void errorLoop(enum OSC_ERR err) {
 	#ifndef __TEST_CASES__
