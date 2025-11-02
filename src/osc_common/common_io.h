@@ -24,11 +24,11 @@
 // datatype for selecting pin
 typedef uint8_t pin_t;
 
+#define PIN_T_INVALID 255 // invalid pin type
+
 // states for digital writes
-enum digitalState {
-	DIGITAL_LOW,
-	DIGITAL_HIGH
-};
+#define DIGITAL_LOW 0
+#define DIGITAL_HIGH 1
 
 // states for pin modes
 enum pinModeState {
@@ -57,7 +57,7 @@ void hardPinMode(pin_t pin, enum pinModeState mode);
  * @param pin pin to set
  * @param value value to set
  */
-void hardDigitalWrite(pin_t pin, enum digitalState value);
+void hardDigitalWrite(pin_t pin, uint8_t value);
 
 #ifdef __cplusplus
 }

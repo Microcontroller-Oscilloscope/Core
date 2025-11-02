@@ -19,6 +19,9 @@
 #ifndef STATUS_H
 #define STATUS_H
 
+#include "../compile_flags/compile_flags.h"
+#include "../osc_common/common_io.h"
+
 /**
  * List of status codes for LED
  */
@@ -30,6 +33,12 @@ enum STATUS_CODE {
 
 #define CONNECTING_FREQ 1 // LED blink frequency for connecting
 #define CRIT_ERROR_FREQ 10 // LED blink frequency for critical errors
+
+// available status pins to retrieve
+enum statusPin {
+	STATUS_PIN_INTERNAL,
+	STATUS_PIN_EXTERNAL,
+};
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,6 +55,19 @@ void initStatus(void);
  * @param status status code to show
  */
 void setStatus(enum STATUS_CODE status);
+
+/**
+ * Gets status pin for board
+ * 
+ * @param pin pointer to pin variable
+ * @param status status pin to retrieve
+ * 
+ * @warning check before setting pin if pin equals PIN_T_INVALID
+ * @warning this prevents the check from executing every pin write
+ * 
+ * @return if pin is strapped to more critical pin
+ */
+bool getStatusPin(pin_t *pin, enum statusPin status);
 
 #ifdef __cplusplus
 }

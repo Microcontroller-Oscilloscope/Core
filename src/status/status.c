@@ -19,11 +19,31 @@
 #include "status.h"
 #include "../compile_flags/compile_flags.h"
 #include "../osc_common/common_timer.h"
+#include "../osc_common/common_io.h"
 
 // if status LEDs are enabled
 #define STATUS_LED_DEFINED defined(HARD_TIMER_ID_LED)
 
 #define STATUS_LED_PRIORITY DEFAULT_HARD_TIMER_PRIORITY // priority of status LED timer interrupt
+
+inline void writeStatus(uint8_t state);
+
+/**
+ * Sets write status for given state
+ * 
+ * @param state whether to set pin high or low
+ */
+void writeStatus(uint8_t state) {
+	pin_t statusPin;
+	getStatusPin(&statusPin, STATUS_PIN_INTERNAL);
+	if (statusPin != PIN_T_INVALID) {
+		hardDigitalWrite(statusPin, state);
+	}
+	getStatusPin(&statusPin, STATUS_PIN_EXTERNAL);
+	if (statusPin != PIN_T_INVALID) {
+		hardDigitalWrite(statusPin, state);
+	}
+}
 
 #if STATUS_LED_DEFINED
 
@@ -39,12 +59,7 @@
 	 */
 	hard_timer_return_t RUN_IN_RAM(ledFunction) ledFunction(hard_timer_param_t emptyParams) {
 		ledToggle = !ledToggle;
-		#ifdef STATUS_LED_PIN
-			hardDigitalWrite(STATUS_LED_PIN, ledToggle);
-		#endif
-		#ifdef EXTERNAL_STATUS_LED_PIN
-			hardDigitalWrite(EXTERNAL_STATUS_LED_PIN, ledToggle);
-		#endif
+		writeStatus(ledToggle);
 		HARD_TIMER_END();
 	}
 
@@ -52,12 +67,15 @@
 
 void initStatus(void) {
 
-	#ifdef STATUS_LED_PIN
-		hardPinMode(STATUS_LED_PIN, PIN_MODE_OUTPUT);
-	#endif
-	#ifdef EXTERNAL_STATUS_LED_PIN
-		hardPinMode(EXTERNAL_STATUS_LED_PIN, PIN_MODE_OUTPUT);
-	#endif
+	pin_t statusPin;
+	getStatusPin(&statusPin, STATUS_PIN_INTERNAL);
+	if (statusPin != PIN_T_INVALID) {
+		hardPinMode(statusPin, PIN_MODE_OUTPUT);
+	}
+	getStatusPin(&statusPin, STATUS_PIN_EXTERNAL);
+	if (statusPin != PIN_T_INVALID) {
+		hardPinMode(statusPin, PIN_MODE_OUTPUT);
+	}
 
 	#if STATUS_LED_DEFINED
 		struct hardTimerPriority priority;
@@ -72,25 +90,14 @@ void setStatus(enum STATUS_CODE status) {
 
 		// reset timers and LEDs
 		cancelHardTimer(ledTimer);
-
-		#ifdef STATUS_LED_PIN
-			hardDigitalWrite(STATUS_LED_PIN, DIGITAL_LOW);
-		#endif
-		#ifdef EXTERNAL_STATUS_LED_PIN
-			hardDigitalWrite(EXTERNAL_STATUS_LED_PIN, DIGITAL_LOW);
-		#endif
+		writeStatus(DIGITAL_LOW);
 
 		ledToggle = false;
 
 		// sets LEDs
 		if (status == BOARD_OK) {
 			unclaimTimer(ledTimer);
-			#ifdef STATUS_LED_PIN
-				hardDigitalWrite(STATUS_LED_PIN, DIGITAL_HIGH);
-			#endif
-			#ifdef EXTERNAL_STATUS_LED_PIN
-				hardDigitalWrite(EXTERNAL_STATUS_LED_PIN, DIGITAL_HIGH);
-			#endif
+			writeStatus(DIGITAL_HIGH);
 		}
 		else if (status == BOARD_CONNECTING || status == BOARD_CRIT_ERROR) {
 
@@ -115,20 +122,10 @@ void setStatus(enum STATUS_CODE status) {
 	#else
 		
 		if (status == BOARD_OK) {
-			#ifdef STATUS_LED_PIN
-				hardDigitalWrite(STATUS_LED_PIN, DIGITAL_HIGH);
-			#endif
-			#ifdef EXTERNAL_STATUS_LED_PIN
-				hardDigitalWrite(EXTERNAL_STATUS_LED_PIN, DIGITAL_HIGH);
-			#endif
+			writeStatus(DIGITAL_HIGH);
 		}
 		else {
-			#ifdef STATUS_LED_PIN
-				hardDigitalWrite(STATUS_LED_PIN, DIGITAL_LOW);
-			#endif
-			#ifdef EXTERNAL_STATUS_LED_PIN
-				hardDigitalWrite(EXTERNAL_STATUS_LED_PIN, DIGITAL_LOW);
-			#endif
+			writeStatus(DIGITAL_LOW);
 		}
 
 	#endif
