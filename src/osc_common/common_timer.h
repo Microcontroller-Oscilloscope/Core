@@ -105,7 +105,7 @@ typedef uint8_t timer_priority_t; // hard timer execute priority variable
 	 * 
 	 * @warning emptyParams doesn't include any user input parameters
 	 */
-	#define HARD_TIMER_END() return true
+	#define HARD_TIMER_END() return false
 #elif SUPPORTED_PICO
 	typedef bool hard_timer_return_t; // return type of timer function
 	typedef struct repeating_timer* hard_timer_param_t; // parameter type of timer function

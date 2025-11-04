@@ -52,8 +52,6 @@ void hardPrintBegin(uint32_t baud);
 
 #ifndef SERIAL_PRINTF
 
-typedef const char memCharString;
-
 /**
  * Prints memory char array to Serial
  * 

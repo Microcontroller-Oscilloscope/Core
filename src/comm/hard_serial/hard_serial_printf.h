@@ -23,10 +23,6 @@
 
 #if defined(SERIAL_PRINTF)
 
-#include <stdio.h>
-
-typedef const char memCharString;
-
 #ifdef __cplusplus
 extern "C" {
 #endif

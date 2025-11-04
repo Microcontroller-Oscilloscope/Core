@@ -62,11 +62,17 @@
 // default nvm size when flash is used instead of dedicated EEPROM
 #define FLASH_NVM_SIZE 4096
 
+/****************************
+ * Common Types
+****************************/
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stddef.h>
 #include <string.h>
+
+typedef const char memCharString;
 
 /****************************
  * Changes Flags When Testing
