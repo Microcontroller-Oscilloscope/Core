@@ -96,4 +96,7 @@ typedef const char memCharString;
 	#define DEFAULT_BAUD_RATE 9600 // default baud rate for microcontrollers
 #endif
 
+// sets function as weak with c attribute
+#define WEAK __attribute__((weak))
+
 #endif

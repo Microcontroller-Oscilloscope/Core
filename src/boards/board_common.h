@@ -30,6 +30,11 @@
 	SUPPORTED_ESP32 \
 )
 
+// if board should use arduino methods
+#define ENVIRONMENT_ARDUINO ( \
+	!SUPPORTED_PLATFORM \
+)
+
 #ifndef RUN_IN_RAM
 	/**
 	 * Sets function to run in RAM if possible
@@ -43,6 +48,10 @@
 
 #ifndef PROG_FLASH
 	#define PROG_FLASH // storage specifier for flash space
+#endif
+
+#ifndef BAUD_RATE
+	#define BAUD_RATE DEFAULT_BAUD_RATE
 #endif
 
 #endif

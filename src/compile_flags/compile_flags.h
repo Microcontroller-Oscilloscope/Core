@@ -50,7 +50,7 @@
 /**
  * Supports PROGMEM as pointers
  */
-#if !(SUPPORTED_PICO || SUPPORTED_ESP32)
+#if !(SUPPORTED_PICO || SUPPORTED_ESP32 || !SUPPORTED_PLATFORM)
 	#define NO_PROGMEM_COPY_SUPPORT
 #endif
 
