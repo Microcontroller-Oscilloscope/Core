@@ -33,7 +33,7 @@ enum NVMStartCode {NVM_OK, NVM_STARTED, NVM_FAILED, NVM_INVALID_SIZE};
 // result of NVM reset
 enum NVMDefaultCode {NVM_DEFAULT_OK, NVM_DEFAULT_SIZE_TOO_BIG,
 		NVM_DEFAULT_FAIL_WRITE, NVM_DEFAULT_FAIL_CLEAR, NVM_DEFAULT_FAIL_MAX_SIZE, 
-		NVM_DEFAULT_FAIL_STOP, NVM_DEFAULT_FAIL_INIT};
+		NVM_DEFAULT_FAIL_STOP, NVM_DEFAULT_FAIL_INIT, NVM_DEFAULT_NOT_STARTED};
 
 // variable type for retrieving values
 enum VarType {
@@ -109,11 +109,9 @@ enum NVMStartCode nvmInit(nvm_size_t nvmSize);
 /**
  * Gets max size of nvm method
  * 
- * @param size amount of bytes in nvm
- * 
- * @return if retrieval was successful
+ * @return maximum size of nvm
  */
-bool nvmMaxSize(nvm_size_t *size);
+nvm_size_t nvmMaxSize(void);
 
 /**
  * Resets nvm settings to default settings

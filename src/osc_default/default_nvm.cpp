@@ -39,6 +39,9 @@ extern "C" enum NVMStartCode nvmInit(nvm_size_t setNVMSize) {
 	if (setNVMSize == (nvm_size_t)DEFAULT_NVM_SIZE) {
 		return NVM_INVALID_SIZE;
 	}
+	if (setNVMSize > nvmMaxSize()) {
+		return NVM_INVALID_SIZE;
+	}
 
 	#ifdef __NVM_BEGIN__
 		#ifdef __NVM_BEGIN_RETURN__
@@ -62,38 +65,19 @@ extern "C" enum NVMStartCode nvmInit(nvm_size_t setNVMSize) {
 	return NVM_OK;
 }
 
-extern "C" bool nvmMaxSize(nvm_size_t *size) {
-	
-	if (nvmBegan) {
-		*size = (nvm_size_t)EEPROM.length();
-		if (*size == 0) {
-			*size = NVM_MAX_SIZE;
-		}
-		return true;
-	}
-
-	*size = DEFAULT_NVM_SIZE;
-	return false;
+extern "C" nvm_size_t nvmMaxSize(void) {
+	return EEPROM.length();
 }
 
 extern "C" enum NVMDefaultCode nvmSetDefaults(void) {
-	// ensures NVM_SIZE isn't too big for microcontroller
-	nvm_size_t nvmMaxValue;
-	if (nvmMaxSize(&nvmMaxValue)) {
-		#ifdef NVM_SIZE
-			if (NVM_SIZE > nvmMaxValue) {
-				errorLoop(NVM_SIZE_TOO_BIG_FAIL);
-				return NVM_DEFAULT_SIZE_TOO_BIG;
-			}
-		#endif
-	}
-	else {
+
+	if (!nvmBegan)  {
 		// if nvm not started or unable to get size
-		return NVM_DEFAULT_FAIL_MAX_SIZE;
+		return NVM_DEFAULT_NOT_STARTED;
 	}
 
 	// writes critical values
-	enum NVMDefaultCode code = nvmSetCritDefaults(nvmMaxValue);
+	enum NVMDefaultCode code = nvmSetCritDefaults(nvmMaxSize());
 	if (code != NVM_DEFAULT_OK) {
 		return code;
 	}
