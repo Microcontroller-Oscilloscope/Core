@@ -22,8 +22,6 @@
 memCharString leftBracket[] PROG_FLASH = {"["};
 memCharString rightBracket[] PROG_FLASH = {"]:"};
 
-memCharString errorTag[] PROG_FLASH = {"Err"};
-memCharString nvmTag[] PROG_FLASH = {"NVM"};
 memCharString critErrorTag[] PROG_FLASH = {"!!!"};
 
 void printTag(memCharString* tag) {
@@ -31,18 +29,6 @@ void printTag(memCharString* tag) {
 	hardPrintMemCharArray(tag);
 	hardPrintMemCharArray(rightBracket);
 }
-
-#ifdef __ERROR_DEBUG__
-void printError(void) {
-	printTag(errorTag);
-}
-#endif
-
-#ifdef __NVM_DEBUG__
-void printNVM(void) {
-	printTag(nvmTag);
-}
-#endif
 
 void printCritError(void) {
 	printTag(critErrorTag);

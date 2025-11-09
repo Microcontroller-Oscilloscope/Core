@@ -24,6 +24,9 @@
 // defualt size for nvm storage
 #define DEFAULT_NVM_SIZE 0U
 
+// default nvm size when flash is used instead of dedicated EEPROM
+#define FLASH_NVM_SIZE 4096
+
 // result of NVM initialization
 enum NVMStartCode {NVM_OK, NVM_STARTED, NVM_FAILED, NVM_INVALID_SIZE};
 
@@ -89,17 +92,6 @@ extern "C" {
  * @return if array isn't null
  */
 bool validCharPointer(const char* value);
-
-#ifdef __NVM_DEBUG__
-
-	/**
-	 * Prints the variable type inputted to console
-	 * 
-	 * @param varType type of variable
-	 */
-	void printVarType(enum VarType varType);
-
-#endif
 
 /****************************
  * General NVM Methods

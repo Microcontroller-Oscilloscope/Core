@@ -52,25 +52,11 @@
 	 * Serial Config
 	****************************/
 
-	#define SERIAL_PRINTF // uses printf as serial
-
 	#if defined(CONFIG_ESPTOOLPY_MONITOR_BAUD) && !defined(PLATFORMIO)
 		#ifdef BAUD_RATE
 			#undef BAUD_RATE
 		#endif
 		#define BAUD_RATE CONFIG_ESPTOOLPY_MONITOR_BAUD
-	#endif
-
-	/****************************
-	 * Timer Config
-	 * 
-	 * Only 4 hardware timers available
-	****************************/
-
-	#define FREQ_MAX 5000000 // max frequency user set timer can be
-
-	#ifndef NUM_TIMERS
-		#define NUM_TIMERS 4 // amount of hardware timers to use
 	#endif
 
 #endif

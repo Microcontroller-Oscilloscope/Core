@@ -27,16 +27,6 @@
 #include "../boards/board_common.h"
 
 /****************************
- * Debug Flags
-****************************/
-
-/**
- * Debug flag to show undefined methods
- * Only uncomment when debugging
- */
-//#define DEBUG_INSPECT
-
-/****************************
  * Variable Support
 ****************************/
 
@@ -52,24 +42,6 @@
  */
 #if !(SUPPORTED_PICO || SUPPORTED_ESP32 || !SUPPORTED_PLATFORM)
 	#define NO_PROGMEM_COPY_SUPPORT
-#endif
-
-/****************************
- * Debug Toggles
-****************************/
-
-/**
- * Defines flags to show all hidden methods
- */
-#if defined(DEBUG_INSPECT) && !defined(__TEST_CASES__)
-
-	#ifndef __ERROR_DEBUG__
-		#define __ERROR_DEBUG__
-	#endif
-	#ifndef __NVM_DEBUG__
-		#define __NVM_DEBUG__
-	#endif
-
 #endif
 
 #endif

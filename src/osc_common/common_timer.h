@@ -21,6 +21,131 @@
 
 #include "compile_flags/compile_flags.h"
 
+// codes when getting hard timer stats
+enum HardTimerStatusReturn {
+	HARD_TIMER_OK, // hard timer stats retrieved
+	HARD_TIMER_SLIGHTLY_OFF, // retrieved values that aren't completely accurate
+	HARD_TIMER_FAIL, // failed to get timer values
+};
+
+typedef uint32_t freq_t; // hard timer frequency variable
+typedef uint8_t timer_priority_t; // hard timer execute priority variable
+
+#if SUPPORTED_ESP32
+	typedef bool hard_timer_return_t; // return type of timer function
+	typedef void* hard_timer_param_t; // parameter type of timer function
+
+	/**
+	 * Returns from timer function
+	 * 
+	 * @note hard_timer_return_t RUN_IN_RAM({function_name}) {function_name}(hard_timer_param_t emptyParams) {
+	 * @note 	{contents}
+	 * @note 	HARD_TIMER_END();
+	 * @note }
+	 * 
+	 * @warning emptyParams doesn't include any user input parameters
+	 */
+	#define HARD_TIMER_END() return false
+
+	/****************************
+	 * Timer Config
+	 * 
+	 * Only 4 hardware timers available
+	****************************/
+
+	#define FREQ_MAX 5000000 // max frequency user set timer can be
+
+	#ifndef NUM_TIMERS
+		#define NUM_TIMERS 4 // amount of hardware timers to use
+	#endif
+
+#elif SUPPORTED_PICO
+	typedef bool hard_timer_return_t; // return type of timer function
+	typedef struct repeating_timer* hard_timer_param_t; // parameter type of timer function
+
+	/**
+	 * Returns from timer function
+	 * 
+	 * @note hard_timer_return_t RUN_IN_RAM({function_name}) {function_name}(hard_timer_param_t emptyParams) {
+	 * @note 	{contents}
+	 * @note 	HARD_TIMER_END();
+	 * @note }
+	 * 
+	 * @warning emptyParams doesn't include any user input parameters
+	 */
+	#define HARD_TIMER_END() return true
+
+	/****************************
+	 * Timer Config
+	 * 
+	 * Only 16 hardware alarm timers available
+	 * 
+	 * 2 are used for system timing on each core
+	 * 
+	 * Only 14 timers after api usage
+	****************************/
+
+	#define FREQ_MAX 1000000 // max frequency user set timer can be
+
+	#ifndef NUM_TIMERS
+		#define NUM_TIMERS 14 // amount of hardware timers to use
+	#endif
+#elif SUPPORTED_AVR
+	typedef void hard_timer_return_t; // return type of timer function
+	typedef void* hard_timer_param_t; // parameter type of timer function
+
+	/****************************
+	 * Timer Config
+	 * 
+	 * Only 3 hardware timers available
+	****************************/
+
+	#define FREQ_MAX 1000000 // max frequency user set timer can be
+
+	#ifndef NUM_TIMERS
+		#define NUM_TIMERS 3 // amount of hardware timers to use
+	#endif
+#else
+	typedef void hard_timer_return_t; // return type of timer function
+	typedef void* hard_timer_param_t; // parameter type of timer function
+
+	/****************************
+	 * Timer Config
+	 * 
+	 * No hardware timers available
+	****************************/
+
+	#define FREQ_MAX 0 // max frequency user set timer can be
+
+	#ifndef NUM_TIMERS
+		#define NUM_TIMERS 0 // amount of hardware timers to use
+	#endif
+#endif
+
+#ifndef HARD_TIMER_END
+	/**
+	 * Returns from timer function
+	 * 
+	 * @note hard_timer_return_t RUN_IN_RAM({function_name}) {function_name}(hard_timer_param_t emptyParams) {
+	 * @note 	{contents}
+	 * @note 	HARD_TIMER_END();
+	 * @note }
+	 * 
+	 * @warning emptyParams doesn't include any user input parameters
+	 */
+	#define HARD_TIMER_END() return
+#endif
+
+typedef hard_timer_return_t (*hard_timer_function_ptr_t) (hard_timer_param_t); // timer callback function pointer
+
+#define DEFAULT_HARD_TIMER_PRIORITY 0 // default hard timer priority
+
+// hardware timer priority for claiming timers
+struct hardTimerPriority {
+	bool slowestTimer: 1; // whether to use slowest timer or not
+	bool mostAccurateTimer: 1; // whether to use most accurate timer or not
+};
+
 // available timers to use
 #if NUM_TIMERS > 0
 	#define HARD_TIMER_ID_OSC // oscilloscope data collection enable
@@ -80,75 +205,6 @@ typedef enum { // hardware timer type
 		HARD_TIMER15,
 	#endif
 } hard_timer_t; // hardware timer type
-
-// codes when getting hard timer stats
-enum HardTimerStatusReturn {
-	HARD_TIMER_OK, // hard timer stats retrieved
-	HARD_TIMER_SLIGHTLY_OFF, // retrieved values that aren't completely accurate
-	HARD_TIMER_FAIL, // failed to get timer values
-};
-
-typedef uint32_t freq_t; // hard timer frequency variable
-typedef uint8_t timer_priority_t; // hard timer execute priority variable
-
-#if SUPPORTED_ESP32
-	typedef bool hard_timer_return_t; // return type of timer function
-	typedef void* hard_timer_param_t; // parameter type of timer function
-
-	/**
-	 * Returns from timer function
-	 * 
-	 * @note hard_timer_return_t RUN_IN_RAM({function_name}) {function_name}(hard_timer_param_t emptyParams) {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning emptyParams doesn't include any user input parameters
-	 */
-	#define HARD_TIMER_END() return false
-#elif SUPPORTED_PICO
-	typedef bool hard_timer_return_t; // return type of timer function
-	typedef struct repeating_timer* hard_timer_param_t; // parameter type of timer function
-
-	/**
-	 * Returns from timer function
-	 * 
-	 * @note hard_timer_return_t RUN_IN_RAM({function_name}) {function_name}(hard_timer_param_t emptyParams) {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning emptyParams doesn't include any user input parameters
-	 */
-	#define HARD_TIMER_END() return true
-#else
-	typedef void hard_timer_return_t; // return type of timer function
-	typedef void* hard_timer_param_t; // parameter type of timer function
-#endif
-
-#ifndef HARD_TIMER_END
-	/**
-	 * Returns from timer function
-	 * 
-	 * @note hard_timer_return_t RUN_IN_RAM({function_name}) {function_name}(hard_timer_param_t emptyParams) {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning emptyParams doesn't include any user input parameters
-	 */
-	#define HARD_TIMER_END() return
-#endif
-
-typedef hard_timer_return_t (*hard_timer_function_ptr_t) (hard_timer_param_t); // timer callback function pointer
-
-#define DEFAULT_HARD_TIMER_PRIORITY 0 // default hard timer priority
-
-// hardware timer priority for claiming timers
-struct hardTimerPriority {
-	bool slowestTimer: 1; // whether to use slowest timer or not
-	bool mostAccurateTimer: 1; // whether to use most accurate timer or not
-};
 
 #ifdef __cplusplus
 extern "C" {

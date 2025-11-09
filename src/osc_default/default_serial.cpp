@@ -19,7 +19,7 @@
 #include "../compile_flags/compile_flags.h"
 #include "../comm/hard_serial/hard_serial.h"
 
-#if !defined(SERIAL_PRINTF) && ENVIRONMENT_ARDUINO
+#ifdef SERIAL_ARDUINO
 
 #include <Arduino.h>
 

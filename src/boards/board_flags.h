@@ -59,9 +59,6 @@
  */
 #define TO_BIT(bit) (1 << (bit))
 
-// default nvm size when flash is used instead of dedicated EEPROM
-#define FLASH_NVM_SIZE 4096
-
 /****************************
  * Common Types
 ****************************/
@@ -73,16 +70,6 @@
 #include <string.h>
 
 typedef const char memCharString;
-
-/****************************
- * Changes Flags When Testing
-****************************/
-
-#ifndef __TEST_CASES__
-	#if defined(PIO_UNIT_TESTING) || defined(UNIT_TEST)
-		#define __TEST_CASES__ // indicator if compiling for testing
-	#endif
-#endif
 
 /****************************
  * Checks Custom Config Flags

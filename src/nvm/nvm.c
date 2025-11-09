@@ -20,7 +20,6 @@
 
 #include "eeprom_addresses.h"
 #include "../osc_err/osc_err.h"
-#include "../status/debug.h"
 #include "../comm/hard_serial/hard_serial.h"
 
 #include <stddef.h>
@@ -46,137 +45,44 @@
 
 #endif
 
-memCharString noNull[] = {"Can't use null pointer"};
-
 bool validCharPointer(const char* value) {
 	if (value == NULL) {
-		#ifdef __NVM_DEBUG__
-			printNVM();
-			hardPrintMemCharArrayln(noNull);
-		#endif
 		return false;
 	}
 	return true;
 }
 
-#ifdef __NVM_DEBUG__
-
-	memCharString bStr[] = {"b"};
-	memCharString i8Str[] = {"i8"};
-	memCharString ui8Str[] = {"ui8"};
-	memCharString i16Str[] = {"i16"};
-	memCharString ui16Str[] = {"ui16"};
-	memCharString i32Str[] = {"i32"};
-	memCharString ui32Str[] = {"ui32"};
-	memCharString i64Str[] = {"i64"};
-	memCharString ui64Str[] = {"ui64"};
-	memCharString fStr[] = {"flt"};
-	memCharString dStr[] = {"dbl"};
-	memCharString caStr[] = {"char arr"};
-	memCharString invStr[] = {"invalid"};
-
-	void printVarType(enum VarType varType) {
-		switch(varType) {
-			case VAR_BOOL:
-				hardPrintMemCharArray(bStr);
-			break;
-			case VAR_INT8:
-				hardPrintMemCharArray(i8Str);
-			break;
-			case VAR_UINT8:
-				hardPrintMemCharArray(ui8Str);
-			break;
-			case VAR_INT16:
-				hardPrintMemCharArray(i16Str);
-			break;
-			case VAR_UINT16:
-				hardPrintMemCharArray(ui16Str);
-			break;
-			case VAR_INT32:
-				hardPrintMemCharArray(i32Str);
-			break;
-			case VAR_UINT32:
-				hardPrintMemCharArray(ui32Str);
-			break;
-			case VAR_INT64:
-				hardPrintMemCharArray(i64Str);
-			break;
-			case VAR_UINT64:
-				hardPrintMemCharArray(ui64Str);
-			break;
-			case VAR_FLOAT:
-				hardPrintMemCharArray(fStr);
-			break;
-			case VAR_DOUBLE:
-				hardPrintMemCharArray(dStr);
-			break;
-			case VAR_CHAR_ARRAY:
-				hardPrintMemCharArray(caStr);
-			break;
-			default:
-				hardPrintMemCharArray(invStr);
-			break;
-		}
-	}
-
-#endif
-
 memCharString failWriteStr[] = {"nvm failed write"};
-
-/**
- * Prints debug messages for setting nvm defaults
- * 
- * @param message message to print
- */
-void printDefaultDebug(memCharString *message) {
-	#ifdef __NVM_DEBUG__
-		printNVM();
-		hardPrintMemCharArray(message);
-	#endif
-}
-
-#define FAILED_WRITE_MESSAGE() printDefaultDebug(failWriteStr)
 
 enum NVMDefaultCode nvmSetCritDefaults(nvm_size_t nvmMaxValue) {
 
 	if (sizeof(nvm_size_t) == sizeof(uint8_t)) {
 		if (!nvmWriteUI8(NVM_AVAILABLE_KEY, nvmMaxValue)) {
-			FAILED_WRITE_MESSAGE();
 			return NVM_DEFAULT_FAIL_WRITE;
 		}
 	}
 	else if (sizeof(nvm_size_t) == sizeof(uint16_t)) {
 		if (!nvmWriteUI16(NVM_AVAILABLE_KEY, nvmMaxValue)) {
-			FAILED_WRITE_MESSAGE();
 			return NVM_DEFAULT_FAIL_WRITE;
 		}
 	}
 	else if (sizeof(nvm_size_t) == sizeof(uint32_t)) {
 		if (!nvmWriteUI32(NVM_AVAILABLE_KEY, nvmMaxValue)) {
-			FAILED_WRITE_MESSAGE();
 			return NVM_DEFAULT_FAIL_WRITE;
 		}
 	}
 	else if (sizeof(nvm_size_t) == sizeof(uint64_t)) {
 		if (!nvmWriteUI64(NVM_AVAILABLE_KEY, nvmMaxValue)) {
-			FAILED_WRITE_MESSAGE();
 			return NVM_DEFAULT_FAIL_WRITE;
 		}
 	}
 	else {
-		FAILED_WRITE_MESSAGE();
 		return NVM_DEFAULT_FAIL_WRITE;
 	}
 
 	return NVM_DEFAULT_OK;
 }
 
-#ifdef __TEST_CASES__
 enum NVMDefaultCode nvmSetEnvDefaults(void) {
 	return NVM_DEFAULT_OK;
 }
-#else
-enum NVMDefaultCode nvmSetEnvDefaults(void) {
-	return NVM_DEFAULT_OK;
-}
-#endif

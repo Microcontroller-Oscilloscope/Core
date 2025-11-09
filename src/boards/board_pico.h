@@ -21,28 +21,29 @@
 
 #include "board_flags.h"
 
-// if any supported pico board non wireless is selected
-#define SUPPORTED_PICO_NO_W ( \
-	defined(CUSTOM_PICO) /* user custom pico */ || \
+// if any supported pico board is selected
+#define SUPPORTED_PICO ( \
+	defined(CUSTOM_PICO) || \
 	defined(RASPBERRYPI_PICO) || \
 	defined(ARDUINO_RASPBERRY_PI_PICO) || \
 	defined(RASPBERRYPI_PICO2) || \
-	defined(ARDUINO_RASPBERRY_PI_PICO2) \
-)
-
-// if any supported pico board wireless is selected
-#define SUPPORTED_PICO_W ( \
-	defined(CUSTOM_PICO_W) /* user custom pico W */ || \
+	defined(ARDUINO_RASPBERRY_PI_PICO2) || \
 	defined(RASPBERRYPI_PICO_W) || \
 	defined(ARDUINO_RASPBERRY_PI_PICO_W) || \
 	defined(RASPBERRYPI_PICO2_W) || \
 	defined(ARDUINO_RASPBERRY_PI_PICO2_W) \
 )
 
-// if any supported pico board is selected
-#define SUPPORTED_PICO ( \
-	SUPPORTED_PICO_NO_W || \
-	SUPPORTED_PICO_W \
+// if any supported pico board non wireless is selected
+#define SUPPORTED_PICO_NO_W ( \
+	!defined(PICO_CYW43_SUPPORTED) && \
+	SUPPORTED_PICO \
+)
+
+// if any supported pico board wireless is selected
+#define SUPPORTED_PICO_W ( \
+	defined(PICO_CYW43_SUPPORTED) && \
+	SUPPORTED_PICO \
 )
 
 #if SUPPORTED_PICO
@@ -69,24 +70,6 @@
 	/****************************
 	 * Serial Config
 	****************************/
-
-	#define SERIAL_PRINTF // uses printf as serial
-
-	/****************************
-	 * Timer Config
-	 * 
-	 * Only 16 hardware alarm timers available
-	 * 
-	 * 2 are used for system timing on each core
-	 * 
-	 * Only 14 timers after api usage
-	****************************/
-
-	#define FREQ_MAX 1000000 // max frequency user set timer can be
-
-	#ifndef NUM_TIMERS
-		#define NUM_TIMERS 14 // amount of hardware timers to use
-	#endif
 
 #endif
 

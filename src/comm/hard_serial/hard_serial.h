@@ -19,6 +19,19 @@
 #ifndef HARD_SERIAL_H
 #define HARD_SERIAL_H
 
+/**
+ * ~~~~~Flags~~~~~
+ * 
+ * Serial Methods:
+ * 
+ * SERIAL_PRINTF
+ *     Uses c method 'printf' for serial
+ * SERIAL_INTERNAL
+ *     Uses methods defined in '{platform}_lib' for serial
+ * SERIAL_ARDUINO
+ *     Uses Arduino 'Serial' for serial
+ */
+
 #define DEFAULT_FLOAT_PLACES 2
 #define DEFAULT_DOUBLE_PLACES 4
 #define ASCII0 48 // ASCII code for printing 0
@@ -27,6 +40,17 @@
 #define CHAR_LEN_ERROR UINT8_MAX
 
 #include "../../compile_flags/compile_flags.h"
+
+#if SUPPORTED_ESP32
+	#define SERIAL_PRINTF // uses printf as serial
+#elif SUPPORTED_PICO
+	#define SERIAL_PRINTF // uses printf as serial
+#elif SUPPORTED_AVR
+	#define SERIAL_INTERNAL // uses boards internal functions for transmission
+	#define NO_FLOAT_PRINT_SUPPORT
+#else
+	#define SERIAL_ARDUINO // uses Arduino method as serial
+#endif
 
 #ifdef __cplusplus
 extern "C" {

@@ -26,7 +26,6 @@
 #include "../osc_err/osc_err.h"
 #include "../status/status.h"
 #include "../comm/hard_serial/hard_serial.h"
-#include "../status/debug.h"
 
 typedef int eeprom_key_t; // type to convert keys to
 

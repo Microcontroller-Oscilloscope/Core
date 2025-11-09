@@ -46,27 +46,5 @@
 	 * Serial Config
 	****************************/
 
-	#ifndef SERIAL_INTERNAL
-		#define SERIAL_INTERNAL // uses boards internal functions for transmission
-	#endif
-
-	#ifdef SERIAL_INTERNAL
-		#ifndef NO_FLOAT_PRINT_SUPPORT
-			#define NO_FLOAT_PRINT_SUPPORT
-		#endif
-	#endif
-
-	/****************************
-	 * Timer Config
-	 * 
-	 * Only 3 hardware timers available
-	****************************/
-
-	#define FREQ_MAX 1000000 // max frequency user set timer can be
-
-	#ifndef NUM_TIMERS
-		#define NUM_TIMERS 3 // amount of hardware timers to use
-	#endif
-
 #endif
 #endif

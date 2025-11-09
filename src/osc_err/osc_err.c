@@ -23,11 +23,9 @@
 #include "osc_common/common_thread.h"
 
 void errorLoop(enum OSC_ERR err) {
-	#ifndef __TEST_CASES__
-		while(true) {
-			printCritError();
-			hardPrintUInt16ln(err);
-			hardDelayMS(OSC_ERR_DELAY);
-		}
-	#endif
+	while(true) {
+		printCritError();
+		hardPrintUInt16ln(err);
+		hardDelayMS(OSC_ERR_DELAY);
+	}
 }
