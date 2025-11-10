@@ -21,6 +21,13 @@
 
 #include "../../compile_flags/compile_flags.h"
 
+#if SUPPORTED_ESP32
+	#include <esp_idf_version.h>
+	#if ESP_IDF_VERSION_MAJOR == 5
+		#define PRINT_LONG_SPECIFIER
+	#endif
+#endif
+
 #if defined(SERIAL_PRINTF)
 
 #ifdef __cplusplus
@@ -60,11 +67,19 @@ static inline void hardPrintUInt16(uint16_t value) {
 }
 
 static inline void hardPrintInt32(int32_t value) {
-	printf("%d", value);
+	#ifdef PRINT_LONG_SPECIFIER
+		printf("%ld", value);
+	#else
+		printf("%d", value);
+	#endif
 }
 
 static inline void hardPrintUInt32(uint32_t value) {
-	printf("%u", value);
+	#ifdef PRINT_LONG_SPECIFIER
+		printf("%lu", value);
+	#else
+		printf("%u", value);
+	#endif
 }
 
 static inline void hardPrintInt64(int64_t value) {
@@ -126,11 +141,19 @@ static inline void hardPrintUInt16ln(uint16_t value) {
 }
 
 static inline void hardPrintInt32ln(int32_t value) {
-	printf("%d\n", value);
+	#ifdef PRINT_LONG_SPECIFIER
+		printf("%ld\n", value);
+	#else
+		printf("%d\n", value);
+	#endif
 }
 
 static inline void hardPrintUInt32ln(uint32_t value) {
-	printf("%u\n", value);
+	#ifdef PRINT_LONG_SPECIFIER
+		printf("%lu\n", value);
+	#else
+		printf("%u\n", value);
+	#endif
 }
 
 static inline void hardPrintInt64ln(int64_t value) {
