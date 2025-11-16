@@ -33,62 +33,19 @@ typedef uint8_t timer_priority_t; // hard timer execute priority variable
 
 #if SUPPORTED_ESP32
 
-	#if ESP_IDF_VERSION_MAJOR == 4
-		// version 4 uses driver timer
-		typedef bool hard_timer_return_t; // return type of timer function
-
-		/**
-		 * Returns from timer function
-		 * 
-		 * @note hard_timer_return_t RUN_IN_RAM({function_name}) {function_name}(hard_timer_param_t emptyParams) {
-		 * @note 	{contents}
-		 * @note 	HARD_TIMER_END();
-		 * @note }
-		 * 
-		 * @warning emptyParams doesn't include any user input parameters
-		 */
-		#define HARD_TIMER_END() return false
-
-		typedef void* hard_timer_param_t; // parameter type of timer function
-	#elif ESP_IDF_VERSION_MAJOR == 5
-		// version 5 uses gptimer
-		typedef void hard_timer_return_t; // return type of timer function
-		typedef void* hard_timer_param_t; // parameter type of timer function
-
-		#define FREQ_MIN 1221 // gptimer requires this as minimum freq
-	#else
-		#error "common_timer.h: ESP IDF major version must be 4 or 5"
-		typedef void hard_timer_return_t; // return type of timer function
-		typedef void* hard_timer_param_t; // parameter type of timer function
-	#endif
-
 	/****************************
 	 * Timer Config
 	 * 
 	 * Only 4 hardware timers available
 	****************************/
 
-	#define FREQ_MAX 1000000 // max frequency user set timer can be
+	#define HARD_TIMER_FREQ_MAX 1000000 // max frequency user set timer can be
 
 	#ifndef NUM_TIMERS
 		#define NUM_TIMERS 4 // amount of hardware timers to use
 	#endif
 
 #elif SUPPORTED_PICO
-	typedef bool hard_timer_return_t; // return type of timer function
-	typedef struct repeating_timer* hard_timer_param_t; // parameter type of timer function
-
-	/**
-	 * Returns from timer function
-	 * 
-	 * @note hard_timer_return_t RUN_IN_RAM({function_name}) {function_name}(hard_timer_param_t emptyParams) {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning emptyParams doesn't include any user input parameters
-	 */
-	#define HARD_TIMER_END() return true
 
 	/****************************
 	 * Timer Config
@@ -100,14 +57,12 @@ typedef uint8_t timer_priority_t; // hard timer execute priority variable
 	 * Only 14 timers after api usage
 	****************************/
 
-	#define FREQ_MAX 1000000 // max frequency user set timer can be
+	#define HARD_TIMER_FREQ_MAX 1000000 // max frequency user set timer can be
 
 	#ifndef NUM_TIMERS
 		#define NUM_TIMERS 14 // amount of hardware timers to use
 	#endif
 #elif SUPPORTED_AVR
-	typedef void hard_timer_return_t; // return type of timer function
-	typedef void* hard_timer_param_t; // parameter type of timer function
 
 	/****************************
 	 * Timer Config
@@ -115,14 +70,12 @@ typedef uint8_t timer_priority_t; // hard timer execute priority variable
 	 * Only 3 hardware timers available
 	****************************/
 
-	#define FREQ_MAX 1000000 // max frequency user set timer can be
+	#define HARD_TIMER_FREQ_MAX 1000000 // max frequency user set timer can be
 
 	#ifndef NUM_TIMERS
 		#define NUM_TIMERS 3 // amount of hardware timers to use
 	#endif
 #else
-	typedef void hard_timer_return_t; // return type of timer function
-	typedef void* hard_timer_param_t; // parameter type of timer function
 
 	/****************************
 	 * Timer Config
@@ -130,28 +83,14 @@ typedef uint8_t timer_priority_t; // hard timer execute priority variable
 	 * No hardware timers available
 	****************************/
 
-	#define FREQ_MAX 0 // max frequency user set timer can be
+	#define HARD_TIMER_FREQ_MAX 0 // max frequency user set timer can be
 
 	#ifndef NUM_TIMERS
 		#define NUM_TIMERS 0 // amount of hardware timers to use
 	#endif
 #endif
 
-#ifndef HARD_TIMER_END
-	/**
-	 * Returns from timer function
-	 * 
-	 * @note hard_timer_return_t RUN_IN_RAM({function_name}) {function_name}(hard_timer_param_t emptyParams) {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning emptyParams doesn't include any user input parameters
-	 */
-	#define HARD_TIMER_END() return
-#endif
-
-typedef hard_timer_return_t (*hard_timer_function_ptr_t) (hard_timer_param_t); // timer callback function pointer
+typedef void (*hard_timer_function_ptr_t) (void*); // timer callback function pointer
 
 #define DEFAULT_HARD_TIMER_PRIORITY 0 // default hard timer priority
 
@@ -267,6 +206,7 @@ bool cancelHardTimer(hard_timer_t timer);
  * @param timer pointer to timer to start
  * @param freq pointer to desired frequency in Hz
  * @param function pointer to function to call back
+ * @param params parameters to pass to callback function
  * @param priority priority to run timer at (0 min, 255 max)
  * 
  * setHardTimer(HARD_TIMER_INVALID, ...):
@@ -287,7 +227,7 @@ bool cancelHardTimer(hard_timer_t timer);
  * 
  * @return if timer was successfully set
  */
-bool setHardTimer(hard_timer_t *timer, freq_t *freq, hard_timer_function_ptr_t function, timer_priority_t priority);
+bool setHardTimer(hard_timer_t *timer, freq_t *freq, hard_timer_function_ptr_t function, void* params, timer_priority_t priority);
 
 /**
  * Gets if selected timer was started

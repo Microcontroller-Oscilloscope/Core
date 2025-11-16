@@ -53,14 +53,11 @@ void writeStatus(uint8_t state) {
 	/**
 	 * Blinks LEDs on and off
 	 * 
-	 * @param emptyParams empty parameter set
-	 * 
-	 * @return hard_timer_return_t: return type for timers
+	 * @param params parameter set
 	 */
-	hard_timer_return_t RUN_IN_RAM(ledFunction) ledFunction(hard_timer_param_t emptyParams) {
+	void RUN_IN_RAM(ledFunction) ledFunction(void *params) {
 		ledToggle = !ledToggle;
 		writeStatus(ledToggle);
-		HARD_TIMER_END();
 	}
 
 #endif
@@ -116,7 +113,7 @@ void setStatus(enum STATUS_CODE status) {
 				freq = CRIT_ERROR_FREQ;
 			}
 
-			setHardTimer(&ledTimer, &freq, &ledFunction, STATUS_LED_PRIORITY);
+			setHardTimer(&ledTimer, &freq, &ledFunction, NULL, STATUS_LED_PRIORITY);
 		}
 
 	#else
