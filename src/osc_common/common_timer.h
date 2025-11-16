@@ -45,6 +45,14 @@ typedef uint8_t timer_priority_t; // hard timer execute priority variable
 		#define NUM_TIMERS 4 // amount of hardware timers to use
 	#endif
 
+	#if ESP_IDF_VERSION_MAJOR == 4
+		#include <driver/timer.h>
+		typedef timer_isr_t callback_ptr_t; // callback pointer type
+	#elif ESP_IDF_VERSION_MAJOR == 5
+		#include <driver/gptimer.h>
+		typedef gptimer_alarm_cb_t callback_ptr_t; // callback pointer type
+	#endif
+
 #elif SUPPORTED_PICO
 
 	/****************************
@@ -237,6 +245,29 @@ bool setHardTimer(hard_timer_t *timer, freq_t *freq, hard_timer_function_ptr_t f
  * @return if timer was started
  */
 bool hardTimerStarted(hard_timer_t timer);
+
+/**
+ * Sets function to execute for timer ISR
+ * 
+ * @param timer timer to set
+ * @param function function to set
+ * 
+ * @return if successfully set
+ */
+bool setHardTimerFunction(hard_timer_t timer, hard_timer_function_ptr_t function, void* params);
+
+/**
+ * Gets callback function used for setting timer
+ * 
+ * @param timer timer to get
+ * 
+ * @return pointer to callback function
+ */
+callback_ptr_t getHardTimerCallback(hard_timer_t timer);
+
+// extern hard_timer_function_ptr_t hardTimerFunctions[NUM_TIMERS];
+// extern void* hardTimerParams[NUM_TIMERS];
+// extern callback_ptr_t hardTimerCallbacks[NUM_TIMERS];
 
 #ifdef __cplusplus
 }

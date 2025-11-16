@@ -16,9 +16,9 @@
 
 if(IDF_TARGET STREQUAL "esp32")
     idf_component_register(
-        SRC_DIRS "src" "src/comm/hard_serial" "src/nvm" "src/osc_default" "src/osc_err" "src/status" "include"
+        SRC_DIRS "src" "src/comm/hard_serial" "src/nvm" "src/osc_default" "src/osc_err" "src/status" "src/osc_common" "include"
         INCLUDE_DIRS "include"
-        REQUIRES lib_esp32
+        REQUIRES driver
     )
 
     target_compile_options(${COMPONENT_LIB} PRIVATE -Wno-expansion-to-defined)
