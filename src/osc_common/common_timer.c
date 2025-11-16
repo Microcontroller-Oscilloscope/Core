@@ -22,44 +22,49 @@
 hard_timer_function_ptr_t hardTimerFunctions[NUM_TIMERS];
 // function parameters to pass
 void* hardTimerParams[NUM_TIMERS];
-// callback functions for linking to ISR
-callback_ptr_t hardTimerCallbacks[NUM_TIMERS];
 
-#if SUPPORTED_ESP32
+#ifndef NO_TIMER_CALLBACK_SUPPORT
 
-	typedef bool callback_ret_t;
-	#define CALLBACK_RETURN() return false
+	// callback functions for linking to ISR
+	callback_ptr_t hardTimerCallbacks[NUM_TIMERS];
 
-	#if ESP_IDF_VERSION_MAJOR == 4
-		#define CALL_PARAMS void *params
-	#elif ESP_IDF_VERSION_MAJOR == 5
-		#define CALL_PARAMS gptimer_handle_t timer, const gptimer_alarm_event_data_t *edata, void *params
+	#if SUPPORTED_ESP32
+
+		typedef bool callback_ret_t;
+		#define CALLBACK_RETURN() return false
+
+		#if ESP_IDF_VERSION_MAJOR == 4
+			#define CALL_PARAMS void *params
+		#elif ESP_IDF_VERSION_MAJOR == 5
+			#define CALL_PARAMS gptimer_handle_t timer, const gptimer_alarm_event_data_t *edata, void *params
+		#endif
+
 	#endif
 
-#endif
+	/**
+	 * Creates callback functions for each timer
+	 * 
+	 * @param num timer number to set
+	 */
+	#define TIMER_CALLBACK_PROTOTYPE(num) \
+		static callback_ret_t CONCATENATE(timerCallback, num)(CALL_PARAMS) { \
+			((void(*)())hardTimerFunctions[num])(hardTimerParams[num]); \
+			CALLBACK_RETURN(); \
+		}
 
-/**
- * Creates callback functions for each timer
- * 
- * @param num timer number to set
- */
-#define TIMER_CALLBACK_PROTOTYPE(num) \
-	static callback_ret_t CONCATENATE(timerCallback, num)(CALL_PARAMS) { \
-		((void(*)())hardTimerFunctions[num])(hardTimerParams[num]); \
-		CALLBACK_RETURN(); \
-	}
+	#if NUM_TIMERS >= 1
+		TIMER_CALLBACK_PROTOTYPE(0)
+	#endif
+	#if NUM_TIMERS >= 2
+		TIMER_CALLBACK_PROTOTYPE(1)
+	#endif
+	#if NUM_TIMERS >= 3
+		TIMER_CALLBACK_PROTOTYPE(2)
+	#endif
+	#if NUM_TIMERS >= 4
+		TIMER_CALLBACK_PROTOTYPE(3)
+	#endif
 
-#if NUM_TIMERS >= 1
-	TIMER_CALLBACK_PROTOTYPE(0)
-#endif
-#if NUM_TIMERS >= 2
-	TIMER_CALLBACK_PROTOTYPE(1)
-#endif
-#if NUM_TIMERS >= 3
-	TIMER_CALLBACK_PROTOTYPE(2)
-#endif
-#if NUM_TIMERS >= 4
-	TIMER_CALLBACK_PROTOTYPE(3)
 #endif
 
 bool setHardTimerFunction(hard_timer_t timer, hard_timer_function_ptr_t function, void* params) {
@@ -69,37 +74,45 @@ bool setHardTimerFunction(hard_timer_t timer, hard_timer_function_ptr_t function
 	hardTimerFunctions[timer] = function;
 	hardTimerParams[timer] = params;
 
-	switch(timer) {
-		#if NUM_TIMERS >= 1
-			case(HARD_TIMER0):
-				hardTimerCallbacks[timer] = timerCallback0;
+	#ifndef NO_TIMER_CALLBACK_SUPPORT
+
+		switch(timer) {
+			#if NUM_TIMERS >= 1
+				case(HARD_TIMER0):
+					hardTimerCallbacks[timer] = timerCallback0;
+				break;
+			#endif
+			#if NUM_TIMERS >= 2
+				case(HARD_TIMER1):
+					hardTimerCallbacks[timer] = timerCallback1;
+				break;
+			#endif
+			#if NUM_TIMERS >= 3
+				case(HARD_TIMER2):
+					hardTimerCallbacks[timer] = timerCallback2;
+				break;
+			#endif
+			#if NUM_TIMERS >= 4
+				case(HARD_TIMER3):
+					hardTimerCallbacks[timer] = timerCallback3;
+				break;
+			#endif
+			default:
 			break;
-		#endif
-		#if NUM_TIMERS >= 2
-			case(HARD_TIMER1):
-				hardTimerCallbacks[timer] = timerCallback1;
-			break;
-		#endif
-		#if NUM_TIMERS >= 3
-			case(HARD_TIMER2):
-				hardTimerCallbacks[timer] = timerCallback2;
-			break;
-		#endif
-		#if NUM_TIMERS >= 4
-			case(HARD_TIMER3):
-				hardTimerCallbacks[timer] = timerCallback3;
-			break;
-		#endif
-		default:
-		break;
-	}
+		}
+
+	#endif
 
 	return true;
 }
 
 callback_ptr_t getHardTimerCallback(hard_timer_t timer) {
-	if (timer == HARD_TIMER_INVALID) {
+	#ifndef NO_TIMER_CALLBACK_SUPPORT
+		if (timer == HARD_TIMER_INVALID) {
+			return NULL;
+		}
+		return hardTimerCallbacks[timer];
+	#else
 		return NULL;
-	}
-	return hardTimerCallbacks[timer];
+	#endif
 }

@@ -83,6 +83,9 @@ typedef uint8_t timer_priority_t; // hard timer execute priority variable
 	#ifndef NUM_TIMERS
 		#define NUM_TIMERS 3 // amount of hardware timers to use
 	#endif
+
+	typedef void* callback_ptr_t; // callback pointer type
+	#define NO_TIMER_CALLBACK_SUPPORT // hardware timer doesn't use callbacks
 #else
 
 	/****************************
@@ -265,9 +268,10 @@ bool setHardTimerFunction(hard_timer_t timer, hard_timer_function_ptr_t function
  */
 callback_ptr_t getHardTimerCallback(hard_timer_t timer);
 
-// extern hard_timer_function_ptr_t hardTimerFunctions[NUM_TIMERS];
-// extern void* hardTimerParams[NUM_TIMERS];
-// extern callback_ptr_t hardTimerCallbacks[NUM_TIMERS];
+#ifdef NO_TIMER_CALLBACK_SUPPORT
+	extern hard_timer_function_ptr_t hardTimerFunctions[NUM_TIMERS];
+	extern void* hardTimerParams[NUM_TIMERS];
+#endif
 
 #ifdef __cplusplus
 }
