@@ -34,6 +34,11 @@
 	****************************/
 
 	#include <esp_attr.h>
+	#include <esp_idf_version.h>
+
+	#if ESP_IDF_VERSION_MAJOR != 4 && ESP_IDF_VERSION_MAJOR != 5
+		#error "ESP IDF major version must be 4 or 5"
+	#endif
 
 	/****************************
 	 * General Config

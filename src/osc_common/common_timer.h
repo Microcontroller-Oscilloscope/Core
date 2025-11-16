@@ -32,20 +32,35 @@ typedef uint32_t freq_t; // hard timer frequency variable
 typedef uint8_t timer_priority_t; // hard timer execute priority variable
 
 #if SUPPORTED_ESP32
-	typedef bool hard_timer_return_t; // return type of timer function
-	typedef void* hard_timer_param_t; // parameter type of timer function
 
-	/**
-	 * Returns from timer function
-	 * 
-	 * @note hard_timer_return_t RUN_IN_RAM({function_name}) {function_name}(hard_timer_param_t emptyParams) {
-	 * @note 	{contents}
-	 * @note 	HARD_TIMER_END();
-	 * @note }
-	 * 
-	 * @warning emptyParams doesn't include any user input parameters
-	 */
-	#define HARD_TIMER_END() return false
+	#if ESP_IDF_VERSION_MAJOR == 4
+		// version 4 uses driver timer
+		typedef bool hard_timer_return_t; // return type of timer function
+
+		/**
+		 * Returns from timer function
+		 * 
+		 * @note hard_timer_return_t RUN_IN_RAM({function_name}) {function_name}(hard_timer_param_t emptyParams) {
+		 * @note 	{contents}
+		 * @note 	HARD_TIMER_END();
+		 * @note }
+		 * 
+		 * @warning emptyParams doesn't include any user input parameters
+		 */
+		#define HARD_TIMER_END() return false
+
+		typedef void* hard_timer_param_t; // parameter type of timer function
+	#elif ESP_IDF_VERSION_MAJOR == 5
+		// version 5 uses gptimer
+		typedef void hard_timer_return_t; // return type of timer function
+		typedef void* hard_timer_param_t; // parameter type of timer function
+
+		#define FREQ_MIN 1221 // gptimer requires this as minimum freq
+	#else
+		#error "common_timer.h: ESP IDF major version must be 4 or 5"
+		typedef void hard_timer_return_t; // return type of timer function
+		typedef void* hard_timer_param_t; // parameter type of timer function
+	#endif
 
 	/****************************
 	 * Timer Config
@@ -53,7 +68,7 @@ typedef uint8_t timer_priority_t; // hard timer execute priority variable
 	 * Only 4 hardware timers available
 	****************************/
 
-	#define FREQ_MAX 5000000 // max frequency user set timer can be
+	#define FREQ_MAX 1000000 // max frequency user set timer can be
 
 	#ifndef NUM_TIMERS
 		#define NUM_TIMERS 4 // amount of hardware timers to use

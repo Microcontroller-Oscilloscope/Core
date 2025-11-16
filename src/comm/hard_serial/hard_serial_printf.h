@@ -22,7 +22,6 @@
 #include "../../compile_flags/compile_flags.h"
 
 #if SUPPORTED_ESP32
-	#include <esp_idf_version.h>
 	#if ESP_IDF_VERSION_MAJOR == 5
 		#define PRINT_LONG_SPECIFIER
 	#endif
