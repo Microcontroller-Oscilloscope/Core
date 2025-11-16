@@ -39,6 +39,12 @@ void* hardTimerParams[NUM_TIMERS];
 			#define CALL_PARAMS gptimer_handle_t timer, const gptimer_alarm_event_data_t *edata, void *params
 		#endif
 
+	#elif SUPPORTED_PICO
+
+		typedef bool callback_ret_t;
+		#define CALLBACK_RETURN() return true
+		#define CALL_PARAMS repeating_timer_t *rt
+
 	#endif
 
 	/**
@@ -64,8 +70,54 @@ void* hardTimerParams[NUM_TIMERS];
 	#if NUM_TIMERS >= 4
 		TIMER_CALLBACK_PROTOTYPE(3)
 	#endif
+	#if NUM_TIMERS >= 5
+		TIMER_CALLBACK_PROTOTYPE(4)
+	#endif
+	#if NUM_TIMERS >= 6
+		TIMER_CALLBACK_PROTOTYPE(5)
+	#endif
+	#if NUM_TIMERS >= 7
+		TIMER_CALLBACK_PROTOTYPE(6)
+	#endif
+	#if NUM_TIMERS >= 8
+		TIMER_CALLBACK_PROTOTYPE(7)
+	#endif
+	#if NUM_TIMERS >= 9
+		TIMER_CALLBACK_PROTOTYPE(8)
+	#endif
+	#if NUM_TIMERS >= 10
+		TIMER_CALLBACK_PROTOTYPE(9)
+	#endif
+	#if NUM_TIMERS >= 11
+		TIMER_CALLBACK_PROTOTYPE(10)
+	#endif
+	#if NUM_TIMERS >= 12
+		TIMER_CALLBACK_PROTOTYPE(11)
+	#endif
+	#if NUM_TIMERS >= 13
+		TIMER_CALLBACK_PROTOTYPE(12)
+	#endif
+	#if NUM_TIMERS >= 14
+		TIMER_CALLBACK_PROTOTYPE(13)
+	#endif
+	#if NUM_TIMERS >= 15
+		TIMER_CALLBACK_PROTOTYPE(14)
+	#endif
+	#if NUM_TIMERS >= 16
+		TIMER_CALLBACK_PROTOTYPE(15)
+	#endif
 
 #endif
+
+/**
+ * Simplifies callback test cases
+ * 
+ * @param num timer number
+ */
+#define CALLBACK_TEST_CASE(num) \
+	case(CONCATENATE(HARD_TIMER, num)): \
+		hardTimerCallbacks[num] = CONCATENATE(timerCallback, num); \
+	break;
 
 bool setHardTimerFunction(hard_timer_t timer, hard_timer_function_ptr_t function, void* params) {
 	if (timer == HARD_TIMER_INVALID) {
@@ -78,24 +130,52 @@ bool setHardTimerFunction(hard_timer_t timer, hard_timer_function_ptr_t function
 
 		switch(timer) {
 			#if NUM_TIMERS >= 1
-				case(HARD_TIMER0):
-					hardTimerCallbacks[timer] = timerCallback0;
-				break;
+				CALLBACK_TEST_CASE(0)
 			#endif
 			#if NUM_TIMERS >= 2
-				case(HARD_TIMER1):
-					hardTimerCallbacks[timer] = timerCallback1;
-				break;
+				CALLBACK_TEST_CASE(1)
 			#endif
 			#if NUM_TIMERS >= 3
-				case(HARD_TIMER2):
-					hardTimerCallbacks[timer] = timerCallback2;
-				break;
+				CALLBACK_TEST_CASE(2)
 			#endif
 			#if NUM_TIMERS >= 4
-				case(HARD_TIMER3):
-					hardTimerCallbacks[timer] = timerCallback3;
-				break;
+				CALLBACK_TEST_CASE(3)
+			#endif
+			#if NUM_TIMERS >= 5
+				CALLBACK_TEST_CASE(4)
+			#endif
+			#if NUM_TIMERS >= 6
+				CALLBACK_TEST_CASE(5)
+			#endif
+			#if NUM_TIMERS >= 7
+				CALLBACK_TEST_CASE(6)
+			#endif
+			#if NUM_TIMERS >= 8
+				CALLBACK_TEST_CASE(7)
+			#endif
+			#if NUM_TIMERS >= 9
+				CALLBACK_TEST_CASE(8)
+			#endif
+			#if NUM_TIMERS >= 10
+				CALLBACK_TEST_CASE(9)
+			#endif
+			#if NUM_TIMERS >= 11
+				CALLBACK_TEST_CASE(10)
+			#endif
+			#if NUM_TIMERS >= 12
+				CALLBACK_TEST_CASE(11)
+			#endif
+			#if NUM_TIMERS >= 13
+				CALLBACK_TEST_CASE(12)
+			#endif
+			#if NUM_TIMERS >= 14
+				CALLBACK_TEST_CASE(13)
+			#endif
+			#if NUM_TIMERS >= 15
+				CALLBACK_TEST_CASE(14)
+			#endif
+			#if NUM_TIMERS >= 16
+				CALLBACK_TEST_CASE(15)
 			#endif
 			default:
 			break;

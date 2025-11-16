@@ -31,6 +31,8 @@ enum HardTimerStatusReturn {
 typedef uint32_t freq_t; // hard timer frequency variable
 typedef uint8_t timer_priority_t; // hard timer execute priority variable
 
+#define MAX_NUM_TIMERS 16 // max number of hardware timers supported in library
+
 #if SUPPORTED_ESP32
 
 	/****************************
@@ -39,7 +41,7 @@ typedef uint8_t timer_priority_t; // hard timer execute priority variable
 	 * Only 4 hardware timers available
 	****************************/
 
-	#define HARD_TIMER_FREQ_MAX 1000000 // max frequency user set timer can be
+	#define HARD_TIMER_FREQ_MAX 200000 // max frequency user set timer can be
 
 	#ifndef NUM_TIMERS
 		#define NUM_TIMERS 4 // amount of hardware timers to use
@@ -65,11 +67,15 @@ typedef uint8_t timer_priority_t; // hard timer execute priority variable
 	 * Only 14 timers after api usage
 	****************************/
 
-	#define HARD_TIMER_FREQ_MAX 1000000 // max frequency user set timer can be
+	#define HARD_TIMER_FREQ_MAX 333333 // max frequency user set timer can be
 
 	#ifndef NUM_TIMERS
 		#define NUM_TIMERS 14 // amount of hardware timers to use
 	#endif
+
+	#include <pico/time.h>
+	typedef repeating_timer_callback_t callback_ptr_t; // callback pointer type
+
 #elif SUPPORTED_AVR
 
 	/****************************
@@ -78,7 +84,7 @@ typedef uint8_t timer_priority_t; // hard timer execute priority variable
 	 * Only 3 hardware timers available
 	****************************/
 
-	#define HARD_TIMER_FREQ_MAX 1000000 // max frequency user set timer can be
+	#define HARD_TIMER_FREQ_MAX 120000 // max frequency user set timer can be
 
 	#ifndef NUM_TIMERS
 		#define NUM_TIMERS 3 // amount of hardware timers to use
@@ -99,6 +105,11 @@ typedef uint8_t timer_priority_t; // hard timer execute priority variable
 	#ifndef NUM_TIMERS
 		#define NUM_TIMERS 0 // amount of hardware timers to use
 	#endif
+#endif
+
+#if NUM_TIMERS > MAX_NUM_TIMERS
+	#undef NUM_TIMERS
+	#define NUM_TIMERS MAX_NUM_TIMERS // amount of hardware timers to use
 #endif
 
 typedef void (*hard_timer_function_ptr_t) (void*); // timer callback function pointer
