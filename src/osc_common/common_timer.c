@@ -196,3 +196,33 @@ callback_ptr_t getHardTimerCallback(hard_timer_t timer) {
 		return NULL;
 	#endif
 }
+
+hard_timer_t claimTimer(struct hardTimerPriority *priority) WEAK;
+hard_timer_t claimTimer(struct hardTimerPriority *priority) {
+	return HARD_TIMER_INVALID;
+}
+
+bool unclaimTimer(hard_timer_t timer) WEAK;
+bool unclaimTimer(hard_timer_t timer) {
+	return false;
+}
+
+bool hardTimerClaimed(hard_timer_t timer) WEAK;
+bool hardTimerClaimed(hard_timer_t timer) {
+	return false;
+}
+
+bool cancelHardTimer(hard_timer_t timer) WEAK;
+bool cancelHardTimer(hard_timer_t timer) {
+	return false;
+}
+
+bool setHardTimer(hard_timer_t *timer, freq_t *freq, hard_timer_function_ptr_t function, void* params, timer_priority_t priority) WEAK;
+bool setHardTimer(hard_timer_t *timer, freq_t *freq, hard_timer_function_ptr_t function, void* params, timer_priority_t priority) {
+	return false;
+}
+
+bool hardTimerStarted(hard_timer_t timer) WEAK;
+bool hardTimerStarted(hard_timer_t timer) {
+	return false;
+}

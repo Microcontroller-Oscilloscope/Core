@@ -82,12 +82,20 @@ typedef uint8_t timer_priority_t; // hard timer execute priority variable
 	 * Timer Config
 	 * 
 	 * Only 3 hardware timers available
+	 * 
+	 * 1 is used for Arduino timing
+	 * 
+	 * Only 2 timers after api usage, unless overriden
 	****************************/
 
 	#define HARD_TIMER_FREQ_MAX 120000 // max frequency user set timer can be
 
 	#ifndef NUM_TIMERS
-		#define NUM_TIMERS 3 // amount of hardware timers to use
+		#ifdef OVERRIDE_ARDUINO_TIMER
+			#define NUM_TIMERS 3 // amount of hardware timers to use
+		#else
+			#define NUM_TIMERS 2 // amount of hardware timers to use
+		#endif
 	#endif
 
 	typedef void* callback_ptr_t; // callback pointer type
@@ -129,6 +137,8 @@ struct hardTimerPriority {
 #if NUM_TIMERS > 1
 	#define HARD_TIMER_ID_LED // status LED enable
 #endif
+
+#define HARD_TIMER_INVALID_LIT -1 // literal number version of HARD_TIMER_INVALID
 
 typedef enum { // hardware timer type
 	HARD_TIMER_INVALID = -1, // invalid counter
