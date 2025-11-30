@@ -18,13 +18,17 @@
 
 #include "status.h"
 #include "../compile_flags/compile_flags.h"
-#include "../osc_common/common_timer.h"
+#include <hardware_timer.h>
 #include "../osc_common/common_io.h"
 
 // if status LEDs are enabled
-#define STATUS_LED_DEFINED defined(HARD_TIMER_ID_LED)
+#if HARD_TIMER_COUNT > 1
+	#define STATUS_LED_DEFINED 1
+#else
+	#define STATUS_LED_DEFINED 0
+#endif
 
-#define STATUS_LED_PRIORITY DEFAULT_HARD_TIMER_PRIORITY // priority of status LED timer interrupt
+#define STATUS_LED_PRIORITY HARD_TIMER_PRIORITY_DEFAULT // priority of status LED timer interrupt
 
 inline void writeStatus(uint8_t state);
 
@@ -48,7 +52,7 @@ void writeStatus(uint8_t state) {
 #if STATUS_LED_DEFINED
 
 	volatile bool ledToggle = false; // LED toggle state
-	hard_timer_t ledTimer = HARD_TIMER_INVALID; // LED timer reference
+	hard_timer_enum_t ledTimer = HARD_TIMER_INVALID; // LED timer reference
 
 	/**
 	 * Blinks LEDs on and off
@@ -75,7 +79,7 @@ void initStatus(void) {
 	}
 
 	#if STATUS_LED_DEFINED
-		struct hardTimerPriority priority;
+		hard_timer_claim_s priority;
 		priority.slowestTimer = true;
 		ledTimer = claimTimer(&priority);
 	#endif
@@ -99,7 +103,7 @@ void setStatus(enum STATUS_CODE status) {
 		else if (status == BOARD_CONNECTING || status == BOARD_CRIT_ERROR) {
 
 			if (!hardTimerClaimed(ledTimer)) {
-				struct hardTimerPriority priority;
+				hard_timer_claim_s priority;
 				priority.slowestTimer = true;
 				ledTimer = claimTimer(&priority);
 			}
